@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PlusIcon, Search } from "lucide-react";
 import { AddDesignModal } from "@/components/add-design-modal";
-import { WorkflowProgressCard } from "@/components/workflow-progress-card";
 
 const designs = [
   {
@@ -71,13 +70,13 @@ export default function Home() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex  sm:items-center justify-between gap-4">
         <h1 className="text-[28px] sm:text-[35px] md:text-[45px] font-serif font-bold text-primary-foreground">
           Designs
         </h1>
         <Button
           onClick={() => setIsModalOpen(true)}
-          className="bg-[#dcccbd] hover:bg-[#dcccbd]/90 text-primary-foreground h-[38px] px-4 rounded-lg gap-2 font-semibold w-full sm:w-auto"
+          className="bg-[#dcccbd] hover:bg-[#dcccbd]/90 text-primary-foreground h-9.5 px-4 rounded-lg gap-2 font-semibold w-auto"
         >
           <PlusIcon className="w-4 h-4" />
           <span className="hidden sm:inline">Add Design</span>
@@ -91,29 +90,19 @@ export default function Home() {
         onAdd={handleAddDesign}
       />
 
-      <WorkflowProgressCard
-        title="1. Inspirations"
-        progress={50}
-        currentCount={5}
-        totalCount={20}
-        images={[
-          "/design-thumb.png",
-          "/design-thumb.png",
-          "/design-thumb.png",
-        ]}
-      />
+      
 
       {/* Search and Filters */}
       <div className="flex flex-col lg:flex-row gap-4">
         <div className="relative w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
           <Input
             placeholder="Search designs..."
             className="pl-10 h-10 border-[#dcccbd] rounded-md placeholder:text-primary-foreground/50 text-[16px] sm:text-[18px] focus-visible:ring-0 focus-visible:border-primary transition-colors"
           />
         </div>
         {/* <Tabs defaultValue="concept" className="w-full">
-          <TabsList className="bg-white border border-[#dcccbd] rounded-[6px] p-0 overflow-hidden w-full flex !h-10">
+          <TabsList className="bg-white border border-[#dcccbd] rounded-md p-0 overflow-hidden w-full flex !h-10">
             <TabsTrigger
               value="concept"
               className="flex-1 h-full px-2 sm:px-4 md:px-8 rounded-none font-semibold text-[14px] sm:text-[16px] data-[state=active]:bg-[#dcccbd] data-[state=active]:text-primary-foreground focus-visible:ring-0 focus-visible:outline-none shadow-none"

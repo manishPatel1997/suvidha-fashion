@@ -118,7 +118,7 @@ export function DashboardSidebar() {
                       <ChevronRight
                         className="
                           h-[16px] w-[16px]
-                          text-[#1a1a1a]
+                          text-primary-foreground
                           opacity-60
                           group-hover/menu-item:opacity-100
                           group-data-[collapsible=icon]:hidden
@@ -148,7 +148,7 @@ export function DashboardSidebar() {
               className="
           h-[40px]
           w-full
-          rounded-[6px]
+          rounded-md
           flex items-center gap-3
           px-[15px]
           text-[#c26b6e]

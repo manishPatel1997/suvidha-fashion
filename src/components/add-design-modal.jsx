@@ -64,10 +64,12 @@ export function AddDesignModal({ open, onOpenChange, onAdd }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="max-w-[95vw] sm:max-w-[1182px] p-0 border-none bg-[#FFFFFF] shadow-none rounded-[30px] overflow-hidden !block"
+        className="max-w-[95vw] sm:max-w-295.5 w-[90%] lg:w-full p-0 border-none bg-[#FFFFFF] shadow-none rounded-design overflow-hidden block!"
         showCloseButton={false}
       >
-        <div className="relative w-full min-h-fit md:min-h-[627px] flex items-center justify-center px-4 py-6 md:px-[94px] md:py-[84px]">
+        {/* <div className="relative w-full min-h-fit flex items-center justify-center px-4 py-6 lg:px-23.2 lg:py-21"> */}
+        <div className="relative w-full min-h-fit flex items-center justify-center
+                px-2 py-3 sm:px-4 sm:py-6 lg:px-23.2 lg:py-21">
           <button
             onClick={() => onOpenChange(false)}
             className="absolute top-6 right-6 md:top-8 md:right-10 text-primary-foreground hover:opacity-70 transition-opacity z-20"
@@ -75,25 +77,25 @@ export function AddDesignModal({ open, onOpenChange, onAdd }) {
             <CloseIcon width={17} height={17} color="#1a1a1a" />
           </button>
 
-          <div className="border-2 border-[#dcccbd] rounded-[20px] overflow-hidden bg-white w-full max-w-[994px] flex flex-col">
+          <div className="border-2 border-[#dcccbd] rounded-[20px] overflow-hidden bg-white w-full max-w-248.5 flex flex-col">
             <DialogHeader className="m-0 p-0">
-              <DialogTitle className="text-[20px] p-2.5 font-semibold text-center font-sans tracking-wide text-[#1a1a1a] bg-[#F8F5F2] border-b-2 border-[#dcccbd]">
+              <DialogTitle className="text-[20px] p-2.5 font-semibold text-center font-sans tracking-wide text-primary-foreground bg-[#F8F5F2] border-b-2 border-[#dcccbd]">
                 Add Design
               </DialogTitle>
             </DialogHeader>
 
             <form onSubmit={formik.handleSubmit} className="flex flex-col flex-1">
-              <div className="px-6 py-5 md:px-[36px] md:py-[40px] space-y-4 flex-1 overflow-y-auto max-h-[60vh] md:max-h-none">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-[30px] gap-y-[15px]">
+              <div className="px-6 py-5 md:px-9 md:py-10 space-y-4 flex-1 overflow-y-auto max-h-[60vh] md:max-h-none">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-7.5 gap-y-3.75">
                   {/* Attach Image */}
                   <div className="space-y-1.5">
-                    <label className="text-[16px] font-medium text-[#1a1a1a] block">
+                    <label className="text-[16px] font-medium text-primary-foreground block">
                       Attach Image
                     </label>
                     <div className="relative">
-                      <div className="flex items-center gap-3 border border-[#858585] rounded-[6px] px-4 h-[45px] bg-white">
+                      <div className="flex items-center gap-3 border border-muted-foreground rounded-md px-4 h-11.25 bg-white">
                         <AttachIcon width={16} height={16} color="#858585" />
-                        <span className="text-[14px] text-[#858585] font-sans">
+                        <span className="text-[14px] text-muted-foreground font-sans">
                           {formik.values.attachImage || "Attach file"}
                         </span>
                       </div>
@@ -113,33 +115,33 @@ export function AddDesignModal({ open, onOpenChange, onAdd }) {
 
                   {/* Design Id */}
                   <div className="space-y-1.5">
-                    <label className="text-[16px] font-medium text-[#1a1a1a] block">
+                    <label className="text-[16px] font-medium text-primary-foreground block">
                       Design Id
                     </label>
                     <Input
                       name="designId"
                       placeholder="Design Id"
-                      className="h-[45px] border-[#858585] rounded-[6px] placeholder:text-[#858585] placeholder:text-[14px] text-[14px]"
+                      className="h-11.25 border-muted-foreground rounded-md placeholder:text-muted-foreground placeholder:text-[14px] text-[14px]"
                       runForm={formik}
                     />
                   </div>
 
                   {/* Category */}
                   <div className="space-y-1.5">
-                    <label className="text-[16px] font-medium text-[#1a1a1a] block">
+                    <label className="text-[16px] font-medium text-primary-foreground block">
                       Category
                     </label>
                     <Select
                       onValueChange={(value) => formik.setFieldValue("category", value)}
                       value={formik.values.category}
                     >
-                      <SelectTrigger className="!h-[45px] px-4 py-1 border-[#858585] rounded-[6px] text-[#858585] text-[14px] w-full bg-white">
+                      <SelectTrigger className="h-11.25! px-4 py-1 border-muted-foreground rounded-md text-muted-foreground text-[14px] w-full bg-white">
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                       <SelectContent className="bg-[#F8F5F2] border-[#dcccbd]">
-                        <SelectItem value="concept" className="data-[state=checked]:bg-[#dcccbd] data-[state=checked]:text-[#1a1a1a]">Concept</SelectItem>
-                        <SelectItem value="regular" className="data-[state=checked]:bg-[#dcccbd] data-[state=checked]:text-[#1a1a1a]">Regular</SelectItem>
-                        <SelectItem value="cutting" className="data-[state=checked]:bg-[#dcccbd] data-[state=checked]:text-[#1a1a1a]">Cutting</SelectItem>
+                        <SelectItem value="concept" className="data-[state=checked]:bg-[#dcccbd] data-[state=checked]:text-primary-foreground">Concept</SelectItem>
+                        <SelectItem value="regular" className="data-[state=checked]:bg-[#dcccbd] data-[state=checked]:text-primary-foreground">Regular</SelectItem>
+                        <SelectItem value="cutting" className="data-[state=checked]:bg-[#dcccbd] data-[state=checked]:text-primary-foreground">Cutting</SelectItem>
                       </SelectContent>
                     </Select>
                     {formik.touched.category && formik.errors.category && (
@@ -149,7 +151,7 @@ export function AddDesignModal({ open, onOpenChange, onAdd }) {
 
                   {/* Start Date */}
                   <div className="space-y-1.5">
-                    <label className="text-[16px] font-medium text-[#1a1a1a] block">
+                    <label className="text-[16px] font-medium text-primary-foreground block">
                       Start Date
                     </label>
                     <Popover>
@@ -157,8 +159,8 @@ export function AddDesignModal({ open, onOpenChange, onAdd }) {
                         <Button
                           variant="outline"
                           className={cn(
-                            "w-full h-[45px] border-[#858585] rounded-[6px] text-left font-normal px-4 bg-white justify-between",
-                            !formik.values.startDate && "text-[#858585]"
+                            "w-full h-11.25 border-muted-foreground rounded-md text-left font-normal px-4 bg-white justify-between",
+                            !formik.values.startDate && "text-muted-foreground"
                           )}
                         >
                           <span className="text-[14px]">
@@ -183,7 +185,7 @@ export function AddDesignModal({ open, onOpenChange, onAdd }) {
 
                   {/* Finish Date */}
                   <div className="space-y-1.5">
-                    <label className="text-[16px] font-medium text-[#1a1a1a] block">
+                    <label className="text-[16px] font-medium text-primary-foreground block">
                       Finish Date
                     </label>
                     <Popover>
@@ -191,8 +193,8 @@ export function AddDesignModal({ open, onOpenChange, onAdd }) {
                         <Button
                           variant="outline"
                           className={cn(
-                            "w-full h-[45px] border-[#858585] rounded-[6px] text-left font-normal px-4 bg-white justify-between",
-                            !formik.values.finishDate && "text-[#858585]"
+                            "w-full h-11.25 border-muted-foreground rounded-md text-left font-normal px-4 bg-white justify-between",
+                            !formik.values.finishDate && "text-muted-foreground"
                           )}
                         >
                           <span className="text-[14px]">
@@ -217,7 +219,7 @@ export function AddDesignModal({ open, onOpenChange, onAdd }) {
 
                   {/* Target Date */}
                   <div className="space-y-1.5">
-                    <label className="text-[16px] font-medium text-[#1a1a1a] block">
+                    <label className="text-[16px] font-medium text-primary-foreground block">
                       Target Date
                     </label>
                     <Popover>
@@ -225,8 +227,8 @@ export function AddDesignModal({ open, onOpenChange, onAdd }) {
                         <Button
                           variant="outline"
                           className={cn(
-                            "w-full h-[45px] border-[#858585] rounded-[6px] text-left font-normal px-4 bg-white justify-between",
-                            !formik.values.targetDate && "text-[#858585]"
+                            "w-full h-11.25 border-muted-foreground rounded-md text-left font-normal px-4 bg-white justify-between",
+                            !formik.values.targetDate && "text-muted-foreground"
                           )}
                         >
                           <span className="text-[14px]">
@@ -254,7 +256,7 @@ export function AddDesignModal({ open, onOpenChange, onAdd }) {
               <div className=" px-6 py-3 md:px-[36px] md:py-[20px] flex justify-end">
                 <Button
                   type="submit"
-                  className="bg-[#dcccbd] hover:bg-[#dcccbd]/90 text-[#1a1a1a] h-[45px] px-8 rounded-[6px] font-semibold text-[16px]"
+                  className="bg-[#dcccbd] hover:bg-[#dcccbd]/90 text-primary-foreground h-11.25 px-8 rounded-md font-semibold text-[16px]"
                 >
                   Add
                 </Button>
@@ -333,7 +335,7 @@ export function AddDesignModal({ open, onOpenChange, onAdd }) {
 //   return (
 //     <Dialog open={open} onOpenChange={onOpenChange}>
 //       <DialogContent 
-//         className="max-w-[95vw] sm:max-w-[900px] p-0 border-none bg-[#FFFFFF] shadow-none rounded-[30px] overflow-hidden !block"
+//         className="max-w-[95vw] sm:max-w-[900px] p-0 border-none bg-[#FFFFFF] shadow-none rounded-design overflow-hidden !block"
 //         showCloseButton={false}
 //       >
 //         <div className="relative w-full min-h-[500px] flex items-center justify-center px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
@@ -346,7 +348,7 @@ export function AddDesignModal({ open, onOpenChange, onAdd }) {
 
 //           <div className="border-2 border-[#dcccbd] rounded-[20px] overflow-hidden bg-white w-full max-w-full min-h-[400px] flex flex-col justify-center">
 //             <DialogHeader className="mb-6">
-//               <DialogTitle className="text-[20px] p-2.5 font-semibold text-center font-sans tracking-wide text-[#1a1a1a] bg-[#F8F5F2] border-b-2 border-[#dcccbd]">
+//               <DialogTitle className="text-[20px] p-2.5 font-semibold text-center font-sans tracking-wide text-primary-foreground bg-[#F8F5F2] border-b-2 border-[#dcccbd]">
 //                 Add Design
 //               </DialogTitle>
 //             </DialogHeader>
@@ -355,13 +357,13 @@ export function AddDesignModal({ open, onOpenChange, onAdd }) {
 //               <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-4 sm:gap-x-6 sm:gap-y-6">
 //                 {/* Attach Image */}
 //                 <div className="space-y-2">
-//                   <label className="text-[16px] font-medium text-[#1a1a1a] block">
+//                   <label className="text-[16px] font-medium text-primary-foreground block">
 //                     Attach Image
 //                   </label>
 //                   <div className="relative">
-//                     <div className="flex items-center gap-3 border border-[#858585] rounded-[6px] px-4 h-[45px] bg-white">
+//                     <div className="flex items-center gap-3 border border-muted-foreground rounded-md px-4 h-11.25 bg-white">
 //                       <AttachIcon width={16} height={16} color="#858585" />
-//                       <span className="text-[14px] text-[#858585] font-sans">
+//                       <span className="text-[14px] text-muted-foreground font-sans">
 //                         {formik.values.attachImage || "Attach file"}
 //                       </span>
 //                     </div>
@@ -381,33 +383,33 @@ export function AddDesignModal({ open, onOpenChange, onAdd }) {
 
 //                 {/* Design Id */}
 //                 <div className="space-y-2">
-//                   <label className="text-[16px] font-medium text-[#1a1a1a] block">
+//                   <label className="text-[16px] font-medium text-primary-foreground block">
 //                     Design Id
 //                   </label>
 //                   <Input
 //                     name="designId"
 //                     placeholder="Design Id"
-//                     className="h-[45px] border-[#858585] rounded-[6px] placeholder:text-[#858585] placeholder:text-[14px] text-[14px]"
+//                     className="h-11.25 border-muted-foreground rounded-md placeholder:text-muted-foreground placeholder:text-[14px] text-[14px]"
 //                     runForm={formik}
 //                   />
 //                 </div>
 
 //                 {/* Category */}
 //                 <div className="space-y-2">
-//                   <label className="text-[16px] font-medium text-[#1a1a1a] block">
+//                   <label className="text-[16px] font-medium text-primary-foreground block">
 //                     Category
 //                   </label>
 //                   <Select
 //                     onValueChange={(value) => formik.setFieldValue("category", value)}
 //                     value={formik.values.category}
 //                   >
-//                     <SelectTrigger className="!h-[45px] px-4 py-1 border-[#858585] rounded-[6px] text-[#858585] text-[14px] w-full bg-white">
+//                     <SelectTrigger className="!h-11.25 px-4 py-1 border-muted-foreground rounded-md text-muted-foreground text-[14px] w-full bg-white">
 //                       <SelectValue placeholder="Select category" />
 //                     </SelectTrigger>
 //                     <SelectContent className="bg-[#F8F5F2] border-[#dcccbd]">
-//                       <SelectItem value="concept" className="data-[state=checked]:bg-[#dcccbd] data-[state=checked]:text-[#1a1a1a]">Concept</SelectItem>
-//                       <SelectItem value="regular" className="data-[state=checked]:bg-[#dcccbd] data-[state=checked]:text-[#1a1a1a]">Regular</SelectItem>
-//                       <SelectItem value="cutting" className="data-[state=checked]:bg-[#dcccbd] data-[state=checked]:text-[#1a1a1a]">Cutting</SelectItem>
+//                       <SelectItem value="concept" className="data-[state=checked]:bg-[#dcccbd] data-[state=checked]:text-primary-foreground">Concept</SelectItem>
+//                       <SelectItem value="regular" className="data-[state=checked]:bg-[#dcccbd] data-[state=checked]:text-primary-foreground">Regular</SelectItem>
+//                       <SelectItem value="cutting" className="data-[state=checked]:bg-[#dcccbd] data-[state=checked]:text-primary-foreground">Cutting</SelectItem>
 //                     </SelectContent>
 //                   </Select>
 //                   {formik.touched.category && formik.errors.category && (
@@ -417,7 +419,7 @@ export function AddDesignModal({ open, onOpenChange, onAdd }) {
 
 //                 {/* Start Date */}
 //                 <div className="space-y-2">
-//                   <label className="text-[16px] font-medium text-[#1a1a1a] block">
+//                   <label className="text-[16px] font-medium text-primary-foreground block">
 //                     Start Date
 //                   </label>
 //                   <Popover>
@@ -425,8 +427,8 @@ export function AddDesignModal({ open, onOpenChange, onAdd }) {
 //                       <Button
 //                         variant="outline"
 //                         className={cn(
-//                           "w-full h-[45px] border-[#858585] rounded-[6px] text-left font-normal px-4 bg-white justify-between",
-//                           !formik.values.startDate && "text-[#858585]"
+//                           "w-full h-11.25 border-muted-foreground rounded-md text-left font-normal px-4 bg-white justify-between",
+//                           !formik.values.startDate && "text-muted-foreground"
 //                         )}
 //                       >
 //                         <span className="text-[14px]">
@@ -451,7 +453,7 @@ export function AddDesignModal({ open, onOpenChange, onAdd }) {
 
 //                 {/* Finish Date */}
 //                 <div className="space-y-2">
-//                   <label className="text-[16px] font-medium text-[#1a1a1a] block">
+//                   <label className="text-[16px] font-medium text-primary-foreground block">
 //                     Finish Date
 //                   </label>
 //                   <Popover>
@@ -459,8 +461,8 @@ export function AddDesignModal({ open, onOpenChange, onAdd }) {
 //                       <Button
 //                         variant="outline"
 //                         className={cn(
-//                           "w-full h-[45px] border-[#858585] rounded-[6px] text-left font-normal px-4 bg-white justify-between",
-//                           !formik.values.finishDate && "text-[#858585]"
+//                           "w-full h-11.25 border-muted-foreground rounded-md text-left font-normal px-4 bg-white justify-between",
+//                           !formik.values.finishDate && "text-muted-foreground"
 //                         )}
 //                       >
 //                         <span className="text-[14px]">
@@ -485,7 +487,7 @@ export function AddDesignModal({ open, onOpenChange, onAdd }) {
 
 //                 {/* Target Date */}
 //                 <div className="space-y-2">
-//                   <label className="text-[16px] font-medium text-[#1a1a1a] block">
+//                   <label className="text-[16px] font-medium text-primary-foreground block">
 //                     Target Date
 //                   </label>
 //                   <Popover>
@@ -493,8 +495,8 @@ export function AddDesignModal({ open, onOpenChange, onAdd }) {
 //                       <Button
 //                         variant="outline"
 //                         className={cn(
-//                           "w-full h-[45px] border-[#858585] rounded-[6px] text-left font-normal px-4 bg-white justify-between",
-//                           !formik.values.targetDate && "text-[#858585]"
+//                           "w-full h-11.25 border-muted-foreground rounded-md text-left font-normal px-4 bg-white justify-between",
+//                           !formik.values.targetDate && "text-muted-foreground"
 //                         )}
 //                       >
 //                         <span className="text-[14px]">
@@ -521,7 +523,7 @@ export function AddDesignModal({ open, onOpenChange, onAdd }) {
 //               <div className="flex justify-end pt-4">
 //                 <Button
 //                   type="submit"
-//                   className="bg-[#dcccbd] hover:bg-[#dcccbd]/90 text-[#1a1a1a] h-[45px] px-8 rounded-[6px] font-semibold text-[16px]"
+//                   className="bg-[#dcccbd] hover:bg-[#dcccbd]/90 text-primary-foreground h-11.25 px-8 rounded-md font-semibold text-[16px]"
 //                 >
 //                   Add
 //                 </Button>

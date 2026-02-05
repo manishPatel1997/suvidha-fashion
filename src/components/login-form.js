@@ -47,8 +47,9 @@ function LoginForm() {
                         id="email"
                         name="email"
                         placeholder="Email"
-                        className="pl-13 h-14 text-[18px] border-primary-foreground rounded-[10px] placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:border-primary transition-colors"
                         runForm={runForm}
+                        className={"pl-13"}
+                        // className="pl-13 h-14 text-[18px] border-primary-foreground rounded-[10px] placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:border-primary transition-colors"
                         icon={<EmailIcon />}
                     />
                     <div className="relative">
@@ -57,7 +58,7 @@ function LoginForm() {
                             id="password"
                             name="password"
                             placeholder="Password"
-                            className="pl-13 h-14 text-[18px] border-primary-foreground rounded-[10px] placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:border-primary transition-colors"
+                            className={"pl-13"}
                             runForm={runForm}
                             icon={<PasswordIcon />}
                         />
