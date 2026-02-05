@@ -1,8 +1,10 @@
 'use client'
 import { Button } from '@/components/ui/button'
 import { WorkflowProgressCard } from '@/components/workflow-progress-card'
+import { SampleWorkflowCard } from '@/components/sample-workflow-card'
 import { ChevronLeft } from 'lucide-react'
 import { useState } from 'react'
+
 
 function page() {
     const [isModalOpen, setIsModalOpen] = useState(false)
@@ -42,6 +44,11 @@ function page() {
                     "/design-thumb.png",
                 ]}
                 IsBlur
+            />
+
+            <SampleWorkflowCard
+                title="6. Sample"
+                progress={50}
             />
         </div>
     )

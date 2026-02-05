@@ -85,7 +85,7 @@ export function AddDesignModal({ open, onOpenChange, onAdd }) {
             </DialogHeader>
 
             <form onSubmit={formik.handleSubmit} className="flex flex-col flex-1">
-              <div className="px-6 py-5 md:px-9 md:py-10 space-y-4 flex-1 overflow-y-auto max-h-[60vh] md:max-h-none">
+              <div className="px-6 py-5 md:px-9 md:py-10 space-y-4 flex-1 overflow-y-auto max-h-[60vh]">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-7.5 gap-y-3.75">
                   {/* Attach Image */}
                   <div className="space-y-1.5">

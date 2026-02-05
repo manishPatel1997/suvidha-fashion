@@ -77,7 +77,7 @@ export function WorkflowProgressCard({
             <div className={
                 clsx(IsBlur && "relative")
             }>
-                {IsBlur && <LockBlur className="absolute top-0 left-0 w-full h-full" />}
+                {IsBlur && <LockBlur className="absolute top-0 left-0 w-full h-full z-50" />}
                 <div className={clsx("p-6 space-y-8", IsBlur && "blur-sm")}>
                     {/* Progress */}
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">

@@ -89,7 +89,7 @@ export default function Home() {
         onOpenChange={setIsModalOpen}
         onAdd={handleAddDesign}
       />
-
++
       
 
       {/* Search and Filters */}
