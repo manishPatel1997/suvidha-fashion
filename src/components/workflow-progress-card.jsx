@@ -361,6 +361,7 @@ import {
     AccordionTrigger,
     AccordionContent,
 } from "@/components/ui/accordion"
+import { EditTargetModal } from "./edit-target-modal"
 
 export function WorkflowProgressCard({
     title = "1. Inspirations",
@@ -374,7 +375,12 @@ export function WorkflowProgressCard({
     IsBlur = false,
 }) {
     const [images, setImages] = React.useState(initialImages)
+    const [isEditModalOpen, setIsEditModalOpen] = React.useState(false)
     const fileInputRef = React.useRef(null)
+
+    // Extract title name without number prefix (e.g., "1. Inspirations" -> "Inspirations")
+    const titleName = title.split('.').pop()?.trim() || title
+    const modalTitle = `${titleName} Target`
 
     const handleAddImage = (e) => {
         const file = e.target.files?.[0]
@@ -511,7 +517,7 @@ export function WorkflowProgressCard({
 
                                     <Button
                                         variant="outline"
-                                        onClick={onEditTarget}
+                                        onClick={() => setIsEditModalOpen(true)}
                                         className="h-[36px] bg-[#F8F5F2] border-none hover:bg-[#F0EDE9]"
                                     >
                                         Edit Target
@@ -572,6 +578,16 @@ export function WorkflowProgressCard({
                     </div>
                 </AccordionContent>
             </AccordionItem>
+
+            <EditTargetModal
+                open={isEditModalOpen}
+                onOpenChange={setIsEditModalOpen}
+                title={modalTitle}
+                initialValue={totalCount.toString()}
+                onSave={(val) => {
+                    if (onEditTarget) onEditTarget(val)
+                }}
+            />
         </Accordion>
     )
 }
