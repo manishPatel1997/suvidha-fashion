@@ -43,13 +43,14 @@ export function CommonModal({
                         "border-2 border-[#dcccbd] rounded-[20px] overflow-hidden bg-white w-full max-w-248.5 flex flex-col",
                         contentClassName
                     )}>
-                        {title && (
-                            <DialogHeader className="m-0 p-0">
-                                <DialogTitle className="text-[20px] p-2.5 font-semibold text-center font-sans tracking-wide text-primary-foreground bg-[#F8F5F2] border-b-2 border-[#dcccbd]">
-                                    {title}
-                                </DialogTitle>
-                            </DialogHeader>
-                        )}
+                        <DialogHeader className={cn("m-0 p-0", !title && "sr-only")}>
+                            <DialogTitle className={cn(
+                                "text-[20px] p-2.5 font-semibold text-center font-sans tracking-wide text-primary-foreground bg-[#F8F5F2] border-b-2 border-[#dcccbd]",
+                                !title && "sr-only"
+                            )}>
+                                {title || "Modal Dialog"}
+                            </DialogTitle>
+                        </DialogHeader>
                         {children}
                     </div>
                 </div>

@@ -5,7 +5,7 @@ import { PlusIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import clsx from "clsx";
 
-export function SampleWorkflowCard({ title = "6. Sample", progress = 50 }) {
+export function SampleWorkflowCard({ title = "6. Sample", progress = 50, onAddDesign }) {
   // Mock data to match the image structure
   const sampleRows = [
     {
@@ -164,7 +164,7 @@ export function SampleWorkflowCard({ title = "6. Sample", progress = 50 }) {
                       className={clsx(
                         "space-y-1.5",
                         idx !== row.items.length - 1 &&
-                          "lg:border-r lg:border-[#B0826A] lg:pr-5",
+                        "lg:border-r lg:border-[#B0826A] lg:pr-5",
                       )}
                     >
                       <DetailItem label="Yarn" value={item.yarn} />
@@ -187,6 +187,7 @@ export function SampleWorkflowCard({ title = "6. Sample", progress = 50 }) {
               <div className="flex justify-end">
                 <Button
                   variant="outline"
+                  onClick={onAddDesign}
                   className="h-[28px] w-fit bg-transparent border border-[#000000] text-[#1A1A1A] rounded-md shadow-none text-sm font-semibold px-3.5 cursor-pointer"
                 >
                   + Add

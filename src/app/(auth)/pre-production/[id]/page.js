@@ -5,9 +5,12 @@ import { SampleWorkflowCard } from '@/components/sample-workflow-card'
 import { ChevronLeft } from 'lucide-react'
 import { useState } from 'react'
 
+import { AddDetailsModal } from '@/components/add-details-modal'
+import { AddDesignModal } from '@/components/add-design-modal'
 
 function page() {
-    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
+    const [isDesignModalOpen, setIsDesignModalOpen] = useState(false)
     return (
         <div className="space-y-8">
             <div className="flex flex-row sm:items-center justify-between gap-4">
@@ -32,6 +35,7 @@ function page() {
                     "/design-thumb.png",
                     "/design-thumb.png",
                 ]}
+                onCompleted={() => setIsDetailsModalOpen(true)}
             />
             <WorkflowProgressCard
                 title="2. Sketches"
@@ -49,6 +53,19 @@ function page() {
             <SampleWorkflowCard
                 title="6. Sample"
                 progress={50}
+                onAddDesign={() => setIsDetailsModalOpen(true)}
+            />
+
+            <AddDetailsModal
+                open={isDetailsModalOpen}
+                onOpenChange={setIsDetailsModalOpen}
+                onAdd={(values) => console.log("Added details:", values)}
+            />
+
+            <AddDesignModal
+                open={isDesignModalOpen}
+                onOpenChange={setIsDesignModalOpen}
+                onAdd={(values) => console.log("Added design:", values)}
             />
         </div>
     )

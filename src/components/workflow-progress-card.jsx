@@ -362,6 +362,7 @@ import {
     AccordionContent,
 } from "@/components/ui/accordion"
 import { EditTargetModal } from "./edit-target-modal"
+import { ImageDetailModal } from "./image-detail-modal"
 
 export function WorkflowProgressCard({
     title = "1. Inspirations",
@@ -376,6 +377,7 @@ export function WorkflowProgressCard({
 }) {
     const [images, setImages] = React.useState(initialImages)
     const [isEditModalOpen, setIsEditModalOpen] = React.useState(false)
+    const [selectedImage, setSelectedImage] = React.useState(null)
     const fileInputRef = React.useRef(null)
 
     // Extract title name without number prefix (e.g., "1. Inspirations" -> "Inspirations")
@@ -530,7 +532,8 @@ export function WorkflowProgressCard({
                                 {images.map((img, idx) => (
                                     <div
                                         key={idx}
-                                        className="relative w-[85px] h-[85px] rounded-[10px] overflow-hidden border border-[#dcccbd]"
+                                        onClick={() => setSelectedImage(img)}
+                                        className="relative w-[85px] h-[85px] rounded-[10px] overflow-hidden border border-[#dcccbd] cursor-pointer hover:opacity-90 transition-opacity"
                                     >
                                         <Image
                                             src={img}
@@ -586,6 +589,19 @@ export function WorkflowProgressCard({
                 initialValue={totalCount.toString()}
                 onSave={(val) => {
                     if (onEditTarget) onEditTarget(val)
+                }}
+            />
+
+            <ImageDetailModal
+                open={!!selectedImage}
+                onOpenChange={(isOpen) => !isOpen && setSelectedImage(null)}
+                imageSrc={selectedImage}
+                onDelete={() => {
+                    console.log("Delete image:", selectedImage)
+                    setSelectedImage(null)
+                }}
+                onEdit={() => {
+                    console.log("Edit image:", selectedImage)
                 }}
             />
         </Accordion>
