@@ -3,9 +3,20 @@
 import * as React from "react";
 import { PlusIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { YarnDetailsModal } from "@/components/yarn-details-modal";
 import clsx from "clsx";
 
-export function SampleWorkflowCard({ title = "6. Sample", progress = 50, onAddDesign }) {
+export function SampleWorkflowCard({
+  title = "6. Sample",
+  progress = 50,
+  onAddDesign,
+}) {
   // Mock data to match the image structure
   const sampleRows = [
     {
@@ -106,13 +117,21 @@ export function SampleWorkflowCard({ title = "6. Sample", progress = 50, onAddDe
           {title}
         </h3>
         <div className="space-x-2">
-          <Button
-            variant="outline"
-            size="xs"
-            className="h-7 px-4 py-0 border-[#dcccbd] bg-[#7DAA7B] text-[14px] font-medium text-white rounded-md hover:bg-[#5d8d5b]"
-          >
-            Start
-          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button
+                variant="outline"
+                size="xs"
+                className="h-7 px-4 py-0 border-[#dcccbd] bg-[#7DAA7B] text-[14px] font-medium text-white rounded-md hover:bg-[#5d8d5b]"
+              >
+                Start
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="!max-w-[1182px] p-16 bg-white border-none rounded-3xl">
+              <DialogTitle className="sr-only">Yarn Details</DialogTitle>
+              <YarnDetailsModal />
+            </DialogContent>
+          </Dialog>
           <Button
             variant="outline"
             size="xs"
@@ -164,7 +183,7 @@ export function SampleWorkflowCard({ title = "6. Sample", progress = 50, onAddDe
                       className={clsx(
                         "space-y-1.5",
                         idx !== row.items.length - 1 &&
-                        "lg:border-r lg:border-[#B0826A] lg:pr-5",
+                          "lg:border-r lg:border-[#B0826A] lg:pr-5",
                       )}
                     >
                       <DetailItem label="Yarn" value={item.yarn} />
