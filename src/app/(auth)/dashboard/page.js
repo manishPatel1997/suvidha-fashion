@@ -1,5 +1,5 @@
-"use client"
-import * as React from "react"
+"use client";
+import * as React from "react";
 import { format } from "date-fns";
 import { DesignCard } from "@/components/design-card";
 import { Button } from "@/components/ui/button";
@@ -16,8 +16,9 @@ const designs = [
     finishDate: "00-00-2025",
     targetDate: "00-00-2025",
     status: "Production",
-    summary: "All sketches and designs are finalized and ready for production planning.",
-    image: "/design-thumb.png"
+    summary:
+      "All sketches and designs are finalized and ready for production planning.",
+    image: "/design-thumb.png",
   },
   {
     id: "D-1426",
@@ -26,7 +27,7 @@ const designs = [
     finishDate: "00-00-2025",
     targetDate: "00-00-2025",
     status: "Production",
-    image: "/design-thumb.png"
+    image: "/design-thumb.png",
   },
   {
     id: "D-1427",
@@ -35,7 +36,7 @@ const designs = [
     finishDate: "00-00-2025",
     targetDate: "00-00-2025",
     status: "Production",
-    image: "/design-thumb.png"
+    image: "/design-thumb.png",
   },
   {
     id: "D-1428",
@@ -44,16 +45,16 @@ const designs = [
     finishDate: "00-00-2025",
     targetDate: "00-00-2025",
     status: "Production",
-    image: "/design-thumb.png"
-  }
-]
+    image: "/design-thumb.png",
+  },
+];
 
 export default function Home() {
-  const [isModalOpen, setIsModalOpen] = React.useState(false)
-  const [designList, setDesignList] = React.useState(designs)
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [designList, setDesignList] = React.useState(designs);
 
   const handleAddDesign = (newDesign) => {
-    setDesignList(prev => [
+    setDesignList((prev) => [
       {
         ...newDesign,
         id: `D-${Math.floor(Math.random() * 10000)}`,
@@ -63,9 +64,9 @@ export default function Home() {
         finishDate: format(newDesign.finishDate, "dd-MM-yyyy"),
         targetDate: format(newDesign.targetDate, "dd-MM-yyyy"),
       },
-      ...prev
-    ])
-  }
+      ...prev,
+    ]);
+  };
 
   return (
     <div className="space-y-8">
@@ -83,16 +84,12 @@ export default function Home() {
           <span className="sm:hidden">Add</span>
         </Button>
       </div>
-
       <AddDesignModal
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
         onAdd={handleAddDesign}
       />
-+
-      
-
-      {/* Search and Filters */}
+      +{/* Search and Filters */}
       <div className="flex flex-col lg:flex-row gap-4">
         <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
@@ -222,7 +219,6 @@ export default function Home() {
           </TabsContent> */}
         </Tabs>
       </div>
-
       {/* */}
       {designList.map((design) => (
         <DesignCard key={design.id} {...design} />

@@ -49,7 +49,7 @@ export function DashboardSidebar() {
     <Sidebar collapsible="icon" className="border-none bg-transparent">
       {/* ================= Header ================= */}
       <SidebarHeader className="mt-2 border-b-2 border-border-design py-7 group-data-[collapsible=icon]:border-0">
-        <Link href="/user-profile">
+        <Link href="/dashboard">
           <div className="px-4 group-data-[collapsible=icon]:hidden">
             <FallBackImg className="w-[179px] h-[56px]" IsEager={true} />
           </div>
