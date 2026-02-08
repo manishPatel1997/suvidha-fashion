@@ -4,6 +4,7 @@ import * as React from "react"
 import { Trash2 } from "lucide-react"
 import { CommonModal } from "./CommonModal"
 import { Button } from "@/components/ui/button"
+import DeleteIcon from "@/assets/DeleteIcon"
 
 export function DeleteConfirmationModal({
     open,
@@ -18,13 +19,11 @@ export function DeleteConfirmationModal({
             onOpenChange={onOpenChange}
             className="sm:max-w-[500px]"
             contentClassName="max-w-[440px] border-none shadow-none bg-transparent"
-            containerClassName="py-10 lg:px-10 lg:py-15"
+            containerClassName="py-10 lg:px-10 lg:py-10"
         >
             <div className="bg-white rounded-[20px] overflow-hidden flex flex-col p-8 items-center text-center">
                 {/* Icon */}
-                <div className="w-16 h-16 rounded-full bg-[#FDF2F2] flex items-center justify-center mb-6">
-                    <Trash2 className="w-8 h-8 text-[#E5484D]" strokeWidth={1.5} />
-                </div>
+                <DeleteIcon />
 
                 {/* Text Content */}
                 <h2 className="text-[24px] font-bold text-primary-foreground mb-2">

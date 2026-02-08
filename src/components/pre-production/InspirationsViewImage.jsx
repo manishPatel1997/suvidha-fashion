@@ -3,12 +3,14 @@
 import * as React from "react"
 import Image from "next/image"
 import { Trash2, Share2, Download } from "lucide-react"
-import { CommonModal } from "./CommonModal"
+import { CommonModal } from "../CommonModal"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { DeleteConfirmationModal } from "./delete-confirmation-modal"
+import { DeleteConfirmationModal } from "../delete-confirmation-modal"
+import CloseIcon from "@/assets/CloseIcon"
+import { FloatingTextarea } from "../ui/floating-textarea"
 
-export function ImageDetailModal({
+export function InspirationsViewImage({
     open,
     onOpenChange,
     imageSrc = "/design-thumb.png",
@@ -55,14 +57,15 @@ export function ImageDetailModal({
         <CommonModal
             open={open}
             onOpenChange={onOpenChange}
-            className="sm:max-w-[700px]"
+            className="sm:max-w-[600px]"
             contentClassName="max-w-[600px] border-none shadow-none bg-transparent"
-            containerClassName="py-10 lg:px-10 lg:py-15"
+            containerClassName="px-4 py-4 sm:px-0 sm:py-4 lg:px-0 lg:py-4"
+            IsClose={false}
         >
             <div className="bg-white rounded-[20px] overflow-hidden flex flex-col">
                 {/* Header Actions - Hidden in Edit Mode */}
                 {!isEditing && (
-                    <div className="px-6 py-4 flex items-center justify-between bg-white">
+                    <div className="px-4 py-4 md:px-10 flex items-center justify-between bg-white">
                         <Button
                             variant="ghost"
                             onClick={() => setIsEditing(true)}
@@ -79,15 +82,33 @@ export function ImageDetailModal({
                                 <Trash2 className="w-4 h-4" />
                                 Delete
                             </Button>
+                            <Button
+                                variant="ghost"
+                                onClick={() => onOpenChange(false)}
+                                className="text-primary-foreground hover:opacity-70 transition-opacity"
+                            >
+                                <CloseIcon width={17} height={17} color="#1a1a1a" />
+                            </Button>
                         </div>
                     </div>
                 )}
 
                 {/* Extra padding when header is hidden */}
-                {isEditing && <div className="pt-10" />}
+                {/* {isEditing && <div className="pt-10" />} */}
+                {isEditing &&
+                    <div className="self-end px-4 md:px-10">
+                        <Button
+                            variant="ghost"
+                            onClick={() => setIsEditing(false)}
+                            className="text-primary-foreground hover:opacity-70 transition-opacity"
+                        >
+                            <CloseIcon width={17} height={17} color="#1a1a1a" />
+                        </Button>
+                    </div>
+                }
 
                 {/* Image Preview Container */}
-                <div className="px-10 pb-6 flex flex-col items-center">
+                <div className="px-4 py-4 md:px-10 pb-6 flex flex-col items-center">
                     <div className="relative w-full aspect-square max-w-[450px] rounded-[20px] overflow-hidden group">
                         {previewImage && (
                             <Image
@@ -116,9 +137,8 @@ export function ImageDetailModal({
                             </div>
                         )}
 
-                        {!isEditing && (
+                        {/* {!isEditing && (
                             <>
-                                {/* Floating Action Buttons */}
                                 <div className="absolute bottom-4 right-4 flex flex-col gap-2">
                                     <button className="w-8 h-8 flex items-center justify-center bg-[#DCCCBD]/80 hover:bg-[#DCCCBD] text-white rounded-full transition-colors shadow-sm">
                                         <Share2 className="w-4 h-4" />
@@ -128,34 +148,50 @@ export function ImageDetailModal({
                                     </button>
                                 </div>
                             </>
-                        )}
+                        )} */}
                     </div>
 
                     {/* Note Section */}
                     <div className="mt-8 w-full">
+                        <FloatingTextarea
+                            label={isEditing ? "Add a note" : "Note"}
+                            value={note}
+                            onChange={(e) => setNote(e.target.value)}
+                            readOnly={!isEditing}
+                            className="min-h-[80px]"
+                        />
+                    </div>
+                    {/* <div className="mt-8 w-full">
                         <div className="relative border border-[#dcccbd] rounded-[10px] p-4 pt-6">
                             <span className="absolute -top-3 left-6 bg-white px-2 text-[14px] font-medium text-[#B0826A]">
                                 Note
                             </span>
                             {isEditing ? (
-                                <textarea
-                                    value={note}
-                                    onChange={(e) => setNote(e.target.value)}
-                                    className="w-full min-h-[60px] text-[14px] text-primary-foreground leading-relaxed outline-none resize-none bg-transparent"
-                                    placeholder="Add a note..."
-                                />
+                                <>
+                                    <FloatingTextarea
+                                        label="Add a note"
+                                        defaultValue={note}
+                                        className="min-h-[80px]"
+                                    />
+                                    <textarea
+                                        value={note}
+                                        onChange={(e) => setNote(e.target.value)}
+                                        className="w-full min-h-[60px] text-[14px] text-primary-foreground leading-relaxed outline-none resize-none bg-transparent"
+                                        placeholder="Add a note..."
+                                    />
+                                </>
                             ) : (
                                 <p className="text-[14px] text-primary-foreground leading-relaxed">
                                     {note}
                                 </p>
                             )}
                         </div>
-                    </div>
+                    </div> */}
                 </div>
 
                 {/* Submit Button in Edit Mode */}
                 {isEditing && (
-                    <div className="px-10 pb-10 flex justify-center">
+                    <div className="px-10 flex justify-end">
                         <Button
                             onClick={handleSubmit}
                             className="bg-[#DCCCBD] hover:bg-[#DCCCBD]/90 text-primary-foreground font-semibold h-10 px-12 rounded-lg"

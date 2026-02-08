@@ -11,7 +11,7 @@ export function FloatingInput({ label, hasEdit, className, ...props }) {
       <input
         id={id}
         className={clsx(
-          "block h-12 w-full rounded-[6px] border border-[#858585] bg-transparent px-3 pb-1 text-[16px] text-[#1A1A1A] focus:outline-none focus:ring-1 focus:ring-[#858585] peer",
+          "block h-12 w-full rounded-md border border-muted-foreground bg-transparent px-3 pb-1 text-[16px] text-[#1A1A1A] focus:outline-none focus:ring-1 focus:ring-muted-foreground peer",
           className,
         )}
         placeholder=" "
@@ -19,7 +19,7 @@ export function FloatingInput({ label, hasEdit, className, ...props }) {
       />
       <Label
         htmlFor={id}
-        className="absolute left-3 top-2 text-[#B0826A] text-[14px] font-semibold capitalize leading-none duration-150 transform -translate-y-4 scale-100 z-10 origin-[0] bg-white px-1
+        className="absolute left-3 top-2 text-[#B0826A] text-[14px] font-semibold capitalize leading-none duration-150 transform -translate-y-4 scale-100 z-10 origin-left bg-white px-1
         peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:top-4 peer-placeholder-shown:bg-transparent
         peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:bg-white peer-focus:px-1"
         style={{ fontFamily: "Lato" }}

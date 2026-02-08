@@ -11,7 +11,8 @@ function FileInput({
     name,
     ...props
 }) {
-    const fileName = runForm?.values[name] || ""
+    const value = runForm?.values[name] || ""
+    const fileName = typeof value === "object" ? value?.name : value
 
     return (
         <div className="relative">

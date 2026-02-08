@@ -14,18 +14,19 @@ function page() {
     return (
         <div className="space-y-8">
             <div className="flex flex-row sm:items-center justify-between gap-4">
-                <h1 className="text-[28px] sm:text-[35px] md:text-[45px] font-serif font-bold text-primary-foreground flex items-center gap-3">
+                <h1 className="text-[26px] sm:text-[35px] md:text-[45px] font-serif font-bold text-primary-foreground flex items-center gap-1 sm:gap-3">
                     <ChevronLeft className="w-[1em] h-[1em] text-primary-foreground" />
-                    <span>Pre Production</span>
+                    <span className='text-nowrap sm:text-normal '>Pre Production</span>
                 </h1>
                 <Button
-                    className="bg-[#dcccbd] hover:bg-[#dcccbd]/90 text-primary-foreground  px-4 rounded-lg gap-2 font-semibold"
+                    className="text-[12px] sm:text-[14px] bg-[#dcccbd] hover:bg-[#dcccbd]/90 text-primary-foreground  sm:px-4 rounded-lg gap-2 font-semibold"
                 >
                     Design ID: D-1425
                 </Button>
             </div>
 
             <WorkflowProgressCard
+                defaultOpen
                 title="1. Inspirations"
                 progress={50}
                 currentCount={5}
@@ -47,11 +48,55 @@ function page() {
                     "/design-thumb.png",
                     "/design-thumb.png",
                 ]}
-                IsBlur
+            // IsBlur
+            />
+            <WorkflowProgressCard
+                title="3. Design"
+                progress={50}
+                currentCount={5}
+                totalCount={20}
+                images={[
+                    "/design-thumb.png",
+                    "/design-thumb.png",
+                    "/design-thumb.png",
+                ]}
+            />
+            <WorkflowProgressCard
+                title="4. Fabric"
+                progress={50}
+                currentCount={5}
+                totalCount={20}
+                images={[
+                    "/design-thumb.png",
+                    "/design-thumb.png",
+                    "/design-thumb.png",
+                ]}
+            />
+            <WorkflowProgressCard
+                title="5. Yarn"
+                progress={50}
+                currentCount={5}
+                totalCount={20}
+                images={[
+                    "/design-thumb.png",
+                    "/design-thumb.png",
+                    "/design-thumb.png",
+                ]}
+            />
+            <WorkflowProgressCard
+                title="6. Sequence"
+                progress={50}
+                currentCount={5}
+                totalCount={20}
+                images={[
+                    "/design-thumb.png",
+                    "/design-thumb.png",
+                    "/design-thumb.png",
+                ]}
             />
 
             <SampleWorkflowCard
-                title="6. Sample"
+                title="7. Sample"
                 progress={50}
                 onAddDesign={() => setIsDetailsModalOpen(true)}
             />

@@ -18,3 +18,10 @@ export const formAttr = (form, field) => ({
   onChange: form.handleChange(field), // Ensure field is passed to handleChange
   value: getIn(form.values, field) || "", // Use getIn for nested field access
 });
+
+export const modalOpen = (modal, value, setOpenModal) => {
+  setOpenModal((prev) => ({
+    ...prev,
+    [modal]: value
+  }))
+}

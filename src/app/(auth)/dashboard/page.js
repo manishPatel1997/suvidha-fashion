@@ -89,7 +89,7 @@ export default function Home() {
         onOpenChange={setIsModalOpen}
         onAdd={handleAddDesign}
       />
-      +{/* Search and Filters */}
+      {/* Search and Filters */}
       <div className="flex flex-col lg:flex-row gap-4">
         <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
