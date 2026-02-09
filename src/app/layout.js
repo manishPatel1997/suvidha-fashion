@@ -1,10 +1,12 @@
 import { Lato, Cormorant_Garamond } from "next/font/google";
+import { QueryProvider } from "@/providers/QueryProvider";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const lato = Lato({
   variable: "--font-lato",
   subsets: ["latin"],
-  weight: ["100", "300", "400", "700", "900" ],
+  weight: ["100", "300", "400", "700", "900"],
 });
 
 const cormorant = Cormorant_Garamond({
@@ -29,8 +31,10 @@ export default function RootLayout({ children }) {
       <body
         className={`${lato.variable} ${cormorant.variable} antialiased`}
       >
-        {children}
+        <QueryProvider>{children}</QueryProvider>
+        <Toaster richColors position="top-right" />
       </body>
     </html>
   );
 }
+
