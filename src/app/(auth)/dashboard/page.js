@@ -7,51 +7,82 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PlusIcon, Search } from "lucide-react";
 import { AddDesignModal } from "@/components/add-design-modal";
+import { usePost } from "@/hooks/useApi";
+import { usePagination } from "@/hooks/usePagination";
+import { CommonPagination } from "@/components/CommonPagination";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useDebounce } from "use-debounce";
 
-const designs = [
-  {
-    id: "D-1425",
-    category: "Concept",
-    startDate: "00-00-2025",
-    finishDate: "00-00-2025",
-    targetDate: "00-00-2025",
-    status: "Production",
-    summary:
-      "All sketches and designs are finalized and ready for production planning.",
-    image: "/design-thumb.png",
-  },
-  {
-    id: "D-1426",
-    category: "Concept",
-    startDate: "00-00-2025",
-    finishDate: "00-00-2025",
-    targetDate: "00-00-2025",
-    status: "Production",
-    image: "/design-thumb.png",
-  },
-  {
-    id: "D-1427",
-    category: "Concept",
-    startDate: "00-00-2025",
-    finishDate: "00-00-2025",
-    targetDate: "00-00-2025",
-    status: "Production",
-    image: "/design-thumb.png",
-  },
-  {
-    id: "D-1428",
-    category: "Concept",
-    startDate: "00-00-2025",
-    finishDate: "00-00-2025",
-    targetDate: "00-00-2025",
-    status: "Production",
-    image: "/design-thumb.png",
-  },
-];
 
-export default function Home() {
+
+function DashboardContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+
   const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const [designList, setDesignList] = React.useState(designs);
+  const [designList, setDesignList] = React.useState([]);
+  const [search, setSearch] = React.useState(searchParams.get("search") || "");
+  const [category, setCategory] = React.useState(searchParams.get("category") || "concept");
+  const [debouncedSearch] = useDebounce(search, 500);
+
+  const {
+    pagination,
+    setPagination,
+    currentPage,
+    setCurrentPage,
+    limit,
+    setLimit,
+  } = usePagination(parseInt(searchParams.get("limit")) || 1);
+
+  // Initial sync from URL
+  React.useEffect(() => {
+    const page = parseInt(searchParams.get("page")) || 1;
+    if (page !== currentPage) setCurrentPage(page);
+  }, []);
+
+  // Update URL when states change
+  React.useEffect(() => {
+    const params = new URLSearchParams();
+    if (currentPage > 1) params.set("page", currentPage.toString());
+    if (limit !== 10) params.set("limit", limit.toString());
+    if (debouncedSearch) params.set("search", debouncedSearch);
+    if (category && category !== "concept") params.set("category", category);
+
+    const queryString = params.toString();
+    router.push(queryString ? `?${queryString}` : pathname, { scroll: false });
+  }, [currentPage, limit, debouncedSearch, category, pathname, router]);
+
+  const { mutate: getDesigns, isPending } = usePost('/api/v1/design/list', {
+    onSuccess: (data) => {
+      console.log('data?.data', data?.data)
+      if (data?.data?.data) {
+        setPagination(data.data.pagination);
+
+        // Map backend data to DesignCard props
+        const mappedDesigns = data.data.data.map(item => ({
+          id: item.id,
+          design_slug_id: item.design_slug_id,
+          category: item.category,
+          startDate: item.start_date,
+          finishDate: item.finish_date,
+          targetDate: item.target_date,
+          status: item.status,
+          summary: item.note,
+          image: `${process.env.NEXT_PUBLIC_API_URL}${item.image}`,
+          isLocked: false,
+          backUrl: `?page=${currentPage}&limit=${limit}${debouncedSearch ? `&search=${debouncedSearch}` : ""}${category && category !== "concept" ? `&category=${category}` : ""}`
+        }));
+
+        setDesignList(mappedDesigns);
+      }
+    },
+  });
+
+  React.useEffect(() => {
+    getDesigns({ page: currentPage, limit: limit, search: debouncedSearch, category: category });
+    // getDesigns({ page: currentPage, limit: limit, search: debouncedSearch, category: category });
+  }, [currentPage, limit, debouncedSearch, category]);
 
   const handleAddDesign = (newDesign) => {
     setDesignList((prev) => [
@@ -94,38 +125,19 @@ export default function Home() {
         <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
           <Input
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
             placeholder="Search designs..."
             className="pl-10 h-10 border-[#dcccbd] rounded-md placeholder:text-primary-foreground/50 text-[16px] sm:text-[18px] focus-visible:ring-0 focus-visible:border-primary transition-colors"
           />
         </div>
-        {/* <Tabs defaultValue="concept" className="w-full">
-          <TabsList className="bg-white border border-[#dcccbd] rounded-md p-0 overflow-hidden w-full flex !h-10">
-            <TabsTrigger
-              value="concept"
-              className="flex-1 h-full px-2 sm:px-4 md:px-8 rounded-none font-semibold text-[14px] sm:text-[16px] data-[state=active]:bg-[#dcccbd] data-[state=active]:text-primary-foreground focus-visible:ring-0 focus-visible:outline-none shadow-none"
-            >
-              <span className="hidden sm:inline">Concept</span>
-              <span className="sm:hidden">Concept</span>
-            </TabsTrigger>
-
-            <TabsTrigger
-              value="regular"
-              className="flex-1 h-full px-2 sm:px-4 md:px-8 rounded-none font-semibold text-[14px] sm:text-[16px] data-[state=active]:bg-[#dcccbd] data-[state=active]:text-primary-foreground focus-visible:ring-0 focus-visible:outline-none shadow-none"
-            >
-              <span className="hidden sm:inline">Regular</span>
-              <span className="sm:hidden">Regular</span>
-            </TabsTrigger>
-
-            <TabsTrigger
-              value="cutting"
-              className="flex-1 h-full px-2 sm:px-4 md:px-8 rounded-none font-semibold text-[14px] sm:text-[16px] data-[state=active]:bg-[#dcccbd] data-[state=active]:text-primary-foreground focus-visible:ring-0 focus-visible:outline-none shadow-none"
-            >
-              <span className="hidden sm:inline">Cutting</span>
-              <span className="sm:hidden">Cutting</span>
-            </TabsTrigger>
-          </TabsList>
-        </Tabs> */}
-        <Tabs defaultValue="concept" className="w-full">
+        <Tabs value={category} onValueChange={(val) => {
+          setCategory(val);
+          setCurrentPage(1);
+        }} className="w-full">
           {/* Tabs Header */}
           <TabsList
             className="
@@ -220,9 +232,39 @@ export default function Home() {
         </Tabs>
       </div>
       {/* */}
-      {designList.map((design) => (
-        <DesignCard key={design.id} {...design} />
-      ))}
+      {isPending ? (
+        <div className="flex justify-center items-center py-10">
+          <p className="text-lg text-primary-foreground">Loading designs...</p>
+        </div>
+      ) : designList.length > 0 ? (
+        designList.map((design) => <DesignCard key={design.id} {...design} />)
+      ) : (
+        <div className="flex justify-center items-center py-10">
+          <p className="text-lg text-primary-foreground opacity-60">
+            No designs found.
+          </p>
+        </div>
+      )}
+
+      <CommonPagination
+        pagination={pagination}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        limit={limit}
+        setLimit={setLimit}
+      />
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <React.Suspense fallback={
+      <div className="flex justify-center items-center py-10">
+        <p className="text-lg text-primary-foreground font-serif">Loading Dashboard...</p>
+      </div>
+    }>
+      <DashboardContent />
+    </React.Suspense>
   );
 }

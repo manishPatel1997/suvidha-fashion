@@ -1,12 +1,7 @@
+import { statusColors } from '@/lib/helper'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
 import React from 'react'
-
-const statusColors = {
-    Pending: "bg-[#858585] text-white",
-    "In Process": "bg-[#EAB308] text-white",
-    Completed: "bg-[#22C55E] text-white",
-}
 
 function WorkItemCard({ item, onClick, isFabric = false, isYarn = false, isSequence = false, isStatus = false }) {
     const src = typeof item === "string" ? item : item.src

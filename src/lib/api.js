@@ -1,8 +1,9 @@
+import Cookies from "js-cookie";
+
 /**
  * Base API URL - configure via environment variable
- * Falls back to empty string for relative URLs
  */
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3008";
 
 /**
  * Build URL with query parameters
@@ -32,11 +33,18 @@ function buildUrl(url, params) {
  * @returns {Promise<any>} Parsed JSON response
  */
 async function fetcher(url, options = {}) {
+    const token = Cookies.get("token");
+    const headers = {
+        "Content-Type": "application/json",
+        ...options.headers,
+    };
+
+    if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+    }
+
     const response = await fetch(url, {
-        headers: {
-            "Content-Type": "application/json",
-            ...options.headers,
-        },
+        headers,
         ...options,
     });
 

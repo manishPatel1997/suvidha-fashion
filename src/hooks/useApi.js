@@ -54,7 +54,6 @@ export function useGet(queryKey, url, params = {}, options = {}) {
  */
 export function usePost(url, options = {}) {
     const queryClient = useQueryClient();
-
     return useMutation({
         mutationFn: (body) => post(url, body),
         onSuccess: (data, variables, context) => {

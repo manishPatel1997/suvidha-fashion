@@ -25,3 +25,10 @@ export const modalOpen = (modal, value, setOpenModal) => {
     [modal]: value
   }))
 }
+
+
+export const statusColors = {
+  Pending: "bg-[#858585] text-white",
+  "In Process": "bg-[#EAB308] text-white",
+  Completed: "bg-[#22C55E] text-white",
+}

@@ -29,6 +29,8 @@ import IdeasIcon from "@/assets/IdeasIcon"
 import SketchesIcon from "@/assets/SketchesIcon"
 import LogOutIcon from "@/assets/LogOutIcon"
 
+import Cookies from "js-cookie"
+
 /* ================= Menu Config ================= */
 const MENU_ITEMS = [
   { name: "Home", href: "/dashboard", Icon: HomeIcon, hasArrow: false },
@@ -42,8 +44,22 @@ const MENU_ITEMS = [
   { name: "Sketches", href: "/sketches", Icon: SketchesIcon, hasArrow: true },
 ]
 
+const PRE_PRODUCTION_MENU_ITEMS = [
+  { name: "Pre-production", href: "/pre-production", Icon: SketchesIcon, hasArrow: true },
+  { name: "Production", href: "/production", Icon: OrderIcon, hasArrow: true },
+  { name: "Post production", href: "/post-production", Icon: FabricIcon, hasArrow: true },
+]
+
 export function DashboardSidebar() {
   const pathname = usePathname()
+
+  const isPreProduction = pathname.startsWith("/pre-production")
+  const currentMenuItems = isPreProduction ? PRE_PRODUCTION_MENU_ITEMS : MENU_ITEMS
+
+  const handleLogout = () => {
+    Cookies.remove("token")
+    window.location.reload()
+  }
 
   return (
     <Sidebar collapsible="icon" className="border-none bg-transparent">
@@ -62,7 +78,7 @@ export function DashboardSidebar() {
       {/* ================= Content ================= */}
       <SidebarContent className="pt-6 px-4.5 group-data-[collapsible=icon]:px-2">
         <SidebarMenu>
-          {MENU_ITEMS.map(({ name, href, Icon, hasArrow }) => {
+          {currentMenuItems.map(({ name, href, Icon, hasArrow }) => {
             const isActive =
               href === "/"
                 ? pathname === "/"
@@ -145,6 +161,7 @@ export function DashboardSidebar() {
       "
           >
             <SidebarMenuButton
+              onClick={handleLogout}
               className="
           h-[40px]
           w-full

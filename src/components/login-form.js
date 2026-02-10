@@ -27,14 +27,14 @@ function LoginForm() {
     const [showPassword, setShowPassword] = useState(false)
     const { redirectTo } = useRedirect()
 
-    const { mutate: login, isPending } = usePost('/auth/login', {
+    const { mutate: login, isPending } = usePost('/api/v1/auth/login', {
         onSuccess: (data) => {
-            toast.success('Login successful!')
             // Store token in cookies for middleware access
-            if (data?.token) {
-                Cookies.set('token', data.token, { expires: 7, secure: true })
+            if (data?.data?.token) {
+                toast.success('Login successful!')
+                Cookies.set('token', data.data.token, { expires: 7, secure: true })
+                redirectTo('/dashboard')
             }
-            redirectTo('/')
         },
         onError: (error) => {
             toast.error(error?.message || 'Login failed. Please try again.')
