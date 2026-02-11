@@ -1,4 +1,5 @@
 import Cookies from "js-cookie";
+import { toFormData } from "./helper";
 
 /**
  * Base API URL - configure via environment variable
@@ -34,10 +35,14 @@ function buildUrl(url, params) {
  */
 async function fetcher(url, options = {}) {
     const token = Cookies.get("token");
+    const isFormData = options.body instanceof FormData;
     const headers = {
-        "Content-Type": "application/json",
         ...options.headers,
     };
+
+    if (!isFormData) {
+        headers["Content-Type"] = headers["Content-Type"] || "application/json";
+    }
 
     if (token) {
         headers["Authorization"] = `Bearer ${token}`;
@@ -51,6 +56,15 @@ async function fetcher(url, options = {}) {
     // Handle non-OK responses
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+
+        // Handle JWT expiration or unauthorized
+        if (response.status === 401 || errorData.message === "jwt expired") {
+            Cookies.remove("token");
+            if (typeof window !== "undefined") {
+                window.location.href = "/login";
+            }
+        }
+
         const error = new Error(
             errorData.message || `Request failed with status ${response.status}`
         );
@@ -79,42 +93,36 @@ export async function get(url, params = {}) {
     });
 }
 
-/**
- * POST request helper
- * @param {string} url - The endpoint URL
- * @param {Object} body - Request body
- * @returns {Promise<any>} Response data
- */
-export async function post(url, body = {}) {
+export async function post(url, body = {}, options = {}) {
+    const isFormData = options.isFormData || body instanceof FormData;
+    const finalBody = isFormData && !(body instanceof FormData) ? toFormData(body) : body;
+
     return fetcher(`${BASE_URL}${url}`, {
         method: "POST",
-        body: JSON.stringify(body),
+        body: isFormData ? finalBody : JSON.stringify(finalBody),
+        ...options,
     });
 }
 
-/**
- * PUT request helper
- * @param {string} url - The endpoint URL
- * @param {Object} body - Request body
- * @returns {Promise<any>} Response data
- */
-export async function put(url, body = {}) {
+export async function put(url, body = {}, options = {}) {
+    const isFormData = options.isFormData || body instanceof FormData;
+    const finalBody = isFormData && !(body instanceof FormData) ? toFormData(body) : body;
+
     return fetcher(`${BASE_URL}${url}`, {
         method: "PUT",
-        body: JSON.stringify(body),
+        body: isFormData ? finalBody : JSON.stringify(finalBody),
+        ...options,
     });
 }
 
-/**
- * PATCH request helper
- * @param {string} url - The endpoint URL
- * @param {Object} body - Request body
- * @returns {Promise<any>} Response data
- */
-export async function patch(url, body = {}) {
+export async function patch(url, body = {}, options = {}) {
+    const isFormData = options.isFormData || body instanceof FormData;
+    const finalBody = isFormData && !(body instanceof FormData) ? toFormData(body) : body;
+
     return fetcher(`${BASE_URL}${url}`, {
         method: "PATCH",
-        body: JSON.stringify(body),
+        body: isFormData ? finalBody : JSON.stringify(finalBody),
+        ...options,
     });
 }
 

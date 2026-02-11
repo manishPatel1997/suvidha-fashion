@@ -54,17 +54,17 @@ export function useGet(queryKey, url, params = {}, options = {}) {
  */
 export function usePost(url, options = {}) {
     const queryClient = useQueryClient();
+    const { isFormData, ...mutationOptions } = options;
+
     return useMutation({
-        mutationFn: (body) => post(url, body),
+        mutationFn: (body) => post(url, body, { isFormData }),
         onSuccess: (data, variables, context) => {
-            // Call user's onSuccess if provided
             options.onSuccess?.(data, variables, context);
         },
         onError: (error, variables, context) => {
-            // Call user's onError if provided
             options.onError?.(error, variables, context);
         },
-        ...options,
+        ...mutationOptions,
     });
 }
 
@@ -80,15 +80,16 @@ export function usePost(url, options = {}) {
  * mutate({ name: "Updated Name", email: "new@example.com" });
  */
 export function usePut(url, options = {}) {
+    const { isFormData, ...mutationOptions } = options;
     return useMutation({
-        mutationFn: (body) => put(url, body),
+        mutationFn: (body) => put(url, body, { isFormData }),
         onSuccess: (data, variables, context) => {
             options.onSuccess?.(data, variables, context);
         },
         onError: (error, variables, context) => {
             options.onError?.(error, variables, context);
         },
-        ...options,
+        ...mutationOptions,
     });
 }
 
@@ -104,15 +105,16 @@ export function usePut(url, options = {}) {
  * mutate({ name: "Updated Name" }); // Only update name
  */
 export function usePatch(url, options = {}) {
+    const { isFormData, ...mutationOptions } = options;
     return useMutation({
-        mutationFn: (body) => patch(url, body),
+        mutationFn: (body) => patch(url, body, { isFormData }),
         onSuccess: (data, variables, context) => {
             options.onSuccess?.(data, variables, context);
         },
         onError: (error, variables, context) => {
             options.onError?.(error, variables, context);
         },
-        ...options,
+        ...mutationOptions,
     });
 }
 

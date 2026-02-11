@@ -12,6 +12,7 @@ import { usePagination } from "@/hooks/usePagination";
 import { CommonPagination } from "@/components/CommonPagination";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useDebounce } from "use-debounce";
+import { toast } from "sonner";
 
 
 
@@ -23,7 +24,7 @@ function DashboardContent() {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [designList, setDesignList] = React.useState([]);
   const [search, setSearch] = React.useState(searchParams.get("search") || "");
-  const [category, setCategory] = React.useState(searchParams.get("category") || "concept");
+  const [category, setCategory] = React.useState(searchParams.get("category") || "regular");
   const [debouncedSearch] = useDebounce(search, 500);
 
   const {
@@ -33,7 +34,7 @@ function DashboardContent() {
     setCurrentPage,
     limit,
     setLimit,
-  } = usePagination(parseInt(searchParams.get("limit")) || 1);
+  } = usePagination(parseInt(searchParams.get("limit")) || 10);
 
   // Initial sync from URL
   React.useEffect(() => {
@@ -64,9 +65,9 @@ function DashboardContent() {
           id: item.id,
           design_slug_id: item.design_slug_id,
           category: item.category,
-          startDate: item.start_date,
-          finishDate: item.finish_date,
-          targetDate: item.target_date,
+          startDate: item.start_date ? format(new Date(item.start_date), "dd-MM-yyyy") : "",
+          finishDate: item.finish_date ? format(new Date(item.finish_date), "dd-MM-yyyy") : "",
+          targetDate: item.target_date ? format(new Date(item.target_date), "dd-MM-yyyy") : "",
           status: item.status,
           summary: item.note,
           image: `${process.env.NEXT_PUBLIC_API_URL}${item.image}`,
@@ -84,19 +85,20 @@ function DashboardContent() {
     // getDesigns({ page: currentPage, limit: limit, search: debouncedSearch, category: category });
   }, [currentPage, limit, debouncedSearch, category]);
 
-  const handleAddDesign = (newDesign) => {
-    setDesignList((prev) => [
-      {
-        ...newDesign,
-        id: `D-${Math.floor(Math.random() * 10000)}`,
-        status: "Production",
-        image: "/design-thumb.png", // Default for now
-        startDate: format(newDesign.startDate, "dd-MM-yyyy"),
-        finishDate: format(newDesign.finishDate, "dd-MM-yyyy"),
-        targetDate: format(newDesign.targetDate, "dd-MM-yyyy"),
-      },
-      ...prev,
-    ]);
+  const { mutate: createDesign, isPending: isAdding } = usePost('/api/v1/design/create', {
+    isFormData: true,
+    onSuccess: (data) => {
+      toast.success("Design added successfully");
+      getDesigns({ page: currentPage, limit: limit, search: debouncedSearch, category: category });
+      setIsModalOpen(false);
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to add design");
+    }
+  });
+
+  const handleAddDesign = (values) => {
+    createDesign(values);
   };
 
   return (

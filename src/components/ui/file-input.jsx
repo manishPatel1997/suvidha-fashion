@@ -31,7 +31,7 @@ function FileInput({
                 onChange={(e) => {
                     const file = e.target.files[0]
                     if (file && runForm) {
-                        runForm.setFieldValue(name, file.name)
+                        runForm.setFieldValue(name, file)
                     }
                 }}
                 {...props}

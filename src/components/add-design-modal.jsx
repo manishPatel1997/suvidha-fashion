@@ -37,32 +37,40 @@ import { FileInput } from "@/components/ui/file-input"
 import { FormSelect } from "@/components/ui/form-select"
 import { FormDatePicker } from "@/components/ui/form-date-picker"
 
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+
 const validationSchema = Yup.object().shape({
-  attachImage: Yup.mixed().required("Image is required"),
-  designId: Yup.string().required("Design Id is required"),
+  image: Yup.mixed().required("Image is required"),
+  design_slug_id: Yup.string().required("Design Id is required"),
   category: Yup.string().required("Category is required"),
-  startDate: Yup.date().required("Start date is required"),
-  finishDate: Yup.date()
+  start_date: Yup.date()
+    .required("Start date is required")
+    .min(today, "Start date cannot be in the past"),
+  finish_date: Yup.date()
     .required("Finish date is required")
-    .min(Yup.ref('startDate'), "Finish date cannot be before start date"),
-  targetDate: Yup.date().required("Target date is required"),
+    .min(today, "Finish date cannot be in the past")
+    .min(Yup.ref('start_date'), "Finish date cannot be before start date"),
+  target_date: Yup.date()
+    .required("Target date is required")
+    .min(today, "Target date cannot be in the past")
+    .min(Yup.ref('finish_date'), "Target date cannot be before finish date"),
 })
 
 export function AddDesignModal({ open, onOpenChange, onAdd }) {
   const formik = useFormik({
     initialValues: {
-      attachImage: "",
-      designId: "",
+      image: "",
+      design_slug_id: "",
       category: "",
-      startDate: null,
-      finishDate: null,
-      targetDate: null,
+      start_date: null,
+      finish_date: null,
+      target_date: null,
     },
     validationSchema,
     onSubmit: (values) => {
       console.log("Form values:", values)
       if (onAdd) onAdd(values)
-      onOpenChange(false)
       formik.resetForm()
     },
   })
@@ -95,7 +103,7 @@ export function AddDesignModal({ open, onOpenChange, onAdd }) {
                 Attach Image
               </label>
               <FileInput
-                name="attachImage"
+                name="image"
                 runForm={formik}
                 icon={<AttachIcon width={16} height={16} color="#858585" />}
               />
@@ -107,7 +115,7 @@ export function AddDesignModal({ open, onOpenChange, onAdd }) {
                 Design Id
               </label>
               <Input
-                name="designId"
+                name="design_slug_id"
                 placeholder="Design Id"
                 className="h-11.25 border-muted-foreground rounded-md placeholder:text-muted-foreground placeholder:text-[14px] text-[14px]"
                 runForm={formik}
@@ -133,9 +141,10 @@ export function AddDesignModal({ open, onOpenChange, onAdd }) {
                 Start Date
               </label>
               <FormDatePicker
-                name="startDate"
+                name="start_date"
                 runForm={formik}
                 placeholder="Select start date"
+                calendarProps={{ disabled: { before: today } }}
               />
             </div>
 
@@ -145,9 +154,12 @@ export function AddDesignModal({ open, onOpenChange, onAdd }) {
                 Finish Date
               </label>
               <FormDatePicker
-                name="finishDate"
+                name="finish_date"
                 runForm={formik}
                 placeholder="Select finish date"
+                calendarProps={{
+                  disabled: { before: formik.values.start_date || today }
+                }}
               />
             </div>
 
@@ -157,9 +169,14 @@ export function AddDesignModal({ open, onOpenChange, onAdd }) {
                 Target Date
               </label>
               <FormDatePicker
-                name="targetDate"
+                name="target_date"
                 runForm={formik}
                 placeholder="Select target date"
+                calendarProps={{
+                  disabled: {
+                    before: formik.values.finish_date || formik.values.start_date || today
+                  }
+                }}
               />
             </div>
           </div>

@@ -1,6 +1,7 @@
 'use client'
 import { getIn } from "formik";
 import React from "react";
+import { format } from "date-fns";
 
 export const errorContainer = (form, field) => {
   if (form.touched[field] && form.errors[field]) {
@@ -32,3 +33,35 @@ export const statusColors = {
   "In Process": "bg-[#EAB308] text-white",
   Completed: "bg-[#22C55E] text-white",
 }
+
+/**
+ * Converts a plain object to FormData
+ * @param {Object} obj - The object to convert
+ * @returns {FormData} The resulting FormData object
+ */
+export const toFormData = (obj) => {
+  const formData = new FormData();
+  Object.entries(obj).forEach(([key, value]) => {
+    if (value === null || value === undefined) return;
+
+    // Check if it's a date field based on key name or type
+    const isDateKey = key.includes("date") || key.includes("_at");
+
+    if (value instanceof Date) {
+      formData.append(key, format(value, "yyyy-MM-dd"));
+    } else if (isDateKey && typeof value === 'string' && value.length > 0) {
+      // Try to parse and format date strings for date-related keys
+      const parsedDate = new Date(value);
+      if (!isNaN(parsedDate.getTime())) {
+        formData.append(key, format(parsedDate, "yyyy-MM-dd"));
+      } else {
+        formData.append(key, value);
+      }
+    } else if (Array.isArray(value)) {
+      value.forEach((item) => formData.append(`${key}[]`, item));
+    } else {
+      formData.append(key, value);
+    }
+  });
+  return formData;
+};

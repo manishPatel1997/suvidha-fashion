@@ -21,6 +21,7 @@ function FormDatePicker({
     showError = true,
     className,
     buttonClassName,
+    calendarProps = {},
     ...props
 }) {
     const [open, setOpen] = React.useState(false)
@@ -54,6 +55,7 @@ function FormDatePicker({
                             setOpen(false)
                         }}
                         initialFocus
+                        {...calendarProps}
                     />
                 </PopoverContent>
             </Popover>
