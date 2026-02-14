@@ -9,14 +9,15 @@ import { cn } from "@/lib/utils"
 import { DeleteConfirmationModal } from "../delete-confirmation-modal"
 import CloseIcon from "@/assets/CloseIcon"
 import { FloatingTextarea } from "../ui/floating-textarea"
+import { usePost } from "@/hooks/useApi"
+import { toFormData } from "@/lib/helper"
 
 export function InspirationsViewImage({
     open,
     onOpenChange,
     selectedData,
-    onDelete,
-    onEdit,
-    isLoading
+    onDeleteSuccess,
+    onUpdateSuccess,
 }) {
     const [isEditing, setIsEditing] = React.useState(false)
     const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false)
@@ -24,6 +25,34 @@ export function InspirationsViewImage({
     const [previewImage, setPreviewImage] = React.useState(selectedData?.image_url ? `${process.env.NEXT_PUBLIC_API_URL}${selectedData?.image_url}` : null)
     const [selectedFile, setSelectedFile] = React.useState(null)
     const fileInputRef = React.useRef(null)
+
+    const { mutate: updateInspiration, isPending: isUpdatingImage } = usePost("/api/v1/design/inspiration/update", {
+        isFormData: true,
+        onSuccess: (res) => {
+            if (res.success) {
+                if (onUpdateSuccess) onUpdateSuccess(res.data)
+                setIsEditing(false)
+            }
+        },
+        onError: (error) => {
+            console.error("Error updating inspiration:", error)
+        }
+    })
+
+    const { mutate: deleteInspiration, isPending: isDeletingImage } = usePost("/api/v1/design/inspiration/delete", {
+        onSuccess: (res, variables) => {
+            if (res.success) {
+                if (onDeleteSuccess) onDeleteSuccess(Number(variables.id))
+                onOpenChange(false)
+            }
+        },
+        onError: (error) => {
+            console.error("Error deleting inspiration:", error)
+        }
+    })
+
+    const isLoading = isUpdatingImage || isDeletingImage
+
     // Reset state when modal opens/closes or when imageSrc changes
     React.useEffect(() => {
         if (!open) {
@@ -48,9 +77,12 @@ export function InspirationsViewImage({
     }
 
     const handleSubmit = () => {
-        if (onEdit) {
-            onEdit({ image: selectedFile, note })
+        const payload = {
+            image: selectedFile,
+            note: note,
+            id: selectedData?.id?.toString()
         }
+        updateInspiration(toFormData(payload))
     }
 
     return (
@@ -207,12 +239,14 @@ export function InspirationsViewImage({
             </div>
 
             <DeleteConfirmationModal
-                isLoading={isLoading}
+                isLoading={isDeletingImage}
                 open={isDeleteModalOpen}
                 onOpenChange={setIsDeleteModalOpen}
                 onConfirm={() => {
-                    if (onDelete) onDelete(selectedData?.id)
-                    onOpenChange(false)
+                    const payload = {
+                        id: selectedData?.id?.toString(),
+                    }
+                    deleteInspiration(payload)
                 }}
             />
         </CommonModal>

@@ -156,43 +156,6 @@ export function WorkflowProgressCard({
         }
     })
 
-    const { mutate: updateInspiration, isPending: isUpdatingImage } = usePost("/api/v1/design/inspiration/update", {
-        isFormData: true,
-        onSuccess: (res) => {
-            if (res.success) {
-                // const updatedImages = data.images.map(img =>
-                //     img.id === res.data.id ? res.data : img
-                // )
-                // StateUpdate({
-                //     images: updatedImages,
-                // }, setData)
-                // modalOpen("InspirationsImg", false, setOpenModal)
-                // StateUpdate({ selectedData: null }, setData)
-            }
-        },
-        onError: (error) => {
-            console.error("Error updating inspiration:", error)
-        }
-    })
-
-    const { mutate: deleteInspiration, isPending: isDeletingImage } = usePost("/api/v1/design/inspiration/delete", {
-        onSuccess: (res, variables) => {
-            if (res.success) {
-                const deletedId = Number(variables.id)
-                const updatedImages = data.images.filter(img => img.id !== deletedId)
-                StateUpdate({
-                    images: updatedImages,
-                    progress: data.inspiration_target === 0 ? 0 : (updatedImages.length / data.inspiration_target) * 100
-                }, setData)
-                modalOpen("InspirationsImg", false, setOpenModal)
-                StateUpdate({ selectedData: null }, setData)
-            }
-        },
-        onError: (error) => {
-            console.error("Error deleting inspiration:", error)
-        }
-    })
-
     const handleAddImage = async (values) => {
         const payload = {
             ...values,
@@ -212,20 +175,6 @@ export function WorkflowProgressCard({
         updateTarget(body)
     }
 
-    const InspirationsImageUpdate = async (values) => {
-        const payload = {
-            ...values,
-            id: data.selectedData?.id.toString(),
-        }
-        updateInspiration(toFormData(payload))
-    }
-
-    const InspirationsImageDelete = async (id) => {
-        const payload = {
-            id: id.toString(),
-        }
-        deleteInspiration(payload)
-    }
     return (
         <Accordion
             type="single"
@@ -458,9 +407,19 @@ export function WorkflowProgressCard({
                     open={openModal.InspirationsImg}
                     onOpenChange={(isOpen) => { modalOpen("InspirationsImg", isOpen, setOpenModal), !isOpen && StateUpdate({ selectedData: null }, setData) }}
                     selectedData={data.selectedData}
-                    isLoading={isUpdatingImage || isDeletingImage}
-                    onEdit={InspirationsImageUpdate}
-                    onDelete={InspirationsImageDelete}
+                    onUpdateSuccess={(updatedInspiration) => {
+                        // const updatedImages = data.images.map(img =>
+                        //     img.id === updatedInspiration.id ? updatedInspiration : img
+                        // )
+                        // StateUpdate({ images: updatedImages }, setData)
+                    }}
+                    onDeleteSuccess={(deletedId) => {
+                        const updatedImages = data.images.filter(img => img.id !== deletedId)
+                        StateUpdate({
+                            images: updatedImages,
+                            progress: data.inspiration_target === 0 ? 0 : (updatedImages.length / data.inspiration_target) * 100
+                        }, setData)
+                    }}
                 />
             }
             {
