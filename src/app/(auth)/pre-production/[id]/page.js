@@ -1,119 +1,24 @@
-'use client'
-import { Button } from '@/components/ui/button'
-import { WorkflowProgressCard } from '@/components/workflow-progress-card'
-import { SampleWorkflowCard } from '@/components/sample-workflow-card'
-import { ChevronLeft } from 'lucide-react'
-import { useState } from 'react'
+import { post } from '@/lib/server-api'
+import { PreProductionClient } from './PreProductionClient'
 
-import { AddDetailsModal } from '@/components/add-details-modal'
-import { AddDesignModal } from '@/components/add-design-modal'
-
-function page() {
-    const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
-    const [isDesignModalOpen, setIsDesignModalOpen] = useState(false)
-    return (
-        <div className="space-y-8">
-            <div className="flex flex-row sm:items-center justify-between gap-4">
-                <h1 className="text-[26px] sm:text-[35px] md:text-[45px] font-serif font-bold text-primary-foreground flex items-center gap-1 sm:gap-3">
-                    <ChevronLeft className="w-[1em] h-[1em] text-primary-foreground" />
-                    <span className='text-nowrap sm:text-normal '>Pre Production</span>
-                </h1>
-                <Button
-                    className="text-[12px] sm:text-[14px] bg-[#dcccbd] hover:bg-[#dcccbd]/90 text-primary-foreground  sm:px-4 rounded-lg gap-2 font-semibold"
-                >
-                    Design ID: D-1425
-                </Button>
-            </div>
-
-            <WorkflowProgressCard
-                defaultOpen
-                title="1. Inspirations"
-                progress={50}
-                currentCount={5}
-                totalCount={20}
-                images={[
-                    "/design-thumb.png",
-                    "/design-thumb.png",
-                    "/design-thumb.png",
-                ]}
-                onCompleted={() => setIsDetailsModalOpen(true)}
-            />
-            <WorkflowProgressCard
-                title="2. Sketches"
-                progress={50}
-                currentCount={5}
-                totalCount={20}
-                images={[
-                    "/design-thumb.png",
-                    "/design-thumb.png",
-                    "/design-thumb.png",
-                ]}
-            // IsBlur
-            />
-            <WorkflowProgressCard
-                title="3. Design"
-                progress={50}
-                currentCount={5}
-                totalCount={20}
-                images={[
-                    "/design-thumb.png",
-                    "/design-thumb.png",
-                    "/design-thumb.png",
-                ]}
-            />
-            <WorkflowProgressCard
-                title="4. Fabric"
-                progress={50}
-                currentCount={5}
-                totalCount={20}
-                images={[
-                    "/design-thumb.png",
-                    "/design-thumb.png",
-                    "/design-thumb.png",
-                ]}
-            />
-            <WorkflowProgressCard
-                title="5. Yarn"
-                progress={50}
-                currentCount={5}
-                totalCount={20}
-                images={[
-                    "/design-thumb.png",
-                    "/design-thumb.png",
-                    "/design-thumb.png",
-                ]}
-            />
-            <WorkflowProgressCard
-                title="6. Sequence"
-                progress={50}
-                currentCount={5}
-                totalCount={20}
-                images={[
-                    "/design-thumb.png",
-                    "/design-thumb.png",
-                    "/design-thumb.png",
-                ]}
-            />
-
-            <SampleWorkflowCard
-                title="7. Sample"
-                progress={50}
-                onAddDesign={() => setIsDetailsModalOpen(true)}
-            />
-
-            <AddDetailsModal
-                open={isDetailsModalOpen}
-                onOpenChange={setIsDetailsModalOpen}
-                onAdd={(values) => console.log("Added details:", values)}
-            />
-
-            <AddDesignModal
-                open={isDesignModalOpen}
-                onOpenChange={setIsDesignModalOpen}
-                onAdd={(values) => console.log("Added design:", values)}
-            />
-        </div>
-    )
+const getInspirationData = async (id) => {
+    try {
+        const response = await post('/api/v1/design/inspiration/get', { design_id: id })
+        return response?.data || null
+    } catch (error) {
+        // Next.js redirect throws a specific error that should not be caught here
+        if (error.digest?.startsWith('NEXT_REDIRECT')) {
+            throw error;
+        }
+        console.error('Error fetching inspirations server-side:', error)
+        return null
+    }
 }
 
-export default page
+export default async function Page({ params }) {
+    const { id } = await params
+    const inspirationData = await getInspirationData(id)
+    return (
+        <PreProductionClient id={id} inspirationData={inspirationData} />
+    )
+}

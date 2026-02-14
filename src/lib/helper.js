@@ -27,6 +27,15 @@ export const modalOpen = (modal, value, setOpenModal) => {
   }))
 }
 
+export const StateUpdate = (obj, setState) => {
+  setState((prev) => {
+    return {
+      ...prev,
+      ...obj
+    }
+  })
+}
+
 
 export const statusColors = {
   Pending: "bg-[#858585] text-white",

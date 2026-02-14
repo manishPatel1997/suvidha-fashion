@@ -3,8 +3,7 @@ import { cn } from '@/lib/utils'
 import Image from 'next/image'
 import React from 'react'
 
-function WorkItemCard({ item, onClick, isFabric = false, isYarn = false, isSequence = false, isStatus = false }) {
-    const src = typeof item === "string" ? item : item.src
+function WorkItemCard({ item, onClick, isFabric = false, isYarn = false, isSequence = false, isStatus = false, priority = false }) {
     const status = item?.status || "Completed"
     const assignedName = item?.assignedName || "Name"
     return (
@@ -14,10 +13,13 @@ function WorkItemCard({ item, onClick, isFabric = false, isYarn = false, isSeque
                 className="relative h-[124px] w-full cursor-pointer hover:opacity-90 transition-opacity"
             >
                 <Image
-                    src={src}
+                    src={item.src}
                     alt="Work item"
                     fill
                     className="object-cover"
+                    sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 150px"
+                    priority={priority}
+                    loading={priority ? undefined : "lazy"}
                 />
                 {isStatus && status && (
                     <div className={cn(

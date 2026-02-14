@@ -57,11 +57,13 @@ export function DesignCard({
           {/* Narrow card: stacked layout (single column) */}
           <div className="flex flex-col @sm:hidden space-y-4">
             <div className="relative w-full max-w-[250px] max-h-24 h-24 shrink-0 rounded-[5px] overflow-hidden border border-[#dcccbd]/50">
+              {console.log('image', image)}
               <Image
                 src={image}
                 alt={`Design ${design_slug_id}`}
                 fill
                 className="object-left-bottom"
+                sizes="(max-width: 768px) 100vw,(max-width: 1200px) 80vw, 250px"
               />
             </div>
             <InfoFun label="Category" value={category} />
@@ -89,7 +91,7 @@ export function DesignCard({
               alt={`Design ${design_slug_id}`}
               fill
               className="object-cover object-center"
-              sizes="100vw"
+              sizes="128px"
             />
           </div>
           {console.log('backUrl', backUrl)}

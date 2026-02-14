@@ -36,12 +36,13 @@ import { CommonModal } from "./CommonModal"
 import { FileInput } from "@/components/ui/file-input"
 import { FormSelect } from "@/components/ui/form-select"
 import { FormDatePicker } from "@/components/ui/form-date-picker"
+import { imageValidation, ImgAcceptType } from "@/lib/validation"
 
 const today = new Date();
 today.setHours(0, 0, 0, 0);
 
 const validationSchema = Yup.object().shape({
-  image: Yup.mixed().required("Image is required"),
+  image: imageValidation,
   design_slug_id: Yup.string().required("Design Id is required"),
   category: Yup.string().required("Category is required"),
   start_date: Yup.date()
@@ -69,7 +70,6 @@ export function AddDesignModal({ open, onOpenChange, onAdd }) {
     },
     validationSchema,
     onSubmit: (values) => {
-      console.log("Form values:", values)
       if (onAdd) onAdd(values)
       formik.resetForm()
     },
@@ -103,6 +103,7 @@ export function AddDesignModal({ open, onOpenChange, onAdd }) {
                 Attach Image
               </label>
               <FileInput
+                accept={ImgAcceptType}
                 name="image"
                 runForm={formik}
                 icon={<AttachIcon width={16} height={16} color="#858585" />}

@@ -24,7 +24,7 @@ function DashboardContent() {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [designList, setDesignList] = React.useState([]);
   const [search, setSearch] = React.useState(searchParams.get("search") || "");
-  const [category, setCategory] = React.useState(searchParams.get("category") || "regular");
+  const [category, setCategory] = React.useState(searchParams.get("category") || "concept");
   const [debouncedSearch] = useDebounce(search, 500);
 
   const {
@@ -56,7 +56,6 @@ function DashboardContent() {
 
   const { mutate: getDesigns, isPending } = usePost('/api/v1/design/list', {
     onSuccess: (data) => {
-      console.log('data?.data', data?.data)
       if (data?.data?.data) {
         setPagination(data.data.pagination);
 

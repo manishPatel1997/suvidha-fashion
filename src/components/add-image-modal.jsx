@@ -10,6 +10,7 @@ import { FloatingTextarea } from "./ui/floating-textarea"
 import { FileInput } from "@/components/ui/file-input"
 import AttachIcon from "@/assets/AttachIcon"
 import { FormSelect } from "./ui/form-select"
+import { imageValidation, ImgAcceptType } from "@/lib/validation"
 
 const ASSIGNED_OPTIONS = [
     { value: "1", label: "Devon Lane" },
@@ -19,7 +20,7 @@ const ASSIGNED_OPTIONS = [
     { value: "5", label: "Bessie Cooper" },
 ]
 
-export function AddImageModal({ open, onOpenChange, onAdd, title = "Sketches" }) {
+export function AddImageModal({ open, onOpenChange, onAdd, title = "Sketches", isLoading = false }) {
     const formikRef = React.useRef(null)
     const isInspirations = title === "Inspirations"
     const isSketches = title === "Sketches"
@@ -28,8 +29,8 @@ export function AddImageModal({ open, onOpenChange, onAdd, title = "Sketches" })
     const validationSchema = React.useMemo(() => {
         if (isInspirations) {
             return Yup.object().shape({
-                attachImage: Yup.mixed().required("Image is required"),
-                note: Yup.string().optional(),
+                image: imageValidation,
+                note: Yup.string().trim().optional(),
             })
         }
         if (isDesign) {
@@ -62,20 +63,20 @@ export function AddImageModal({ open, onOpenChange, onAdd, title = "Sketches" })
         >
             <Formik
                 innerRef={formikRef}
-                initialValues={{
-                    attachImage: "",
-                    designNo: "",
-                    assignedTo: "",
-                    note: "",
-                }}
+                initialValues={React.useMemo(() => {
+                    const values = { note: "" }
+                    if (isInspirations) values.image = ""
+                    if (isDesign) values.designNo = ""
+                    if (isSketches || isDesign) values.assignedTo = ""
+                    return values
+                }, [isInspirations, isDesign, isSketches])}
                 validationSchema={validationSchema}
                 onSubmit={(values) => {
                     const finalValues = { ...values }
-                    if (isSketches && !finalValues.attachImage) {
-                        finalValues.attachImage = "/design-thumb.png"
-                    }
+                    // if (isSketches && !finalValues.image) {
+                    //     finalValues.image = "/design-thumb.png"
+                    // }
                     if (onAdd) onAdd(finalValues)
-                    handleOpenChange(false)
                 }}
             >
                 {(runForm) => (
@@ -88,13 +89,14 @@ export function AddImageModal({ open, onOpenChange, onAdd, title = "Sketches" })
                                         Attach Image <span className="text-[#ff6b6b]">*</span>
                                     </label>
                                     <FileInput
-                                        name="attachImage"
+                                        name="image"
+                                        accept={ImgAcceptType}
                                         runForm={runForm}
                                         icon={<AttachIcon width={16} height={16} color="#858585" />}
                                         onChange={(e) => {
                                             const file = e.target.files[0]
                                             if (file) {
-                                                runForm.setFieldValue("attachImage", file)
+                                                runForm.setFieldValue("image", file)
                                             }
                                         }}
                                     />
@@ -151,9 +153,10 @@ export function AddImageModal({ open, onOpenChange, onAdd, title = "Sketches" })
                         <div className="px-6 md:px-[60px] md:pb-5 flex justify-center">
                             <Button
                                 type="submit"
+                                disabled={isLoading}
                                 className="bg-[#dcccbd] hover:bg-[#dcccbd]/90 text-primary-foreground h-9 px-12 rounded-[5px] font-semibold text-[16px] min-w-[124px]"
                             >
-                                Add
+                                {isLoading ? "Adding..." : "Add"}
                             </Button>
                         </div>
                     </form>

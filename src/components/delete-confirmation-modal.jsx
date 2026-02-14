@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Trash2 } from "lucide-react"
+import { Loader2, Trash2 } from "lucide-react"
 import { CommonModal } from "./CommonModal"
 import { Button } from "@/components/ui/button"
 import DeleteIcon from "@/assets/DeleteIcon"
@@ -11,7 +11,8 @@ export function DeleteConfirmationModal({
     onOpenChange,
     onConfirm,
     title = "Are you sure?",
-    description = "Are you sure you want to delete this? This action can't be undone"
+    description = "Are you sure you want to delete this? This action can't be undone",
+    isLoading = false
 }) {
     return (
         <CommonModal
@@ -49,7 +50,7 @@ export function DeleteConfirmationModal({
                         }}
                         className="flex-1 h-12 bg-[#CB7171] hover:bg-[#B66565] text-white rounded-[10px] text-[18px] font-semibold"
                     >
-                        Delete
+                        {isLoading ? <Loader2 className="mr-2 animate-spin" /> : "Delete"}
                     </Button>
                 </div>
             </div>

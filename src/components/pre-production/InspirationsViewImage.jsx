@@ -13,31 +13,32 @@ import { FloatingTextarea } from "../ui/floating-textarea"
 export function InspirationsViewImage({
     open,
     onOpenChange,
-    imageSrc = "/design-thumb.png",
-    note: initialNote = "This Is The Initial Set Of Inspiration Visuals For Color Palette, Pattern, And Style Direction",
-    onEdit,
+    selectedData,
     onDelete,
-    onSave
+    onEdit,
+    isLoading
 }) {
     const [isEditing, setIsEditing] = React.useState(false)
     const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false)
-    const [note, setNote] = React.useState(initialNote)
-    const [previewImage, setPreviewImage] = React.useState(imageSrc)
+    const [note, setNote] = React.useState('')
+    const [previewImage, setPreviewImage] = React.useState(selectedData?.image_url ? `${process.env.NEXT_PUBLIC_API_URL}${selectedData?.image_url}` : null)
+    const [selectedFile, setSelectedFile] = React.useState(null)
     const fileInputRef = React.useRef(null)
-
     // Reset state when modal opens/closes or when imageSrc changes
     React.useEffect(() => {
         if (!open) {
             setIsEditing(false)
             setIsDeleteModalOpen(false)
+            setSelectedFile(null)
         }
-        setNote(initialNote)
-        setPreviewImage(imageSrc)
-    }, [open, initialNote, imageSrc])
+        setNote(selectedData?.note)
+        setPreviewImage(selectedData?.image_url ? `${process.env.NEXT_PUBLIC_API_URL}${selectedData?.image_url}` : null)
+    }, [open, selectedData])
 
     const handleImageChange = (e) => {
         const file = e.target.files?.[0]
         if (file) {
+            setSelectedFile(file)
             const reader = new FileReader()
             reader.onloadend = () => {
                 setPreviewImage(reader.result)
@@ -47,10 +48,9 @@ export function InspirationsViewImage({
     }
 
     const handleSubmit = () => {
-        if (onSave) {
-            onSave({ image: previewImage, note })
+        if (onEdit) {
+            onEdit({ image: selectedFile, note })
         }
-        setIsEditing(false)
     }
 
     return (
@@ -116,6 +116,9 @@ export function InspirationsViewImage({
                                 alt="Design Preview"
                                 fill
                                 className={cn("object-cover", isEditing && "opacity-80")}
+                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 600px"
+                            // sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 150px"
+                            // loading="lazy"
                             />
                         )}
 
@@ -194,19 +197,21 @@ export function InspirationsViewImage({
                     <div className="px-10 flex justify-end">
                         <Button
                             onClick={handleSubmit}
+                            disabled={isLoading}
                             className="bg-[#DCCCBD] hover:bg-[#DCCCBD]/90 text-primary-foreground font-semibold h-10 px-12 rounded-lg"
                         >
-                            Submit
+                            {isLoading ? "Updating..." : "Submit"}
                         </Button>
                     </div>
                 )}
             </div>
 
             <DeleteConfirmationModal
+                isLoading={isLoading}
                 open={isDeleteModalOpen}
                 onOpenChange={setIsDeleteModalOpen}
                 onConfirm={() => {
-                    if (onDelete) onDelete()
+                    if (onDelete) onDelete(selectedData?.id)
                     onOpenChange(false)
                 }}
             />

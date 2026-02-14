@@ -6,6 +6,7 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
+    DialogDescription,
 } from "@/components/ui/dialog"
 import CloseIcon from "@/assets/CloseIcon"
 import { cn } from "@/lib/utils"
@@ -46,6 +47,9 @@ export function CommonModal({
                             )}>
                                 {title || "Modal Dialog"}
                             </DialogTitle>
+                            <DialogDescription className="sr-only">
+                                {title ? `Dialog for ${title}` : "A modal dialog"}
+                            </DialogDescription>
                         </DialogHeader>
                         {IsClose && <button
                             onClick={() => onOpenChange(false)}

@@ -7,11 +7,13 @@ import { CommonModal } from "./CommonModal"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
-const validationSchema = Yup.object().shape({
-    target: Yup.string().required("Target is required"),
-})
+export function EditTargetModal({ open, onOpenChange, onSave, initialValue = "", title = "Inspirations Target", isLoading = false, IsEditTarget = false, min = 0 }) {
+    const validationSchema = React.useMemo(() => Yup.object().shape({
+        target: Yup.number()
+            .required("Target is required")
+            .min(min, `Target cannot be less than current ${min} items`),
+    }), [min])
 
-export function EditTargetModal({ open, onOpenChange, onSave, initialValue = "", title = "Inspirations Target" }) {
     const formik = useFormik({
         initialValues: {
             target: initialValue,
@@ -20,7 +22,6 @@ export function EditTargetModal({ open, onOpenChange, onSave, initialValue = "",
         validationSchema,
         onSubmit: (values) => {
             if (onSave) onSave(values.target)
-            handleOpenChange(false)
         },
     })
 
@@ -57,8 +58,9 @@ export function EditTargetModal({ open, onOpenChange, onSave, initialValue = "",
                     <Button
                         type="submit"
                         className="bg-[#dcccbd] hover:bg-[#dcccbd]/90 text-primary-foreground h-10 px-10 rounded-md font-semibold text-[16px] min-w-[120px]"
+                        disabled={isLoading}
                     >
-                        Add
+                        {isLoading ? "Adding..." : IsEditTarget ? "Update" : "Add"}
                     </Button>
                 </div>
             </form>

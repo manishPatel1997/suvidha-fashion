@@ -22,12 +22,13 @@ const nextConfig = {
     },
   },
   images: {
+    dangerouslyAllowLocalIP: true,
     remotePatterns: [
       {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '3008',
-        pathname: '/upload/**',
+        protocol: "http",
+        hostname: "localhost",
+        port: "3008",
+        pathname: "/upload/**",
       },
     ],
   },
