@@ -23,10 +23,10 @@ function WorkItemCard({ item, onClick, isFabric = false, isYarn = false, isSeque
                 />
                 {isStatus && status && (
                     <div className={cn(
-                        "absolute top-2 right-2 px-2.5 py-0 rounded-full text-[10px] font-medium capitalize",
+                        "absolute top-2 right-2 px-2.5 py-0 rounded-full text-[10px] font-medium capitalize py-0.2",
                         statusColors[status]
                     )}>
-                        {status}
+                        {status === 'running' ? "In Progress" : status}
                     </div>
                 )}
             </div>

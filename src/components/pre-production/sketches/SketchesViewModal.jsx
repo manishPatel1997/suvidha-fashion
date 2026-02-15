@@ -305,9 +305,9 @@ export function SketchesViewImage({
                                                 </span>
                                             </div>
                                         ))}
-                                        <button type="button" className="w-20 h-20 rounded-[12px] bg-[#F8F5F2] border border-[#DCCCBD]/30 flex items-center justify-center text-[#DCCCBD] hover:bg-[#F3F0EC] transition-colors flex-shrink-0">
+                                        {/* <button type="button" className="w-20 h-20 rounded-[12px] bg-[#F8F5F2] border border-[#DCCCBD]/30 flex items-center justify-center text-[#DCCCBD] hover:bg-[#F3F0EC] transition-colors flex-shrink-0">
                                             <Plus className="w-8 h-8" />
-                                        </button>
+                                        </button> */}
                                     </div>
                                 </div>
                             </div>

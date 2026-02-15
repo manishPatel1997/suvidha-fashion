@@ -39,7 +39,7 @@ export const StateUpdate = (obj, setState) => {
 
 export const statusColors = {
   pending: "bg-[#858585] text-white",
-  "In Process": "bg-[#EAB308] text-white",
+  running: "bg-[#EAB308] text-white",
   completed: "bg-[#22C55E] text-white",
 }
 
