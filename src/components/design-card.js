@@ -62,7 +62,8 @@ export function DesignCard({
                 alt={`Design ${design_slug_id}`}
                 fill
                 className="object-left-bottom"
-                sizes="(max-width: 768px) 100vw,(max-width: 1200px) 80vw, 250px"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                quality={90}
               />
             </div>
             <InfoFun label="Category" value={category} />
@@ -90,7 +91,8 @@ export function DesignCard({
               alt={`Design ${design_slug_id}`}
               fill
               className="object-cover object-center"
-              sizes="128px"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 256px"
+              quality={90}
             />
           </div>
           <div className="flex-1 min-w-fit flex flex-wrap items-center justify-between gap-y-4">

@@ -33,15 +33,14 @@ export function SketchesCardView({
     defaultOpen = false,
     getVisualDesignersData
 }) {
-    const [clickedAction, setClickedAction] = React.useState(null)
-
     const [data, setData] = React.useState({
-        assign: [],
-        IsBlur: true,
-        note: "",
-        progress: 0,
+        assign: sketchesData?.assign || [],
+        IsBlur: sketchesData?.status === "pending",
+        note: sketchesData?.note || "",
+        sketche_target: sketchesData?.sketche_target || 0,
+        status: sketchesData?.status || "",
+        progress: (sketchesData?.assign?.length === 0 || !sketchesData) ? 0 : (sketchesData.assign.length / sketchesData.sketche_target) * 100,
         selectedData: null,
-        status: ""
     })
     const [openModal, setOpenModal] = React.useState({
         isAddImageModalOpen: false,
@@ -52,14 +51,22 @@ export function SketchesCardView({
     })
     React.useEffect(() => {
         if (sketchesData) {
-            StateUpdate({
-                assign: sketchesData.assign,
-                IsBlur: sketchesData.status === "pending",
-                note: sketchesData.note,
-                sketche_target: sketchesData.sketche_target,
-                status: sketchesData.status,
-                progress: sketchesData.assign.length === 0 ? 0 : (sketchesData.assign.length / sketchesData.sketche_target) * 100
-            }, setData)
+            // Only update if something actually changed
+            if (
+                data.assign !== sketchesData.assign ||
+                data.status !== sketchesData.status ||
+                data.sketche_target !== sketchesData.sketche_target ||
+                data.note !== sketchesData.note
+            ) {
+                StateUpdate({
+                    assign: sketchesData.assign,
+                    IsBlur: sketchesData.status === "pending",
+                    note: sketchesData.note,
+                    sketche_target: sketchesData.sketche_target,
+                    status: sketchesData.status,
+                    progress: sketchesData.assign.length === 0 ? 0 : (sketchesData.assign.length / sketchesData.sketche_target) * 100
+                }, setData)
+            }
         }
     }, [sketchesData])
 

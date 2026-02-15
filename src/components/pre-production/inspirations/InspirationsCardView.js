@@ -34,17 +34,16 @@ export function InspirationsCardView({
     defaultOpen = false,
     getInspirationData
 }) {
-    const [clickedAction, setClickedAction] = React.useState(null)
-
     const [data, setData] = React.useState({
-        images: [],
+        images: inspirationData?.images || [],
         currentCount: 0,
         target_count: 0,
-        IsBlur: true,
-        note: "",
-        progress: 0,
+        IsBlur: inspirationData?.status === "pending",
+        note: inspirationData?.note || "",
+        progress: (inspirationData?.inspiration_target === 0 || !inspirationData) ? 0 : (inspirationData.images.length / inspirationData.inspiration_target) * 100,
         selectedData: null,
-        status: ""
+        status: inspirationData?.status || "",
+        inspiration_target: inspirationData?.inspiration_target || 0
     })
     const [openModal, setOpenModal] = React.useState({
         isAddImageModalOpen: false,
@@ -55,15 +54,22 @@ export function InspirationsCardView({
     })
     React.useEffect(() => {
         if (inspirationData) {
-            StateUpdate({
-                images: inspirationData.images,
-                inspiration_target: inspirationData.inspiration_target,
-                // IsBlur: false,
-                IsBlur: inspirationData.status === "pending",
-                note: inspirationData.note,
-                status: inspirationData.status,
-                progress: inspirationData.inspiration_target === 0 ? 0 : (inspirationData.images.length / inspirationData.inspiration_target) * 100
-            }, setData)
+            // Only update if something actually changed
+            if (
+                data.images !== inspirationData.images ||
+                data.status !== inspirationData.status ||
+                data.inspiration_target !== inspirationData.inspiration_target ||
+                data.note !== inspirationData.note
+            ) {
+                StateUpdate({
+                    images: inspirationData.images,
+                    inspiration_target: inspirationData.inspiration_target,
+                    IsBlur: inspirationData.status === "pending",
+                    note: inspirationData.note,
+                    status: inspirationData.status,
+                    progress: inspirationData.inspiration_target === 0 ? 0 : (inspirationData.images.length / inspirationData.inspiration_target) * 100
+                }, setData)
+            }
         }
     }, [inspirationData])
 

@@ -17,17 +17,25 @@ export function PreProductionClient({ id, inspirationData = null, sketchesData =
     const [isDesignModalOpen, setIsDesignModalOpen] = useState(false)
 
     const [PreData, setPreData] = useState({
-        inspirationData: null,
-        sketchesData: null,
-        visualDesignersData: null
+        inspirationData: inspirationData,
+        sketchesData: sketchesData,
+        visualDesignersData: visualDesignersData
     })
 
     useEffect(() => {
-        StateUpdate({
-            inspirationData: inspirationData,
-            sketchesData: sketchesData,
-            visualDesignersData: visualDesignersData
-        }, setPreData)
+        // Only update if the props are different from what we've already stored
+        // This prevents an extra render on mount since we already initialized useState with these props
+        if (
+            PreData.inspirationData !== inspirationData ||
+            PreData.sketchesData !== sketchesData ||
+            PreData.visualDesignersData !== visualDesignersData
+        ) {
+            setPreData({
+                inspirationData: inspirationData,
+                sketchesData: sketchesData,
+                visualDesignersData: visualDesignersData
+            })
+        }
     }, [inspirationData, sketchesData, visualDesignersData])
 
 
@@ -58,7 +66,6 @@ export function PreProductionClient({ id, inspirationData = null, sketchesData =
             console.error("Error updating status:", error)
         }
     })
-
     return (
         <div className="space-y-8">
             <div className="flex flex-row sm:items-center justify-between gap-4">

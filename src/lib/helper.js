@@ -74,3 +74,27 @@ export const toFormData = (obj) => {
   });
   return formData;
 };
+
+/**
+ * Downloads an image from a given URL
+ * @param {string} url - The URL of the image to download
+ * @param {string} filename - The name to save the file as (optional)
+ */
+export const downloadImage = async (url, filename = 'downloaded-image') => {
+  try {
+    const timestamp = format(new Date(), "yyyy-MM-dd_HH-mm-ss");
+    const fullFilename = `${filename}_${timestamp}`;
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const blobUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = blobUrl;
+    link.download = fullFilename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(blobUrl);
+  } catch (error) {
+    console.error("Error downloading image:", error);
+  }
+};

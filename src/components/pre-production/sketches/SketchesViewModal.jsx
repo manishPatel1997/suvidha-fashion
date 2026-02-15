@@ -15,7 +15,7 @@ import * as Yup from "yup"
 import { API_LIST_AUTH } from "@/hooks/api-list"
 import { usePost } from "@/hooks/useApi"
 import { FormSelect } from "@/components/ui/form-select"
-import { toFormData } from "@/lib/helper"
+import { downloadImage, toFormData } from "@/lib/helper"
 import clsx from "clsx"
 
 const validationSchema = Yup.object({
@@ -194,15 +194,16 @@ export function SketchesViewImage({
                                             src={previewImage}
                                             alt="Design Preview"
                                             fill
+                                            sizes="(max-width: 768px) 100vw, 300px"
                                             className={cn("object-cover", isEditing && "opacity-80")}
                                         />}
 
-                                        {!isEditing && (
+                                        {!isEditing && previewImage !== "/design-thumb.png" && (
                                             <div className="absolute bottom-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <button type="button" className="w-9 h-9 flex items-center justify-center bg-[#A67F6F] hover:bg-[#8B6A5C] text-white rounded-full transition-colors shadow-lg">
                                                     <Share2 className="w-4 h-4" />
                                                 </button>
-                                                <button type="button" className="w-9 h-9 flex items-center justify-center bg-[#A67F6F] hover:bg-[#8B6A5C] text-white rounded-full transition-colors shadow-lg">
+                                                <button type="button" className="w-9 h-9 flex items-center justify-center bg-[#A67F6F] hover:bg-[#8B6A5C] text-white rounded-full transition-colors shadow-lg" onClick={() => downloadImage(previewImage)}>
                                                     <Download className="w-4 h-4" />
                                                 </button>
                                             </div>
@@ -297,6 +298,7 @@ export function SketchesViewImage({
                                                         src={`${process.env.NEXT_PUBLIC_BASE_URL}${thumb.sketeche_image}` || 'design-thumb.png'}
                                                         alt={`Version ${idx + 1}`}
                                                         fill
+                                                        sizes="80px"
                                                         className="object-cover"
                                                     />
                                                 </div>

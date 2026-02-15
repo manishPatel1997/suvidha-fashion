@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import CloseIcon from "@/assets/CloseIcon"
 import { usePost } from "@/hooks/useApi"
-import { toFormData } from "@/lib/helper"
+import { downloadImage, toFormData } from "@/lib/helper"
 import { API_LIST_AUTH } from "@/hooks/api-list"
 import { CommonModal } from "@/components/CommonModal"
 import { DeleteConfirmationModal } from "@/components/delete-confirmation-modal"
@@ -160,6 +160,7 @@ export function InspirationsViewImage({
                             />
                         )}
 
+
                         {isEditing && (
                             <div className="absolute inset-0 flex items-center justify-center">
                                 <Button
@@ -178,18 +179,16 @@ export function InspirationsViewImage({
                             </div>
                         )}
 
-                        {/* {!isEditing && (
-                            <>
-                                <div className="absolute bottom-4 right-4 flex flex-col gap-2">
-                                    <button className="w-8 h-8 flex items-center justify-center bg-[#DCCCBD]/80 hover:bg-[#DCCCBD] text-white rounded-full transition-colors shadow-sm">
-                                        <Share2 className="w-4 h-4" />
-                                    </button>
-                                    <button className="w-8 h-8 flex items-center justify-center bg-[#DCCCBD]/80 hover:bg-[#DCCCBD] text-white rounded-full transition-colors shadow-sm">
-                                        <Download className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            </>
-                        )} */}
+                        {!isEditing && previewImage !== "/design-thumb.png" && (
+                            <div className="absolute bottom-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button type="button" className="w-9 h-9 flex items-center justify-center bg-[#A67F6F] hover:bg-[#8B6A5C] text-white rounded-full transition-colors shadow-lg">
+                                    <Share2 className="w-4 h-4" />
+                                </button>
+                                <button type="button" className="w-9 h-9 flex items-center justify-center bg-[#A67F6F] hover:bg-[#8B6A5C] text-white rounded-full transition-colors shadow-lg" onClick={() => downloadImage(previewImage)}>
+                                    <Download className="w-4 h-4" />
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     {/* Note Section */}
