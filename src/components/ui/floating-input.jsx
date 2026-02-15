@@ -1,10 +1,18 @@
 import * as React from "react";
-
 import { Label } from "@/components/ui/label";
 import { Edit2 } from "lucide-react"; // content: "Edit2" is used in the component
 import clsx from "clsx";
+import { errorContainer, formAttr } from "@/lib/helper";
 
-export function FloatingInput({ label, hasEdit, className, ...props }) {
+export function FloatingInput({
+  label,
+  hasEdit,
+  className,
+  showError = true,
+  customHandle = false,
+  runForm = null,
+  ...props
+}) {
   const id = React.useId();
   return (
     <div className="relative">
@@ -15,6 +23,8 @@ export function FloatingInput({ label, hasEdit, className, ...props }) {
           className,
         )}
         placeholder=" "
+        {...(runForm && !customHandle ? formAttr(runForm, props.name) : {})}
+        {...(runForm && customHandle ? { onBlur: runForm.handleBlur } : {})}
         {...props}
       />
       <Label
@@ -28,6 +38,13 @@ export function FloatingInput({ label, hasEdit, className, ...props }) {
       </Label>
       {hasEdit && (
         <Edit2 className="w-3.5 h-3.5 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer pointer-events-none" />
+      )}
+
+      {/* Error container with absolute position below the input */}
+      {runForm && showError && (
+        <div className="absolute left-0 top-full min-h-4">
+          {errorContainer(runForm, props.name)}
+        </div>
       )}
     </div>
   );

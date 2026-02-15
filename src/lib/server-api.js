@@ -26,7 +26,7 @@ async function serverFetcher(url, options = {}) {
 
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-
+        console.log('errorData', errorData)
         // Handle unauthorized or expired token
         if (response.status === 401 || errorData.message === "jwt expired") {
             redirect("/login");

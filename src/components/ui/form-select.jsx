@@ -10,8 +10,8 @@ import {
 } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import { errorContainer } from "@/lib/helper"
-
 import { Search } from "lucide-react"
+import { Label } from "@/components/ui/label"
 
 const SearchInput = ({ value, onChange }) => {
     const inputRef = React.useRef(null)
@@ -47,48 +47,76 @@ function FormSelect({
     className,
     triggerClassName,
     isSearch = false,
+    label,
+    floatingUi = false,
+    readOnly = false,
     ...props
 }) {
     const [searchQuery, setSearchQuery] = React.useState("")
+    const id = React.useId()
+    const value = runForm?.values[name] || ""
+    const hasValue = value !== ""
 
     const filteredOptions = React.useMemo(() => {
         if (!isSearch) return options
-        return options.filter((option) =>
-            option.label.toLowerCase().includes(searchQuery.toLowerCase())
-        )
+
+        const search = searchQuery.toLowerCase()
+
+        return options.filter((option) => {
+            const nameMatch =
+                option.label?.toLowerCase().includes(search)
+
+            const emailMatch =
+                option.email?.toLowerCase().includes(search)
+
+            return nameMatch || emailMatch
+        })
     }, [isSearch, options, searchQuery])
 
     return (
         <div className={cn("relative", className)}>
             <Select
-                onValueChange={(value) => runForm?.setFieldValue(name, value)}
-                value={runForm?.values[name] || ""}
+                onValueChange={(value) =>
+                    runForm?.setFieldValue(name, value)
+                }
+                value={value}
                 onOpenChange={(open) => {
                     if (!open) setSearchQuery("")
                 }}
                 {...props}
             >
-                <SelectTrigger className={cn(
-                    "h-11.25! px-4 py-1 border-muted-foreground rounded-md text-muted-foreground text-[14px] w-full bg-white",
-                    triggerClassName
-                )}>
-                    <SelectValue placeholder={placeholder} />
+                <SelectTrigger
+                    id={id}
+                    className={cn(
+                        floatingUi
+                            ? "h-12 w-full rounded-md border border-muted-foreground bg-transparent px-3 pb-1 text-[16px] text-[#1A1A1A] focus:outline-none focus:ring-1 focus:ring-muted-foreground outline-none!"
+                            : "h-11.25! px-4 py-1 border-muted-foreground rounded-md text-muted-foreground text-[14px] w-full bg-white",
+                        readOnly && "pointer-events-none select-none",
+                        triggerClassName
+                    )}
+                >
+                    <SelectValue placeholder={floatingUi ? " " : placeholder} />
                 </SelectTrigger>
+
                 <SelectContent
                     position={isSearch ? "popper" : "item-aligned"}
                     sideOffset={isSearch ? 4 : 0}
                     className={cn(
                         "bg-[#F8F5F2] border-[#dcccbd] p-0 overflow-hidden",
-                        isSearch && "w-[var(--radix-select-trigger-width)]"
+                        isSearch &&
+                        "w-[var(--radix-select-trigger-width)]"
                     )}
                 >
                     {isSearch && (
                         <SearchInput
                             value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onChange={(e) =>
+                                setSearchQuery(e.target.value)
+                            }
                         />
                     )}
-                    <div className={cn("overflow-y-auto", isSearch ? "max-h-[200px]" : "max-h-[300px]")}>
+
+                    <div className="overflow-y-auto max-h-[250px]">
                         {filteredOptions.length > 0 ? (
                             filteredOptions.map((option) => (
                                 <SelectItem
@@ -96,7 +124,14 @@ function FormSelect({
                                     value={option.value}
                                     className="data-[state=checked]:bg-[#dcccbd] data-[state=checked]:text-primary-foreground py-2.5 px-4"
                                 >
-                                    {option.label}
+                                    <div className="flex flex-col">
+                                        <span>{option.label}</span>
+                                        {/* {option.email && (
+                                            <span className="text-xs text-muted-foreground">
+                                                {option.email}
+                                            </span>
+                                        )} */}
+                                    </div>
                                 </SelectItem>
                             ))
                         ) : (
@@ -107,6 +142,22 @@ function FormSelect({
                     </div>
                 </SelectContent>
             </Select>
+
+            {floatingUi && label && (
+                <Label
+                    htmlFor={id}
+                    className={cn(
+                        "absolute left-3 transition-all duration-150 transform z-10 origin-left bg-white px-1 pointer-events-none select-none",
+                        hasValue
+                            ? "top-2 -translate-y-4 scale-100 text-[#B0826A] text-[14px] font-semibold"
+                            : "top-4 translate-y-0 scale-100 text-muted-foreground text-[16px] bg-transparent"
+                    )}
+                    style={{ fontFamily: "Lato" }}
+                >
+                    {label}
+                </Label>
+            )}
+
             {runForm && showError && (
                 <div className="absolute left-0 top-full min-h-4">
                     {errorContainer(runForm, name)}

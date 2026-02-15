@@ -1,8 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
-import Image from "next/image"
 import { PlusIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import LockBlur from "@/assets/LockBlur"
@@ -13,63 +11,32 @@ import {
     AccordionTrigger,
     AccordionContent,
 } from "@/components/ui/accordion"
-import { EditTargetModal } from "./edit-target-modal"
-import { SketchesViewImage } from "./pre-production/sketches/SketchesViewModal"
-import { AddImageModal } from "./add-image-modal"
-import { modalOpen, StateUpdate, toFormData } from "@/lib/helper"
-import { DesignViewModalImage } from "./pre-production/DesignViewModalImage"
-import { YarnViewModalImage } from "./pre-production/YarnViewModalImage"
-import { FabricViewModalImage } from "./pre-production/FabricViewModalImage"
-import { SequenceViewModalImage } from "./pre-production/SequenceViewModalImage"
-import WorkItemCard from "./pre-production/WorkItemCard"
+import { modalOpen, StateUpdate } from "@/lib/helper"
 import { usePost } from "@/hooks/useApi"
-import { InspirationsViewImage } from "./pre-production/inspirations/InspirationsViewImage"
+import dynamic from "next/dynamic"
 
-const ASSIGNED_OPTIONS = [
-    { value: "1", label: "Devon Lane" },
-    { value: "2", label: "Jenny Wilson" },
-    { value: "3", label: "Robert Fox" },
-    { value: "4", label: "Cody Fisher" },
-    { value: "5", label: "Bessie Cooper" },
-]
+const EditTargetModal = dynamic(() =>
+    import("@/components/edit-target-modal").then((mod) => mod.EditTargetModal)
+)
+const AddImageModal = dynamic(() =>
+    import("@/components/add-image-modal").then((mod) => mod.AddImageModal)
+)
+import { API_LIST_AUTH } from "@/hooks/api-list"
+import WorkItemCard from "@/components/pre-production/WorkItemCard"
 
-const STEP_CONFIG = {
-    Inspirations: {
-        status: "/api/v1/design/inspiration/status",
-        target: "/api/v1/design/inspiration/target",
-        create: "/api/v1/design/inspiration/create",
-        targetKey: "inspiration_target",
-    },
-    Sketches: {
-        status: "/api/v1/design/sketches/status",
-        target: "/api/v1/design/sketches/target",
-        create: "/api/v1/design/sketches/create",
-        targetKey: "sketche_target",
-    }
-}
-
-export function WorkflowProgressCard({
+const SketchesViewImage = dynamic(() =>
+    import("@/components/pre-production/sketches/SketchesViewModal").then((mod) => mod.SketchesViewImage)
+)
+export function SketchesCardView({
     title = "1. Inspirations",
-    getInspirationData,
-    inspirationData = null,
     sketchesData = null,
-    onSkip,
-    onCompleted,
     defaultOpen = false,
+    getVisualDesignersData
 }) {
-    const router = useRouter()
-    // Extract title name without number prefix (e.g., "1. Inspirations" -> "Inspirations")
-    const titleName = title.split('.').pop()?.trim() || title
-    const modalTitle = `${titleName} Target`
-
-    const [images, setImages] = React.useState([])
-    const [selectedImage, setSelectedImage] = React.useState(null)
     const [clickedAction, setClickedAction] = React.useState(null)
 
     const [data, setData] = React.useState({
-        images: [],
-        currentCount: 0,
-        target_count: 0,
+        assign: [],
         IsBlur: true,
         note: "",
         progress: 0,
@@ -79,86 +46,40 @@ export function WorkflowProgressCard({
     const [openModal, setOpenModal] = React.useState({
         isAddImageModalOpen: false,
         InspirationsImg: false,
-        SketchesImg: false,
-        SketchesIndex: null,
-        DesignViewModalImage: false,
-        FabricViewModalImage: false,
-        YarnViewModalImage: false,
-        SequenceViewModalImage: false,
         isEditModalOpen: false,
-
         // flag for modal api call
         IsEditTarget: false
     })
-
-    const config = STEP_CONFIG[titleName] || STEP_CONFIG.Inspirations
-    const activeData = titleName === "Inspirations" ? inspirationData : sketchesData
-
     React.useEffect(() => {
-        if (activeData) {
+        if (sketchesData) {
             StateUpdate({
-                images: activeData.images || [],
-                target_count: activeData[config.targetKey] || 0,
-                IsBlur: activeData.status === "pending",
-                status: activeData.status,
-                note: activeData.note,
-                progress: !activeData[config.targetKey] ? 0 : ((activeData.images?.length || 0) / activeData[config.targetKey]) * 100
+                assign: sketchesData.assign,
+                IsBlur: sketchesData.status === "pending",
+                note: sketchesData.note,
+                sketche_target: sketchesData.sketche_target,
+                status: sketchesData.status,
+                progress: sketchesData.assign.length === 0 ? 0 : (sketchesData.assign.length / sketchesData.sketche_target) * 100
             }, setData)
         }
-    }, [inspirationData, sketchesData])
+    }, [sketchesData])
 
-    // StateUpdate
-
-
-
-
-    // React.useEffect(() => {
-    //     return () => {
-    //         images.forEach((img) => {
-    //             const src = typeof img === "string" ? img : img.src
-    //             if (src.startsWith("blob:")) URL.revokeObjectURL(src)
-    //         })
-    //     }
-    // }, [images])
-
-    // const isDetailed = titleName === "Sketches" || titleName === "Design"
+    const titleName = title.split('.').pop()?.trim() || title
+    const modalTitle = `${titleName} Target`
 
     const handleModalOpen = (val, selectedData, index = 0) => {
         StateUpdate({ selectedData: selectedData }, setData)
-        if (val === "Inspirations") {
-            modalOpen("InspirationsImg", true, setOpenModal)
-        }
-        if (val === "Sketches") {
-            modalOpen("SketchesImg", true, setOpenModal)
-            modalOpen("SketchesIndex", index, setOpenModal)
-        }
-        if (val === "Design") {
-            modalOpen("DesignViewModalImage", true, setOpenModal)
-            modalOpen("SketchesIndex", index, setOpenModal)
-        }
-        if (val === "Yarn") {
-            modalOpen("YarnViewModalImage", true, setOpenModal)
-            modalOpen("SketchesIndex", index, setOpenModal)
-        }
-        if (val === "Fabric") {
-            modalOpen("FabricViewModalImage", true, setOpenModal)
-            modalOpen("SketchesIndex", index, setOpenModal)
-        }
-        if (val === "Sequence") {
-            modalOpen("SequenceViewModalImage", true, setOpenModal)
-            modalOpen("SketchesIndex", index, setOpenModal)
-        }
+        modalOpen("SketchesImg", true, setOpenModal)
     }
 
 
-    const { mutate: updateTarget, isPending } = usePost(config.target, {
+    const { mutate: updateTarget, isPending } = usePost(API_LIST_AUTH.Sketches.target, {
         onSuccess: (res, variables) => {
             if (res.success) {
-                const targetValue = Number(variables[config.targetKey])
                 StateUpdate({
-                    target_count: targetValue,
-                    progress: (data.images.length / targetValue) * 100,
-                    IsBlur: false
+                    sketche_target: Number(variables.sketche_target),
+                    progress: (data.assign.length / Number(variables.sketche_target)) * 100,
+                    IsBlur: false,
+                    status: "running"
                 }, setData)
                 StateUpdate({ isEditModalOpen: false, IsEditTarget: false }, setOpenModal)
             }
@@ -167,14 +88,29 @@ export function WorkflowProgressCard({
             console.error("Error updating target:", error)
         }
     })
-    const { mutate: addInspiration, isPending: isAddingImage } = usePost(config.create, {
-        isFormData: true,
+
+    const { mutate: assignTo, isPending: isAssignTo } = usePost(API_LIST_AUTH.Sketches.assign, {
         onSuccess: (res) => {
             if (res.success) {
-                const newImages = [...data.images, res.data]
+                const assignUserId = Number(res.data.assign_user)
+
+                const exists = data.assign.some(
+                    item => item.assign_user === assignUserId
+                )
+                let newImages
+
+                if (exists) {
+                    // Replace existing item
+                    newImages = data.assign.map(item =>
+                        item.assign_user === assignUserId ? res.data : item
+                    )
+                } else {
+                    // Add new item
+                    newImages = [...data.assign, res.data]
+                }
                 StateUpdate({
-                    images: newImages,
-                    progress: data.target_count === 0 ? 0 : (newImages.length / data.target_count) * 100
+                    assign: newImages,
+                    progress: newImages.length === 0 ? 0 : (newImages.length / newImages.length) * 100
                 }, setData)
                 StateUpdate({ isAddImageModalOpen: false }, setOpenModal)
             }
@@ -184,14 +120,12 @@ export function WorkflowProgressCard({
         }
     })
 
-    const { mutate: updateStatus, isPending: isUpdatingStatus } = usePost(config.status, {
+    const { mutate: updateStatus, isPending: isUpdatingStatus } = usePost(API_LIST_AUTH.Sketches.assignStatus, {
         onSuccess: (res, variables) => {
             setClickedAction(null)
             if (res.success) {
                 StateUpdate({ IsBlur: false, status: variables.status }, setData)
-                if (config.status.includes("inspiration")) {
-                    getInspirationData({ design_id: activeData?.design_id?.toString() })
-                }
+                getVisualDesignersData({ design_id: sketchesData?.design_id?.toString() })
             }
         },
         onError: (error) => {
@@ -203,16 +137,16 @@ export function WorkflowProgressCard({
     const handleAddImage = async (values) => {
         const payload = {
             ...values,
-            inspiration_id: activeData?.id?.toString(),
+            sketche_id: sketchesData.id.toString(),
             note: values.note || ""
         }
-        addInspiration(toFormData(payload))
+        assignTo(payload)
     }
 
     const onEditTarget = async (val) => {
         const body = {
-            design_id: activeData?.design_id?.toString(),
-            [config.targetKey]: val.toString(),
+            design_id: sketchesData.design_id.toString(),
+            sketche_target: val.toString(),
             status: "running", // running
             note: ""
         }
@@ -220,14 +154,12 @@ export function WorkflowProgressCard({
     }
 
     const handleOnCompleted = (type) => {
-        if (activeData) {
-            setClickedAction(type)
-            const body = {
-                design_id: activeData.design_id.toString(),
-                status: type
-            }
-            updateStatus(body)
+        setClickedAction(type)
+        const body = {
+            design_id: sketchesData.design_id.toString(),
+            status: type
         }
+        updateStatus(body)
     }
 
     return (
@@ -332,76 +264,42 @@ export function WorkflowProgressCard({
                                 <div className="flex items-center gap-4 min-w-fit">
                                     <span className="font-medium space-x-1">
                                         <span className="text-[#8DB88D]">
-                                            {data.images.length}
+                                            {data.assign.length}
                                         </span>
                                         <span>/</span>
                                         <span className="text-primary-foreground">
-                                            {data.target_count}
+                                            {data.sketche_target}
                                         </span>
                                     </span>
 
-                                    <Button
+                                    {data.status !== "completed" && data.status !== "skipped" && <Button
                                         disabled={data.IsBlur}
                                         variant="outline"
                                         onClick={() => StateUpdate({ isEditModalOpen: true, IsEditTarget: true }, setOpenModal)}
                                         className="h-[36px] bg-[#F8F5F2] border-none hover:bg-[#F0EDE9]"
                                     >
                                         Edit Target
-                                    </Button>
+                                    </Button>}
                                 </div>
                             </div>
                             <div className="border-b border-[#dcccbd]"></div>
                             {/* Gallery */}
                             <div className="p-6 pt-0 grid grid-cols-2 md:flex flex-wrap items-center gap-4">
-                                {data.images.map((img, idx) => {
-                                    const src = `${process.env.NEXT_PUBLIC_API_URL}${img.image_url}`
-                                    const isDetailed = titleName === "Sketches" || titleName === "Design"
-
-                                    if (titleName === "Yarn" || titleName === "Fabric" || titleName === "Sequence") {
-                                        return (
-                                            <WorkItemCard
-                                                isFabric={titleName === "Fabric"}
-                                                isYarn={titleName === "Yarn"}
-                                                isSequence={titleName === "Sequence"}
-                                                key={idx}
-                                                item={img}
-                                                priority={idx === 0}
-                                                onClick={() => handleModalOpen(titleName, img)}
-                                            />
-                                        )
-                                    }
-
-                                    if (isDetailed) {
-                                        return (
-                                            <WorkItemCard
-                                                isStatus
-                                                key={idx}
-                                                item={img}
-                                                priority={idx === 0}
-                                                onClick={() => handleModalOpen(titleName, img)}
-                                            />
-                                        )
-                                    }
+                                {data.assign.map((img, idx) => {
+                                    const src = (img.sketche_image && img.sketche_image !== "") ? `${process.env.NEXT_PUBLIC_API_URL}${img.sketche_image}` : "/design-thumb.png"
+                                    let itemData = { ...img, src: src }
                                     return (
-                                        <div
+                                        <WorkItemCard
+                                            isStatus
                                             key={idx}
-                                            onClick={() => handleModalOpen(titleName, img, idx)}
-                                            className="relative w-full sm:w-[162px] h-[162px] rounded-[10px] overflow-hidden border border-[#dcccbd] cursor-pointer hover:opacity-90 transition-opacity"
-                                        >
-                                            <Image
-                                                src={src}
-                                                alt={`Work ${idx}`}
-                                                fill
-                                                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 150px"
-                                                className="object-cover"
-                                                priority={idx === 0}
-                                                loading={idx === 0 ? undefined : "lazy"}
-                                            />
-                                        </div>
+                                            item={itemData}
+                                            priority={idx === 0}
+                                            onClick={() => handleModalOpen(titleName, img)}
+                                        />
                                     )
                                 })}
 
-                                {!data.IsBlur && data.images.length < Number(data.target_count) && (
+                                {!data.IsBlur && data.assign.length < Number(data.sketche_target) && data.status !== "completed" && data.status !== "skipped" && (
                                     <button
                                         disabled={data.IsBlur}
                                         onClick={() =>
@@ -444,96 +342,49 @@ export function WorkflowProgressCard({
                 open={openModal.isEditModalOpen}
                 onOpenChange={(isOpen) => { StateUpdate({ isEditModalOpen: isOpen }, setOpenModal) }}
                 title={modalTitle}
-                initialValue={data.target_count}
+                initialValue={data.sketche_target}
                 onSave={onEditTarget}
                 isLoading={isPending}
                 IsEditTarget={openModal.IsEditTarget}
-                min={data.images.length}
+                min={data.assign.length}
             />
             {/* taeget modal */}
             {/* taeget modal */}
+
             {
-                openModal.InspirationsImg &&
-                <InspirationsViewImage
-                    open={openModal.InspirationsImg}
-                    onOpenChange={(isOpen) => { modalOpen("InspirationsImg", isOpen, setOpenModal), !isOpen && StateUpdate({ selectedData: null }, setData) }}
-                    selectedData={data.selectedData}
-                    onUpdateSuccess={(updatedInspiration) => {
-                        // console.log('updatedInspiration', updatedInspiration)
-                        // const updatedImages = data.images.map(img =>
-                        //     img.id === updatedInspiration.id ? updatedInspiration : img
-                        // )
-                        // StateUpdate({ images: updatedImages }, setData)
-                    }}
-                    onDeleteSuccess={(deletedId) => {
-                        const updatedImages = data.images.filter(img => img.id !== deletedId)
+                openModal.SketchesImg &&
+                <SketchesViewImage
+                    isDone={data.status === "completed" || data.status === "skipped"}
+                    onUpdateSuccess={(res) => {
+                        let newImages = data.assign.map(item =>
+                            item.assign_user === res.assign_user ? res : item
+                        )
                         StateUpdate({
-                            images: updatedImages,
-                            progress: data.target_count === 0 ? 0 : (updatedImages.length / data.target_count) * 100
+                            assign: newImages,
+                        }, setData)
+                        modalOpen("SketchesImg", false, setOpenModal)
+
+                    }}
+                    open={openModal.SketchesImg}
+                    selectedData={data.selectedData}
+                    onOpenChange={(isOpen) => { modalOpen("SketchesImg", isOpen, setOpenModal) }}
+                    onDelete={(deletedId) => {
+                        const updatedImages = data.assign.filter(img => img.id !== Number(deletedId))
+                        StateUpdate({
+                            assign: updatedImages,
+                            progress: data.sketche_target === 0 ? 0 : (updatedImages.length / data.sketche_target) * 100
                         }, setData)
                     }}
                 />
             }
-            {
-                openModal.SketchesImg &&
-                <SketchesViewImage
-                    open={openModal.SketchesImg}
-                    onOpenChange={(isOpen) => { modalOpen("SketchesImg", isOpen, setOpenModal), !isOpen && setSelectedImage(null) }}
-                    images={images}
-                    currentImg={openModal.SketchesIndex}
-                    note={selectedImage?.note}
-                    assignedTo={selectedImage?.assignedName}
-                    status={selectedImage?.status}
-                    onDelete={() => {
-                        setImages(prev => prev.filter(img => (typeof img === "string" ? img : img.src) !== (typeof selectedImage === "string" ? selectedImage : selectedImage?.src)))
-                        setSelectedImage(null)
-                    }}
-                />
-            }
-            {
-                openModal.DesignViewModalImage &&
-                <DesignViewModalImage
-                    open={openModal.DesignViewModalImage}
-                    onOpenChange={(isOpen) => { modalOpen("DesignViewModalImage", isOpen, setOpenModal), !isOpen && setSelectedImage(null) }}
-                    images={images}
-                    currentImg={openModal.SketchesIndex}
-                    note={selectedImage?.note}
-                    assignedTo={selectedImage?.assignedName}
-                    status={selectedImage?.status}
-                    onDelete={() => {
-                        setImages(prev => prev.filter(img => (typeof img === "string" ? img : img.src) !== (typeof selectedImage === "string" ? selectedImage : selectedImage?.src)))
-                        setSelectedImage(null)
-                    }}
-                />
-            }
-            {
-                openModal.YarnViewModalImage &&
-                <YarnViewModalImage
-                    open={openModal.YarnViewModalImage}
-                    onOpenChange={(isOpen) => { modalOpen("YarnViewModalImage", isOpen, setOpenModal), !isOpen && setSelectedImage(null) }}
-                />
-            }
-            {
-                openModal.FabricViewModalImage &&
-                <FabricViewModalImage
-                    open={openModal.FabricViewModalImage}
-                    onOpenChange={(isOpen) => { modalOpen("FabricViewModalImage", isOpen, setOpenModal), !isOpen && setSelectedImage(null) }}
-                />
-            }
-            {
-                openModal.SequenceViewModalImage &&
-                <SequenceViewModalImage
-                    open={openModal.SequenceViewModalImage}
-                    onOpenChange={(isOpen) => { modalOpen("SequenceViewModalImage", isOpen, setOpenModal), !isOpen && setSelectedImage(null) }}
-                />
-            }
+
 
             <AddImageModal
                 open={openModal.isAddImageModalOpen}
                 onOpenChange={(isOpen) => { StateUpdate({ isAddImageModalOpen: isOpen }, setOpenModal) }}
                 title={titleName}
                 onAdd={handleAddImage}
-                isLoading={isAddingImage}
+                isLoading={isAssignTo}
             />
         </Accordion >
     )

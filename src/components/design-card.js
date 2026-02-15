@@ -57,7 +57,6 @@ export function DesignCard({
           {/* Narrow card: stacked layout (single column) */}
           <div className="flex flex-col @sm:hidden space-y-4">
             <div className="relative w-full max-w-[250px] max-h-24 h-24 shrink-0 rounded-[5px] overflow-hidden border border-[#dcccbd]/50">
-              {console.log('image', image)}
               <Image
                 src={image}
                 alt={`Design ${design_slug_id}`}
@@ -94,7 +93,6 @@ export function DesignCard({
               sizes="128px"
             />
           </div>
-          {console.log('backUrl', backUrl)}
           <div className="flex-1 min-w-fit flex flex-wrap items-center justify-between gap-y-4">
             <InfoFun label="Category" value={category} className="shrink-0" />
             <div className="w-px h-[35px] shrink-0 bg-[#dcccbd]" />

@@ -3,16 +3,19 @@
 import * as React from "react"
 import Image from "next/image"
 import { Trash2, Share2, Download } from "lucide-react"
-import { CommonModal } from "../CommonModal"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { DeleteConfirmationModal } from "../delete-confirmation-modal"
 import CloseIcon from "@/assets/CloseIcon"
-import { FloatingTextarea } from "../ui/floating-textarea"
 import { usePost } from "@/hooks/useApi"
 import { toFormData } from "@/lib/helper"
+import { API_LIST_AUTH } from "@/hooks/api-list"
+import { CommonModal } from "@/components/CommonModal"
+import { DeleteConfirmationModal } from "@/components/delete-confirmation-modal"
+import { FloatingTextarea } from "@/components/ui/floating-textarea"
+import clsx from "clsx"
 
 export function InspirationsViewImage({
+    isDone = false,
     open,
     onOpenChange,
     selectedData,
@@ -26,7 +29,7 @@ export function InspirationsViewImage({
     const [selectedFile, setSelectedFile] = React.useState(null)
     const fileInputRef = React.useRef(null)
 
-    const { mutate: updateInspiration, isPending: isUpdatingImage } = usePost("/api/v1/design/inspiration/update", {
+    const { mutate: updateInspiration, isPending: isUpdatingImage } = usePost(API_LIST_AUTH.Inspirations.update, {
         isFormData: true,
         onSuccess: (res) => {
             if (res.success) {
@@ -39,7 +42,7 @@ export function InspirationsViewImage({
         }
     })
 
-    const { mutate: deleteInspiration, isPending: isDeletingImage } = usePost("/api/v1/design/inspiration/delete", {
+    const { mutate: deleteInspiration, isPending: isDeletingImage } = usePost(API_LIST_AUTH.Inspirations.delete, {
         onSuccess: (res, variables) => {
             if (res.success) {
                 if (onDeleteSuccess) onDeleteSuccess(Number(variables.id))
@@ -78,7 +81,7 @@ export function InspirationsViewImage({
 
     const handleSubmit = () => {
         const payload = {
-            image: selectedFile,
+            image_url: selectedFile,
             note: note,
             id: selectedData?.id?.toString()
         }
@@ -97,23 +100,26 @@ export function InspirationsViewImage({
             <div className="bg-white rounded-[20px] overflow-hidden flex flex-col">
                 {/* Header Actions - Hidden in Edit Mode */}
                 {!isEditing && (
-                    <div className="px-4 py-4 md:px-10 flex items-center justify-between bg-white">
-                        <Button
+                    <div className={clsx(
+                        "px-4 py-4 md:px-10 flex items-center justify-between bg-white",
+                        isDone && "ml-auto"
+                    )}>
+                        {!isDone && <Button
                             variant="ghost"
                             onClick={() => setIsEditing(true)}
                             className="h-9 px-6 bg-[#F3F0EC] hover:bg-[#E8E2DA] text-primary-foreground rounded-md text-[14px] font-semibold"
                         >
                             Edit
-                        </Button>
+                        </Button>}
                         <div className="flex items-center gap-2">
-                            <Button
+                            {!isDone && <Button
                                 variant="ghost"
                                 onClick={() => setIsDeleteModalOpen(true)}
                                 className="h-9 px-4 bg-[#FDF2F2] hover:bg-[#FBE4E4] text-[#E5484D] rounded-md text-[14px] font-semibold flex items-center gap-2"
                             >
                                 <Trash2 className="w-4 h-4" />
                                 Delete
-                            </Button>
+                            </Button>}
                             <Button
                                 variant="ghost"
                                 onClick={() => onOpenChange(false)}

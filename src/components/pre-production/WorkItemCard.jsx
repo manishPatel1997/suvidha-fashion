@@ -4,8 +4,8 @@ import Image from 'next/image'
 import React from 'react'
 
 function WorkItemCard({ item, onClick, isFabric = false, isYarn = false, isSequence = false, isStatus = false, priority = false }) {
-    const status = item?.status || "Completed"
-    const assignedName = item?.assignedName || "Name"
+    const status = item?.status || ""
+    const assignedName = item?.assign_user_name || ""
     return (
         <div className="flex flex-col w-full sm:w-[162px] rounded-[12px] overflow-hidden bg-[#F8F5F2] border border-[#dcccbd]/30">
             <div
@@ -23,7 +23,7 @@ function WorkItemCard({ item, onClick, isFabric = false, isYarn = false, isSeque
                 />
                 {isStatus && status && (
                     <div className={cn(
-                        "absolute top-2 right-2 px-2.5 py-0 rounded-full text-[10px] font-medium",
+                        "absolute top-2 right-2 px-2.5 py-0 rounded-full text-[10px] font-medium capitalize",
                         statusColors[status]
                     )}>
                         {status}
