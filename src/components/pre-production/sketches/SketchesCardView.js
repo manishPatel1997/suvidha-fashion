@@ -23,7 +23,7 @@ const AddImageModal = dynamic(() =>
 )
 import { API_LIST_AUTH } from "@/hooks/api-list"
 import WorkItemCard from "@/components/pre-production/WorkItemCard"
-import { DesignViewModalImage } from "../DesignViewModalImage"
+import { DesignViewModalImage } from "./DesignViewModalImage"
 
 const SketchesViewImage = dynamic(() =>
     import("@/components/pre-production/sketches/SketchesViewModal").then((mod) => mod.SketchesViewImage)
