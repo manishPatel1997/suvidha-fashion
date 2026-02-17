@@ -269,14 +269,20 @@ export function SketchesViewImage({
                                         className="min-h-[140px]"
                                     />
 
-                                    {isEditing && (
+                                    {/* {isEditing && (
                                         <Button
                                             type="submit"
                                             className="mt-4 bg-[#DCCCBD] hover:bg-[#DCCCBD]/90 text-primary-foreground font-semibold h-12 rounded-xl text-[16px]"
                                         >
                                             {IsSketches ? <Loader2 className="size-6 animate-spin" /> : "Save Changes"}
                                         </Button>
-                                    )}
+                                    )} */}
+                                    <Button
+                                        type="submit"
+                                        className=" px-9 py-0 bg-[#DCCCBD] hover:bg-[#DCCCBD]/90 text-primary-foreground font-semibold  rounded-[8px] text-[16px] self-start"
+                                    >
+                                        {IsSketches ? <Loader2 className="size-6 animate-spin" /> : "Submit"}
+                                    </Button>
                                 </div>
 
                                 {/* Thumbnail Gallery */}

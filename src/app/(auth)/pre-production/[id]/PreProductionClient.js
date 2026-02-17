@@ -90,20 +90,19 @@ export function PreProductionClient({ id, inspirationData = null, sketchesData =
             }
             {PreData.sketchesData &&
                 <SketchesCardView
-                    defaultOpen
                     title="2. Sketches"
                     sketchesData={PreData.sketchesData}
                     getVisualDesignersData={getVisualDesignersData}
                 />
             }
-            {/* {PreData.visualDesignersData &&
+            {PreData.visualDesignersData &&
                 <SketchesCardView
                     defaultOpen
-                    title="2. Sketches"
-                    sketchesData={PreData.sketchesData}
+                    title="3. Design"
+                    sketchesData={PreData.visualDesignersData}
                     getVisualDesignersData={getVisualDesignersData}
                 />
-            } */}
+            }
             {/* <WorkflowProgressCard
                 title="2. Sketches"
                 progress={50}

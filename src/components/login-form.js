@@ -11,6 +11,7 @@ import { useRedirect } from '@/hook/useRedirect';
 import { usePost } from '@/hooks/useApi';
 import { toast } from 'sonner';
 import Cookies from 'js-cookie';
+import { API_LIST_NO_AUTH } from '@/hooks/api-list';
 
 
 const formSchema = Yup.object({
@@ -27,7 +28,7 @@ function LoginForm() {
     const [showPassword, setShowPassword] = useState(false)
     const { redirectTo } = useRedirect()
 
-    const { mutate: login, isPending } = usePost('/api/v1/auth/login', {
+    const { mutate: login, isPending } = usePost(API_LIST_NO_AUTH.login, {
         onSuccess: (data) => {
             // Store token in cookies for middleware access
             if (data?.data?.token) {

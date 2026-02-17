@@ -60,7 +60,7 @@ export function AddImageModal({
         }
         if (isDesign) {
             return Yup.object().shape({
-                designNo: Yup.string().required("Design number is required"),
+                design_no: Yup.string().required("Design number is required"),
                 user_id: Yup.string().required("Please select who to assign to"),
                 note: Yup.string().optional(),
             })
@@ -91,7 +91,7 @@ export function AddImageModal({
                 initialValues={React.useMemo(() => {
                     const values = { note: "" }
                     if (isInspirations) values.image_url = ""
-                    if (isDesign) values.designNo = ""
+                    if (isDesign) values.design_no = ""
                     if (isSketches || isDesign) values.user_id = ""
                     return values
                 }, [isInspirations, isDesign, isSketches])}
@@ -138,7 +138,7 @@ export function AddImageModal({
                                         Design No <span className="text-[#ff6b6b]">*</span>
                                     </label>
                                     <Input
-                                        name="designNo"
+                                        name="design_no"
                                         placeholder="Enter design number"
                                         runForm={runForm}
                                         className="h-[45px]"
@@ -236,7 +236,7 @@ export function AddImageModal({
 //         }
 //         if (isDesign) {
 //             return Yup.object().shape({
-//                 designNo: Yup.string().required("Design number is required"),
+//                 design_no: Yup.string().required("Design number is required"),
 //                 assignedTo: Yup.string().required("Please select who to assign to"),
 //                 note: Yup.string().optional(),
 //             })
@@ -267,7 +267,7 @@ export function AddImageModal({
 //                 initialValues={React.useMemo(() => {
 //                     const values = { note: "" }
 //                     if (isInspirations) values.image = ""
-//                     if (isDesign) values.designNo = ""
+//                     if (isDesign) values.design_no = ""
 //                     if (isSketches || isDesign) values.assignedTo = ""
 //                     return values
 //                 }, [isInspirations, isDesign, isSketches])}
@@ -311,7 +311,7 @@ export function AddImageModal({
 //                                         Design No <span className="text-[#ff6b6b]">*</span>
 //                                     </label>
 //                                     <Input
-//                                         name="designNo"
+//                                         name="design_no"
 //                                         placeholder="Enter design number"
 //                                         runForm={runForm}
 //                                         className="h-[45px]"

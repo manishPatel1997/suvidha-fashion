@@ -52,6 +52,8 @@ export function InspirationsCardView({
         // flag for modal api call
         IsEditTarget: false
     })
+
+    const [clickedAction, setClickedAction] = React.useState(null)
     React.useEffect(() => {
         if (inspirationData) {
             // Only update if something actually changed

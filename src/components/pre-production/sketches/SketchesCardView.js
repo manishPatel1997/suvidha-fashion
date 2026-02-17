@@ -23,23 +23,50 @@ const AddImageModal = dynamic(() =>
 )
 import { API_LIST_AUTH } from "@/hooks/api-list"
 import WorkItemCard from "@/components/pre-production/WorkItemCard"
+import { DesignViewModalImage } from "../DesignViewModalImage"
 
 const SketchesViewImage = dynamic(() =>
     import("@/components/pre-production/sketches/SketchesViewModal").then((mod) => mod.SketchesViewImage)
 )
+
+const STEP_CONFIG = {
+    Sketches: {
+        assignStatus: API_LIST_AUTH.Sketches.assignStatus,
+        target: API_LIST_AUTH.Sketches.target,
+        assign: API_LIST_AUTH.Sketches.assign,
+        targetKey: "sketche_target",
+        idKey: "sketche_id",
+        targetImg: "sketche_image"
+    },
+    Design: {
+        assignStatus: API_LIST_AUTH.Design.assignStatus,
+        target: API_LIST_AUTH.Design.target,
+        assign: API_LIST_AUTH.Design.assign,
+        targetKey: "visual_designer_target",
+        idKey: "visual_designer_id",
+        targetImg: "visual_designer_image"
+    }
+}
+
 export function SketchesCardView({
     title = "1. Inspirations",
     sketchesData = null,
     defaultOpen = false,
     getVisualDesignersData
 }) {
+
+    const titleName = title.split('.').pop()?.trim() || title
+    const modalTitle = `${titleName} Target`
+    const config = STEP_CONFIG[titleName] || STEP_CONFIG.Sketches
+    const [clickedAction, setClickedAction] = React.useState(null)
+
     const [data, setData] = React.useState({
         assign: sketchesData?.assign || [],
         IsBlur: sketchesData?.status === "pending",
         note: sketchesData?.note || "",
-        sketche_target: sketchesData?.sketche_target || 0,
+        [config.targetKey]: sketchesData[config.targetKey] || 0,
         status: sketchesData?.status || "",
-        progress: (sketchesData?.assign?.length === 0 || !sketchesData) ? 0 : (sketchesData.assign.length / sketchesData.sketche_target) * 100,
+        progress: (sketchesData?.assign?.length === 0 || !sketchesData) ? 0 : (sketchesData.assign.length / sketchesData[config.targetKey]) * 100,
         selectedData: null,
     })
     const [openModal, setOpenModal] = React.useState({
@@ -47,44 +74,53 @@ export function SketchesCardView({
         InspirationsImg: false,
         isEditModalOpen: false,
         // flag for modal api call
-        IsEditTarget: false
+        IsEditTarget: false,
+        [config.targetKey]: 0
     })
+
     React.useEffect(() => {
         if (sketchesData) {
             // Only update if something actually changed
             if (
                 data.assign !== sketchesData.assign ||
                 data.status !== sketchesData.status ||
-                data.sketche_target !== sketchesData.sketche_target ||
+                data[config.targetKey] !== sketchesData[config.targetKey] ||
                 data.note !== sketchesData.note
             ) {
                 StateUpdate({
                     assign: sketchesData.assign,
                     IsBlur: sketchesData.status === "pending",
                     note: sketchesData.note,
-                    sketche_target: sketchesData.sketche_target,
+                    [config.targetKey]: sketchesData[config.targetKey],
                     status: sketchesData.status,
-                    progress: sketchesData.assign.length === 0 ? 0 : (sketchesData.assign.length / sketchesData.sketche_target) * 100
+                    progress: sketchesData.assign.length === 0 ? 0 : (sketchesData.assign.length / sketchesData[config.targetKey]) * 100
                 }, setData)
             }
         }
     }, [sketchesData])
 
-    const titleName = title.split('.').pop()?.trim() || title
-    const modalTitle = `${titleName} Target`
+
 
     const handleModalOpen = (val, selectedData, index = 0) => {
         StateUpdate({ selectedData: selectedData }, setData)
-        modalOpen("SketchesImg", true, setOpenModal)
+        // modalOpen("SketchesImg", true, setOpenModal)
+        if (val === "Sketches") {
+            modalOpen("SketchesImg", true, setOpenModal)
+            // modalOpen("SketchesIndex", index, setOpenModal)
+        }
+        if (val === "Design") {
+            modalOpen("DesignViewModalImage", true, setOpenModal)
+            // modalOpen("SketchesIndex", index, setOpenModal)
+        }
     }
 
 
-    const { mutate: updateTarget, isPending } = usePost(API_LIST_AUTH.Sketches.target, {
+    const { mutate: updateTarget, isPending } = usePost(config.target, {
         onSuccess: (res, variables) => {
             if (res.success) {
                 StateUpdate({
-                    sketche_target: Number(variables.sketche_target),
-                    progress: (data.assign.length / Number(variables.sketche_target)) * 100,
+                    [config.targetKey]: Number(variables[config.targetKey]),
+                    progress: (data.assign.length / Number(variables[config.targetKey])) * 100,
                     IsBlur: false,
                     status: "running"
                 }, setData)
@@ -96,7 +132,7 @@ export function SketchesCardView({
         }
     })
 
-    const { mutate: assignTo, isPending: isAssignTo } = usePost(API_LIST_AUTH.Sketches.assign, {
+    const { mutate: assignTo, isPending: isAssignTo } = usePost(config.assign, {
         onSuccess: (res) => {
             if (res.success) {
                 const assignUserId = Number(res.data.assign_user)
@@ -126,13 +162,14 @@ export function SketchesCardView({
             console.error("Error creating inspiration:", error)
         }
     })
-
-    const { mutate: updateStatus, isPending: isUpdatingStatus } = usePost(API_LIST_AUTH.Sketches.assignStatus, {
+    const { mutate: updateStatus, isPending: isUpdatingStatus } = usePost(config.assignStatus, {
         onSuccess: (res, variables) => {
             setClickedAction(null)
             if (res.success) {
                 StateUpdate({ IsBlur: false, status: variables.status }, setData)
-                getVisualDesignersData({ design_id: sketchesData?.design_id?.toString() })
+                if (titleName === "Sketches") {
+                    getVisualDesignersData({ design_id: sketchesData?.design_id?.toString() })
+                }
             }
         },
         onError: (error) => {
@@ -144,7 +181,7 @@ export function SketchesCardView({
     const handleAddImage = async (values) => {
         const payload = {
             ...values,
-            sketche_id: sketchesData.id.toString(),
+            [config.idKey]: sketchesData.id.toString(),
             note: values.note || ""
         }
         assignTo(payload)
@@ -153,7 +190,7 @@ export function SketchesCardView({
     const onEditTarget = async (val) => {
         const body = {
             design_id: sketchesData.design_id.toString(),
-            sketche_target: val.toString(),
+            [config.targetKey]: val.toString(),
             status: "running", // running
             note: ""
         }
@@ -275,7 +312,7 @@ export function SketchesCardView({
                                         </span>
                                         <span>/</span>
                                         <span className="text-primary-foreground">
-                                            {data.sketche_target}
+                                            {data[config.targetKey]}
                                         </span>
                                     </span>
 
@@ -293,7 +330,7 @@ export function SketchesCardView({
                             {/* Gallery */}
                             <div className="p-6 pt-0 grid grid-cols-2 md:flex flex-wrap items-center gap-4">
                                 {data.assign.map((img, idx) => {
-                                    const src = (img.sketche_image && img.sketche_image !== "") ? `${process.env.NEXT_PUBLIC_API_URL}${img.sketche_image}` : "/design-thumb.png"
+                                    const src = (img[config.targetImg] && img[config.targetImg] !== "") ? `${process.env.NEXT_PUBLIC_API_URL}${img[config.targetImg]}` : "/design-thumb.png"
                                     let itemData = { ...img, src: src }
                                     return (
                                         <WorkItemCard
@@ -306,7 +343,7 @@ export function SketchesCardView({
                                     )
                                 })}
 
-                                {!data.IsBlur && data.assign.length < Number(data.sketche_target) && data.status !== "completed" && data.status !== "skipped" && (
+                                {!data.IsBlur && data.assign.length < Number(data[config.targetKey]) && data.status !== "completed" && data.status !== "skipped" && (
                                     <button
                                         disabled={data.IsBlur}
                                         onClick={() =>
@@ -349,7 +386,7 @@ export function SketchesCardView({
                 open={openModal.isEditModalOpen}
                 onOpenChange={(isOpen) => { StateUpdate({ isEditModalOpen: isOpen }, setOpenModal) }}
                 title={modalTitle}
-                initialValue={data.sketche_target}
+                initialValue={data[config.targetKey]}
                 onSave={onEditTarget}
                 isLoading={isPending}
                 IsEditTarget={openModal.IsEditTarget}
@@ -379,7 +416,34 @@ export function SketchesCardView({
                         const updatedImages = data.assign.filter(img => img.id !== Number(deletedId))
                         StateUpdate({
                             assign: updatedImages,
-                            progress: data.sketche_target === 0 ? 0 : (updatedImages.length / data.sketche_target) * 100
+                            progress: data[config.targetKey] === 0 ? 0 : (updatedImages.length / data[config.targetKey]) * 100
+                        }, setData)
+                    }}
+                />
+            }
+
+            {
+                openModal.DesignViewModalImage &&
+                <DesignViewModalImage
+                    isDone={data.status === "completed" || data.status === "skipped"}
+                    onUpdateSuccess={(res) => {
+                        let newImages = data.assign.map(item =>
+                            Number(item.assign_user) === res.assign_user ? res : item
+                        )
+                        StateUpdate({
+                            assign: newImages,
+                        }, setData)
+                        modalOpen("DesignViewModalImage", false, setOpenModal)
+                    }}
+
+                    open={openModal.DesignViewModalImage}
+                    selectedData={data.selectedData}
+                    onOpenChange={(isOpen) => { modalOpen("DesignViewModalImage", isOpen, setOpenModal) }}
+                    onDelete={(deletedId) => {
+                        const updatedImages = data.assign.filter(img => img.id !== Number(deletedId))
+                        StateUpdate({
+                            assign: updatedImages,
+                            progress: data[config.targetKey] === 0 ? 0 : (updatedImages.length / data[config.targetKey]) * 100
                         }, setData)
                     }}
                 />
@@ -393,6 +457,6 @@ export function SketchesCardView({
                 onAdd={handleAddImage}
                 isLoading={isAssignTo}
             />
-        </Accordion >
+        </Accordion>
     )
 }

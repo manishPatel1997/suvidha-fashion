@@ -66,6 +66,9 @@ export const toFormData = (obj) => {
       } else {
         formData.append(key, value);
       }
+      // } else if (value instanceof FileList) {
+      //   // Handle FileList from file inputs
+      //   Array.from(value).forEach((file) => formData.append(`${key}[]`, file));
     } else if (Array.isArray(value)) {
       value.forEach((item) => formData.append(`${key}[]`, item));
     } else {
