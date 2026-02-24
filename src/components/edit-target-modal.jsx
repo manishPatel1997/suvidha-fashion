@@ -7,7 +7,7 @@ import { CommonModal } from "./CommonModal"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
-export function EditTargetModal({ open, onOpenChange, onSave, initialValue = "", title = "Inspirations Target", isLoading = false, IsEditTarget = false, min = 0 }) {
+export function EditTargetModal({ open, onOpenChange, onSave, initialValue = 0, title = "Inspirations Target", isLoading = false, IsEditTarget = false, min = 0 }) {
     const validationSchema = React.useMemo(() => Yup.object().shape({
         target: Yup.number()
             .required("Target is required")
@@ -48,6 +48,7 @@ export function EditTargetModal({ open, onOpenChange, onSave, initialValue = "",
                     </label>
                     <Input
                         name="target"
+                        type={'number'}
                         placeholder="Add target"
                         className="h-11.25 border-muted-foreground rounded-md placeholder:text-muted-foreground placeholder:text-[14px] text-[14px]"
                         runForm={formik}

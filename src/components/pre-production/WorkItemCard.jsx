@@ -32,8 +32,8 @@ function WorkItemCard({ item, onClick, isFabric = false, isYarn = false, isSeque
             </div>
             {isFabric ?
                 <div className="space-y-1 py-1">
-                    <ObjVal title="Fabric" value={assignedName} />
-                    <ObjVal title="Meter" value={assignedName} />
+                    <ObjVal title="Fabric" value={item?.fabric_name} />
+                    <ObjVal title="Meter" value={item?.fabric_meter} />
                 </div>
                 :
                 isYarn ?

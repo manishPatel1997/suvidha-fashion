@@ -24,6 +24,9 @@ const AddImageModal = dynamic(() =>
 import { API_LIST_AUTH } from "@/hooks/api-list"
 import WorkItemCard from "@/components/pre-production/WorkItemCard"
 import { DesignViewModalImage } from "./DesignViewModalImage"
+import { FabricViewModalImage } from "../FabricViewModalImage"
+import { YarnViewModalImage } from "../YarnViewModalImage"
+import { toast } from "sonner"
 
 const SketchesViewImage = dynamic(() =>
     import("@/components/pre-production/sketches/SketchesViewModal").then((mod) => mod.SketchesViewImage)
@@ -39,12 +42,28 @@ const STEP_CONFIG = {
         targetImg: "sketche_image"
     },
     Design: {
-        assignStatus: API_LIST_AUTH.Design.assignStatus,
-        target: API_LIST_AUTH.Design.target,
-        assign: API_LIST_AUTH.Design.assign,
+        assignStatus: API_LIST_AUTH.VisualDesigners.assignStatus,
+        target: API_LIST_AUTH.VisualDesigners.target,
+        assign: API_LIST_AUTH.VisualDesigners.assign,
         targetKey: "visual_designer_target",
         idKey: "visual_designer_id",
         targetImg: "visual_designer_image"
+    },
+    Fabric: {
+        assignStatus: API_LIST_AUTH.Fabric.assignStatus,
+        target: API_LIST_AUTH.Fabric.target,
+        assign: API_LIST_AUTH.Fabric.assign,
+        targetKey: "fabric_target",
+        targetImg: "fabric_image",
+        idKey: "id"
+    },
+    Yarn: {
+        assignStatus: API_LIST_AUTH.Yarn.assignStatus,
+        target: API_LIST_AUTH.Yarn.target,
+        assign: API_LIST_AUTH.Yarn.assign,
+        targetKey: "yarn_target",
+        idKey: "id",
+        targetImg: "yarn_image"
     }
 }
 
@@ -52,23 +71,28 @@ export function SketchesCardView({
     title = "1. Inspirations",
     sketchesData = null,
     defaultOpen = false,
-    getVisualDesignersData
+    getVisualDesignersData,
+    getYarnData
 }) {
-
+    const count = React.useRef(0)
+    count.current += 1
+    console.log('count', count.current)
     const titleName = title.split('.').pop()?.trim() || title
     const modalTitle = `${titleName} Target`
-    const config = STEP_CONFIG[titleName] || STEP_CONFIG.Sketches
+    const config = titleName === "Fabric" ? STEP_CONFIG.Fabric : STEP_CONFIG[titleName] || STEP_CONFIG.Sketches
     const [clickedAction, setClickedAction] = React.useState(null)
 
+    const initialAssign = sketchesData?.fabrics || sketchesData?.assign || []
     const [data, setData] = React.useState({
-        assign: sketchesData?.assign || [],
+        assign: initialAssign,
         IsBlur: sketchesData?.status === "pending",
         note: sketchesData?.note || "",
-        [config.targetKey]: sketchesData[config.targetKey] || 0,
+        [config.targetKey]: sketchesData?.[config.targetKey] || 0,
         status: sketchesData?.status || "",
-        progress: (sketchesData?.assign?.length === 0 || !sketchesData) ? 0 : (sketchesData.assign.length / sketchesData[config.targetKey]) * 100,
+        progress: (initialAssign.length === 0 || !sketchesData) ? 0 : (initialAssign.length / sketchesData[config.targetKey]) * 100,
         selectedData: null,
     })
+
     const [openModal, setOpenModal] = React.useState({
         isAddImageModalOpen: false,
         InspirationsImg: false,
@@ -80,20 +104,21 @@ export function SketchesCardView({
 
     React.useEffect(() => {
         if (sketchesData) {
+            const assignData = sketchesData.fabrics || sketchesData.assign || []
             // Only update if something actually changed
             if (
-                data.assign !== sketchesData.assign ||
+                data.assign !== assignData ||
                 data.status !== sketchesData.status ||
                 data[config.targetKey] !== sketchesData[config.targetKey] ||
                 data.note !== sketchesData.note
             ) {
                 StateUpdate({
-                    assign: sketchesData.assign,
+                    assign: assignData,
                     IsBlur: sketchesData.status === "pending",
                     note: sketchesData.note,
                     [config.targetKey]: sketchesData[config.targetKey],
                     status: sketchesData.status,
-                    progress: sketchesData.assign.length === 0 ? 0 : (sketchesData.assign.length / sketchesData[config.targetKey]) * 100
+                    progress: assignData.length === 0 ? 0 : (assignData.length / sketchesData[config.targetKey]) * 100
                 }, setData)
             }
         }
@@ -111,6 +136,12 @@ export function SketchesCardView({
         if (val === "Design") {
             modalOpen("DesignViewModalImage", true, setOpenModal)
             // modalOpen("SketchesIndex", index, setOpenModal)
+        }
+        if (val === "Fabric") {
+            modalOpen("FabricViewModalImage", true, setOpenModal)
+        }
+        if (val === "Yarn") {
+            modalOpen("YarnViewModalImage", true, setOpenModal)
         }
     }
 
@@ -135,31 +166,77 @@ export function SketchesCardView({
     const { mutate: assignTo, isPending: isAssignTo } = usePost(config.assign, {
         onSuccess: (res) => {
             if (res.success) {
-                const assignUserId = Number(res.data.assign_user)
+                if (titleName === "Fabric") {
+                    console.log('res', res.data)
 
-                const exists = data.assign.some(
-                    item => item.assign_user === assignUserId
-                )
-                let newImages
-
-                if (exists) {
-                    // Replace existing item
-                    newImages = data.assign.map(item =>
-                        item.assign_user === assignUserId ? res.data : item
-                    )
-                } else {
-                    // Add new item
-                    newImages = [...data.assign, res.data]
+                    // {
+                    //     "success": true,
+                    //     "code": null,
+                    //     "message": "Success",
+                    //     "data": {
+                    //         "fabric_id": "2",
+                    //         "fabric_meter": "444",
+                    //         "fabric_stock_id": "1",
+                    //         "note": "test 444",
+                    //         "id": 4,
+                    //         "fabric_name": "test123456789",
+                    //         "fabric_image": "/upload/fabrics/Group-1-1771865513783-730084220.png"
+                    //     }
+                    // }
+                    StateUpdate({
+                        assign: [...data.assign, res.data],
+                        progress: (data.assign.length / Number(data[config.targetKey])) * 100,
+                        IsBlur: false,
+                        status: "running"
+                    }, setData)
+                    StateUpdate({ isAddImageModalOpen: false }, setOpenModal)
                 }
-                StateUpdate({
-                    assign: newImages,
-                    progress: newImages.length === 0 ? 0 : (newImages.length / newImages.length) * 100
-                }, setData)
+                else if (titleName === "Yarn") {
+                    console.log('res', res)
+                    StateUpdate({
+                        assign: [...data.assign, res.data],
+                        progress: (data.assign.length / Number(data[config.targetKey])) * 100,
+                        IsBlur: false,
+                        status: "running"
+                    }, setData)
+                    StateUpdate({ isAddImageModalOpen: false }, setOpenModal)
+                    //                     {
+                    //     "yarn_id": "2",
+                    //     "yarn_num_cons": "99",
+                    //     "yarn_stock_id": "1",
+                    //     "note": "99 add nore",
+                    //     "id": 2,
+                    //     "yarn_name": "test123456789",
+                    //     "yarn_image": "/upload/yarns/Group-1-1771865542775-521619552.png"
+                    // }
+                }
+                else {
+                    const assignUserId = Number(res.data.assign_user)
+
+                    const exists = data.assign.some(
+                        item => item.assign_user === assignUserId
+                    )
+                    let newImages
+
+                    if (exists) {
+                        // Replace existing item
+                        newImages = data.assign.map(item =>
+                            item.assign_user === assignUserId ? res.data : item
+                        )
+                    } else {
+                        // Add new item
+                        newImages = [...data.assign, res.data]
+                    }
+                    StateUpdate({
+                        assign: newImages,
+                        progress: newImages.length === 0 ? 0 : (newImages.length / Number(data[config.targetKey])) * 100
+                    }, setData)
+                }
                 StateUpdate({ isAddImageModalOpen: false }, setOpenModal)
             }
         },
         onError: (error) => {
-            console.error("Error creating inspiration:", error)
+            toast.error(error.message || "Something went wrong")
         }
     })
     const { mutate: updateStatus, isPending: isUpdatingStatus } = usePost(config.assignStatus, {
@@ -167,7 +244,9 @@ export function SketchesCardView({
             setClickedAction(null)
             if (res.success) {
                 StateUpdate({ IsBlur: false, status: variables.status }, setData)
-                if (titleName === "Sketches") {
+                if (titleName === "Fabric") {
+                    getYarnData({ design_id: sketchesData?.design_id?.toString() })
+                } else {
                     getVisualDesignersData({ design_id: sketchesData?.design_id?.toString() })
                 }
             }
@@ -179,11 +258,26 @@ export function SketchesCardView({
     })
 
     const handleAddImage = async (values) => {
+
         const payload = {
             ...values,
             [config.idKey]: sketchesData.id.toString(),
             note: values.note || ""
         }
+        if (titleName === "Fabric") {
+            delete payload[config.idKey]
+            payload.fabric_meter = payload.fabric_meter.toString()
+            payload.fabric_id = sketchesData.id.toString()
+            payload.fabric_stock_id = payload.fabric_stock_id.toString()
+        }
+
+        if (titleName === "Yarn") {
+            delete payload[config.idKey]
+            payload.yarn_num_cons = payload.yarn_num_cons.toString()
+            payload.yarn_id = sketchesData.id.toString()
+            payload.yarn_stock_id = payload.yarn_stock_id.toString()
+        }
+        // console.log('payload', payload)
         assignTo(payload)
     }
 
@@ -332,6 +426,21 @@ export function SketchesCardView({
                                 {data.assign.map((img, idx) => {
                                     const src = (img[config.targetImg] && img[config.targetImg] !== "") ? `${process.env.NEXT_PUBLIC_API_URL}${img[config.targetImg]}` : "/design-thumb.png"
                                     let itemData = { ...img, src: src }
+
+                                    if (titleName === "Yarn" || titleName === "Fabric" || titleName === "Sequence") {
+                                        return (
+                                            <WorkItemCard
+                                                isFabric={titleName === "Fabric"}
+                                                isYarn={titleName === "Yarn"}
+                                                isSequence={titleName === "Sequence"}
+                                                key={idx}
+                                                item={itemData}
+                                                priority={idx === 0}
+                                                onClick={() => handleModalOpen(titleName, img)}
+                                            />
+                                        )
+                                    }
+
                                     return (
                                         <WorkItemCard
                                             isStatus
@@ -401,7 +510,7 @@ export function SketchesCardView({
                     isDone={data.status === "completed" || data.status === "skipped"}
                     onUpdateSuccess={(res) => {
                         let newImages = data.assign.map(item =>
-                            item.assign_user === res.assign_user ? res : item
+                            Number(item.assign_user) === res.assign_user ? res : item
                         )
                         StateUpdate({
                             assign: newImages,
@@ -426,16 +535,6 @@ export function SketchesCardView({
                 openModal.DesignViewModalImage &&
                 <DesignViewModalImage
                     isDone={data.status === "completed" || data.status === "skipped"}
-                    onUpdateSuccess={(res) => {
-                        let newImages = data.assign.map(item =>
-                            Number(item.assign_user) === res.assign_user ? res : item
-                        )
-                        StateUpdate({
-                            assign: newImages,
-                        }, setData)
-                        modalOpen("DesignViewModalImage", false, setOpenModal)
-                    }}
-
                     open={openModal.DesignViewModalImage}
                     selectedData={data.selectedData}
                     onOpenChange={(isOpen) => { modalOpen("DesignViewModalImage", isOpen, setOpenModal) }}
@@ -446,6 +545,33 @@ export function SketchesCardView({
                             progress: data[config.targetKey] === 0 ? 0 : (updatedImages.length / data[config.targetKey]) * 100
                         }, setData)
                     }}
+                    onUpdateSuccess={(res) => {
+                        let newImages = data.assign.map(item =>
+                            Number(item.assign_user) === res.assign_user ? res : item
+                        )
+                        StateUpdate({
+                            assign: newImages,
+                        }, setData)
+                        modalOpen("DesignViewModalImage", false, setOpenModal)
+                    }}
+                />
+            }
+
+            {
+                openModal.FabricViewModalImage &&
+                <FabricViewModalImage
+                    selectedData={data.selectedData}
+                    open={openModal.FabricViewModalImage}
+                    onOpenChange={(isOpen) => { modalOpen("FabricViewModalImage", isOpen, setOpenModal) }}
+                />
+            }
+
+            {
+                openModal.YarnViewModalImage &&
+                <YarnViewModalImage
+                    selectedData={data.selectedData}
+                    open={openModal.YarnViewModalImage}
+                    onOpenChange={(isOpen) => { modalOpen("YarnViewModalImage", isOpen, setOpenModal) }}
                 />
             }
 

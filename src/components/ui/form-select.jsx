@@ -50,6 +50,7 @@ function FormSelect({
     label,
     floatingUi = false,
     readOnly = false,
+    onChange,
     ...props
 }) {
     const [searchQuery, setSearchQuery] = React.useState("")
@@ -76,9 +77,10 @@ function FormSelect({
     return (
         <div className={cn("relative", className)}>
             <Select
-                onValueChange={(value) =>
+                onValueChange={(value) => {
                     runForm?.setFieldValue(name, value)
-                }
+                    onChange?.(value)
+                }}
                 value={value}
                 onOpenChange={(open) => {
                     if (!open) setSearchQuery("")

@@ -43,7 +43,10 @@ today.setHours(0, 0, 0, 0);
 
 const validationSchema = Yup.object().shape({
   image: imageValidation,
-  design_slug_id: Yup.string().required("Design Id is required"),
+  design_slug_id: Yup.string()
+    .trim()
+    .min(3, "Design Id must be at least 3 characters")
+    .required("Design Id is required"),
   category: Yup.string().required("Category is required"),
   start_date: Yup.date()
     .required("Start date is required")

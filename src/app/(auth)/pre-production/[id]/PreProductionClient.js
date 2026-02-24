@@ -12,14 +12,16 @@ import { InspirationsCardView } from '@/components/pre-production/inspirations/I
 import { API_LIST_AUTH } from '@/hooks/api-list'
 import { SketchesCardView } from '@/components/pre-production/sketches/SketchesCardView'
 
-export function PreProductionClient({ id, inspirationData = null, sketchesData = null, visualDesignersData = null }) {
+export function PreProductionClient({ id, inspirationData = null, sketchesData = null, visualDesignersData = null, fabricData = null, yarnData = null }) {
     const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
     const [isDesignModalOpen, setIsDesignModalOpen] = useState(false)
 
     const [PreData, setPreData] = useState({
         inspirationData: inspirationData,
         sketchesData: sketchesData,
-        visualDesignersData: visualDesignersData
+        visualDesignersData: visualDesignersData,
+        fabricData: fabricData,
+        yarnData: yarnData
     })
 
     useEffect(() => {
@@ -28,15 +30,19 @@ export function PreProductionClient({ id, inspirationData = null, sketchesData =
         if (
             PreData.inspirationData !== inspirationData ||
             PreData.sketchesData !== sketchesData ||
-            PreData.visualDesignersData !== visualDesignersData
+            PreData.visualDesignersData !== visualDesignersData ||
+            PreData.fabricData !== fabricData ||
+            PreData.yarnData !== yarnData
         ) {
             setPreData({
                 inspirationData: inspirationData,
                 sketchesData: sketchesData,
-                visualDesignersData: visualDesignersData
+                visualDesignersData: visualDesignersData,
+                fabricData: fabricData,
+                yarnData: yarnData
             })
         }
-    }, [inspirationData, sketchesData, visualDesignersData])
+    }, [inspirationData, sketchesData, visualDesignersData, fabricData, yarnData])
 
 
     const designId = inspirationData?.design_slug_id
@@ -44,6 +50,7 @@ export function PreProductionClient({ id, inspirationData = null, sketchesData =
     const { mutate: getInspirationData } = usePost(API_LIST_AUTH.Sketches.get, {
         onSuccess: (res) => {
             if (res.success) {
+                console.log('4')
                 StateUpdate({
                     sketchesData: res?.data || null
                 }, setPreData)
@@ -57,8 +64,36 @@ export function PreProductionClient({ id, inspirationData = null, sketchesData =
     const { mutate: getVisualDesignersData } = usePost(API_LIST_AUTH.VisualDesigners.get, {
         onSuccess: (res) => {
             if (res.success) {
+                console.log('3')
                 StateUpdate({
                     visualDesignersData: res?.data || null
+                }, setPreData)
+            }
+        },
+        onError: (error) => {
+            console.error("Error updating status:", error)
+        }
+    })
+    const { mutate: getFabricData } = usePost(API_LIST_AUTH.Fabric.get, {
+        onSuccess: (res) => {
+            console.log('1')
+            if (res.success) {
+                StateUpdate({
+                    fabricData: res?.data || null
+                }, setPreData)
+            }
+        },
+        onError: (error) => {
+            console.error("Error updating status:", error)
+        }
+    })
+
+    const { mutate: getYarnData } = usePost(API_LIST_AUTH.Yarn.get, {
+        onSuccess: (res) => {
+            if (res.success) {
+                console.log('2')
+                StateUpdate({
+                    yarnData: res?.data || null
                 }, setPreData)
             }
         },
@@ -100,7 +135,23 @@ export function PreProductionClient({ id, inspirationData = null, sketchesData =
                     defaultOpen
                     title="3. Design"
                     sketchesData={PreData.visualDesignersData}
-                    getVisualDesignersData={getVisualDesignersData}
+                    getVisualDesignersData={getFabricData}
+                />
+            }
+            {PreData.fabricData &&
+                <SketchesCardView
+                    defaultOpen
+                    title="4. Fabric"
+                    sketchesData={{ ...PreData.fabricData, assign: PreData.fabricData?.assign || [] }}
+                    getYarnData={getYarnData}
+                />
+            }
+            {
+                PreData.yarnData &&
+                <SketchesCardView
+                    defaultOpen
+                    title="5. Yarn"
+                    sketchesData={{ ...PreData.yarnData, assign: PreData.yarnData?.assign || [] }}
                 />
             }
             {/* <WorkflowProgressCard

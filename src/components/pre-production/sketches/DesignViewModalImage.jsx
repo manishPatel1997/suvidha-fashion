@@ -40,7 +40,7 @@ export function DesignViewModalImage({
     const [currentImgIndex, setCurrentImgIndex] = React.useState(-1)
     const [viewData, setViewData] = React.useState(null)
     const [selectedFile, setSelectedFile] = React.useState(null)
-    const { mutate: assignView, isPending } = usePost(API_LIST_AUTH.Design.assignView, {
+    const { mutate: assignView, isPending } = usePost(API_LIST_AUTH.VisualDesigners.assignView, {
         onSuccess: (res) => {
             if (res.success) {
                 setViewData(res.data)
@@ -79,7 +79,7 @@ export function DesignViewModalImage({
         }
     }
 
-    const { mutate: updateDesign, isPending: IsDesign } = usePost(API_LIST_AUTH.Design.assignUpadte, {
+    const { mutate: updateDesign, isPending: IsDesign } = usePost(API_LIST_AUTH.VisualDesigners.assignUpadte, {
         isFormData: true,
         onSuccess: (res) => {
             if (res.success) {
@@ -107,7 +107,7 @@ export function DesignViewModalImage({
         updateDesign(toFormData(payload))
     }
 
-    const { mutate: deleteInspiration, isPending: isDeletingImage } = usePost(API_LIST_AUTH.Design.assignDelete, {
+    const { mutate: deleteInspiration, isPending: isDeletingImage } = usePost(API_LIST_AUTH.VisualDesigners.assignDelete, {
         onSuccess: (res, variables) => {
             if (res.success) {
                 if (onDelete) onDelete(variables.visual_designer_assign_id)

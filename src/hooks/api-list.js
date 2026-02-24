@@ -16,10 +16,7 @@ export const API_LIST_AUTH = {
         target: "/api/v1/design/sketches/target",
     },
     VisualDesigners: {
-        get: "/api/v1/design/visual_designers/get"
-    },
-    Design: {
-        get: '/api/v1/design/visual_designers/get',
+        get: "/api/v1/design/visual_designers/get",
         assign: '/api/v1/design/visual_designers/assign',
         assignView: '/api/v1/design/visual_designers/assign/view',
         assignUpadte: '/api/v1/design/visual_designers/assign/update',
@@ -27,8 +24,40 @@ export const API_LIST_AUTH = {
         assignStatus: '/api/v1/design/visual_designers/assign/status',
         target: '/api/v1/design/visual_designers/target',
     },
+    Fabric: {
+        get: '/api/v1/design/fabric/get',
+        assign: "/api/v1/design/fabric/assign",
+        assignView: '/api/v1/design/fabric/assign/view',
+        assignUpadte: "/api/v1/design/fabric/assign/update",
+        assignDelete: "/api/v1/design/fabric/assign/delete",
+        assignStatus: "/api/v1/design/fabric/assign/status",
+        target: '/api/v1/design/fabric/target',
 
+        // create flow abric
+        create: "/api/v1/stock/fabric/create",
+        update: "/api/v1/stock/fabric/update",
+        delete: "/api/v1/stock/fabric/delete",
+    },
+    StockFabric: {
+        get: "/api/v1/stock/fabric/get"
+    },
+    StockYarn: {
+        get: "/api/v1/stock/yarn/get"
+    },
+    Yarn: {
+        get: "/api/v1/design/yarn/get",
+        assign: "/api/v1/design/yarn/assign",
+        assignUpadte: "/api/v1/design/yarn/assign/update",
+        assignDelete: "/api/v1/design/yarn/assign/delete",
+        assignStatus: "/api/v1/design/yarn/assign/status",
 
+        target: "/api/v1/design/yarn/target",
+        create: "/api/v1/stock/yarn/create",
+        update: "/api/v1/stock/yarn/update",
+        delete: "/api/v1/stock/yarn/delete",
+    },
+
+    setting: "/api/v1/common/setting",
     users_get: "/api/v1/common/users_get",
 }
 
