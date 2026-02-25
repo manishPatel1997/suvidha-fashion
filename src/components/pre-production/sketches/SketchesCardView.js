@@ -64,6 +64,14 @@ const STEP_CONFIG = {
         targetKey: "yarn_target",
         idKey: "id",
         targetImg: "yarn_image"
+    },
+    Sequences: {
+        assignStatus: API_LIST_AUTH.Sequences.assignStatus,
+        target: API_LIST_AUTH.Sequences.target,
+        assign: API_LIST_AUTH.Sequences.assign,
+        targetKey: "sequence_target",
+        idKey: "id",
+        targetImg: "sequence_image"
     }
 }
 
@@ -74,15 +82,14 @@ export function SketchesCardView({
     getVisualDesignersData,
     getYarnData
 }) {
-    const count = React.useRef(0)
-    count.current += 1
-    console.log('count', count.current)
+    console.log('sketchesData', sketchesData)
     const titleName = title.split('.').pop()?.trim() || title
     const modalTitle = `${titleName} Target`
     const config = titleName === "Fabric" ? STEP_CONFIG.Fabric : STEP_CONFIG[titleName] || STEP_CONFIG.Sketches
     const [clickedAction, setClickedAction] = React.useState(null)
 
-    const initialAssign = sketchesData?.fabrics || sketchesData?.assign || []
+    const initialAssign = titleName === "Sequences" ? sketchesData?.sequences || [] : sketchesData?.yarns || sketchesData?.fabrics || sketchesData?.assign || []
+    console.log('initialAssign', initialAssign)
     const [data, setData] = React.useState({
         assign: initialAssign,
         IsBlur: sketchesData?.status === "pending",
@@ -104,7 +111,7 @@ export function SketchesCardView({
 
     React.useEffect(() => {
         if (sketchesData) {
-            const assignData = sketchesData.fabrics || sketchesData.assign || []
+            const assignData = titleName === "Sequences" ? sketchesData?.sequences || [] : sketchesData?.yarns || sketchesData.fabrics || sketchesData.assign || []
             // Only update if something actually changed
             if (
                 data.assign !== assignData ||
@@ -114,7 +121,7 @@ export function SketchesCardView({
             ) {
                 StateUpdate({
                     assign: assignData,
-                    IsBlur: sketchesData.status === "pending",
+                    IsBlur: sketchesData.status === "pending" && data.status !== "completed",
                     note: sketchesData.note,
                     [config.targetKey]: sketchesData[config.targetKey],
                     status: sketchesData.status,
@@ -122,7 +129,12 @@ export function SketchesCardView({
                 }, setData)
             }
         }
-    }, [sketchesData])
+    }, [
+        sketchesData?.assign,
+        sketchesData?.status,
+        sketchesData?.[config.targetKey],
+        sketchesData?.note
+    ])
 
 
 
@@ -141,7 +153,7 @@ export function SketchesCardView({
             modalOpen("FabricViewModalImage", true, setOpenModal)
         }
         if (val === "Yarn") {
-            modalOpen("YarnViewModalImage", true, setOpenModal)
+            modalOpen("FabricViewModalImage", true, setOpenModal)
         }
     }
 
@@ -167,8 +179,6 @@ export function SketchesCardView({
         onSuccess: (res) => {
             if (res.success) {
                 if (titleName === "Fabric") {
-                    console.log('res', res.data)
-
                     // {
                     //     "success": true,
                     //     "code": null,
@@ -183,19 +193,21 @@ export function SketchesCardView({
                     //         "fabric_image": "/upload/fabrics/Group-1-1771865513783-730084220.png"
                     //     }
                     // }
+
+                    const UpadetData = [...data.assign, res.data]
                     StateUpdate({
-                        assign: [...data.assign, res.data],
-                        progress: (data.assign.length / Number(data[config.targetKey])) * 100,
+                        assign: UpadetData,
+                        progress: (UpadetData.length / Number(data[config.targetKey])) * 100,
                         IsBlur: false,
                         status: "running"
                     }, setData)
                     StateUpdate({ isAddImageModalOpen: false }, setOpenModal)
                 }
                 else if (titleName === "Yarn") {
-                    console.log('res', res)
+                    const UpadetData = [...data.assign, res.data]
                     StateUpdate({
-                        assign: [...data.assign, res.data],
-                        progress: (data.assign.length / Number(data[config.targetKey])) * 100,
+                        assign: UpadetData,
+                        progress: (UpadetData.length / Number(data[config.targetKey])) * 100,
                         IsBlur: false,
                         status: "running"
                     }, setData)
@@ -384,7 +396,7 @@ export function SketchesCardView({
                                 <div className="flex-1 space-y-2">
                                     <div className="flex justify-between items-center font-semibold text-primary-foreground w-full lg:w-[80%]">
                                         <span>Workflow Progress</span>
-                                        <span>{Math.round(data.progress)}%</span>
+                                        <span>{data?.progress ? Math.round(data.progress) : 0}%</span>
                                     </div>
 
                                     <div className="relative w-full lg:w-[80%] h-2 bg-[#F0F0F0] rounded-full overflow-hidden">
@@ -423,6 +435,7 @@ export function SketchesCardView({
                             <div className="border-b border-[#dcccbd]"></div>
                             {/* Gallery */}
                             <div className="p-6 pt-0 grid grid-cols-2 md:flex flex-wrap items-center gap-4">
+                                {console.log('data.assign', data.assign)}
                                 {data.assign.map((img, idx) => {
                                     const src = (img[config.targetImg] && img[config.targetImg] !== "") ? `${process.env.NEXT_PUBLIC_API_URL}${img[config.targetImg]}` : "/design-thumb.png"
                                     let itemData = { ...img, src: src }
@@ -563,6 +576,7 @@ export function SketchesCardView({
                     selectedData={data.selectedData}
                     open={openModal.FabricViewModalImage}
                     onOpenChange={(isOpen) => { modalOpen("FabricViewModalImage", isOpen, setOpenModal) }}
+                    title={titleName}
                 />
             }
 

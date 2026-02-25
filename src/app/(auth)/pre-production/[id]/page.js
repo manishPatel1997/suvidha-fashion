@@ -136,6 +136,10 @@ export default async function Page({ params }) {
         {
             key: 'yarnData',
             url: API_LIST_AUTH.Yarn.get
+        },
+        {
+            key: 'sequencesData',
+            url: API_LIST_AUTH.Sequences.get
         }
     ]
 
@@ -155,7 +159,6 @@ export default async function Page({ params }) {
             break
         }
     }
-
     return (
         <PreProductionClient
             id={id}
@@ -164,6 +167,7 @@ export default async function Page({ params }) {
             visualDesignersData={result.visualDesignersData}
             fabricData={result.fabricData}
             yarnData={result.yarnData}
+            sequencesData={result.sequencesData}
         />
     )
 }

@@ -56,6 +56,15 @@ export const API_LIST_AUTH = {
         update: "/api/v1/stock/yarn/update",
         delete: "/api/v1/stock/yarn/delete",
     },
+    Sequences: {
+        get: "/api/v1/design/sequences/get",
+        assign: "/api/v1/design/sequences/assign",
+        assignView: "/api/v1/design/sequences/assign/view",
+        assignUpdate: "/api/v1/design/sequences/assign/update",
+        assignDelete: "/api/v1/design/sequences/assign/delete",
+        assignStatus: "/api/v1/design/sequences/assign/status",
+        target: "/api/v1/design/sequences/target",
+    },
 
     setting: "/api/v1/common/setting",
     users_get: "/api/v1/common/users_get",

@@ -12,7 +12,7 @@ import { InspirationsCardView } from '@/components/pre-production/inspirations/I
 import { API_LIST_AUTH } from '@/hooks/api-list'
 import { SketchesCardView } from '@/components/pre-production/sketches/SketchesCardView'
 
-export function PreProductionClient({ id, inspirationData = null, sketchesData = null, visualDesignersData = null, fabricData = null, yarnData = null }) {
+export function PreProductionClient({ id, inspirationData = null, sketchesData = null, visualDesignersData = null, fabricData = null, yarnData = null, sequencesData = null }) {
     const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
     const [isDesignModalOpen, setIsDesignModalOpen] = useState(false)
 
@@ -21,7 +21,8 @@ export function PreProductionClient({ id, inspirationData = null, sketchesData =
         sketchesData: sketchesData,
         visualDesignersData: visualDesignersData,
         fabricData: fabricData,
-        yarnData: yarnData
+        yarnData: yarnData,
+        sequencesData: sequencesData,
     })
 
     useEffect(() => {
@@ -32,17 +33,19 @@ export function PreProductionClient({ id, inspirationData = null, sketchesData =
             PreData.sketchesData !== sketchesData ||
             PreData.visualDesignersData !== visualDesignersData ||
             PreData.fabricData !== fabricData ||
-            PreData.yarnData !== yarnData
+            PreData.yarnData !== yarnData ||
+            PreData.sequencesData !== sequencesData
         ) {
             setPreData({
                 inspirationData: inspirationData,
                 sketchesData: sketchesData,
                 visualDesignersData: visualDesignersData,
                 fabricData: fabricData,
-                yarnData: yarnData
+                yarnData: yarnData,
+                sequencesData: sequencesData,
             })
         }
-    }, [inspirationData, sketchesData, visualDesignersData, fabricData, yarnData])
+    }, [inspirationData, sketchesData, visualDesignersData, fabricData, yarnData, sequencesData])
 
 
     const designId = inspirationData?.design_slug_id
@@ -142,7 +145,8 @@ export function PreProductionClient({ id, inspirationData = null, sketchesData =
                 <SketchesCardView
                     defaultOpen
                     title="4. Fabric"
-                    sketchesData={{ ...PreData.fabricData, assign: PreData.fabricData?.assign || [] }}
+                    // sketchesData={{ ...PreData.fabricData, assign: PreData.fabricData?.assign || [] }}
+                    sketchesData={PreData.fabricData}
                     getYarnData={getYarnData}
                 />
             }
@@ -151,7 +155,15 @@ export function PreProductionClient({ id, inspirationData = null, sketchesData =
                 <SketchesCardView
                     defaultOpen
                     title="5. Yarn"
-                    sketchesData={{ ...PreData.yarnData, assign: PreData.yarnData?.assign || [] }}
+                    sketchesData={PreData.yarnData}
+                />
+            }
+            {
+                PreData.sequencesData &&
+                <SketchesCardView
+                    defaultOpen
+                    title="6. Sequences"
+                    sketchesData={PreData.sequencesData}
                 />
             }
             {/* <WorkflowProgressCard

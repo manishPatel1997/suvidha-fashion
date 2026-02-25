@@ -47,11 +47,13 @@ export function EditTargetModal({ open, onOpenChange, onSave, initialValue = 0, 
                         {title}
                     </label>
                     <Input
+                        autoFocus
                         name="target"
                         type={'number'}
                         placeholder="Add target"
                         className="h-11.25 border-muted-foreground rounded-md placeholder:text-muted-foreground placeholder:text-[14px] text-[14px]"
                         runForm={formik}
+                        onFocus={(e) => e.target.select()}
                     />
                 </div>
 

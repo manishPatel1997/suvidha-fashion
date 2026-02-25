@@ -243,7 +243,7 @@ export function InspirationsCardView({
                                 <div className="flex-1 space-y-2">
                                     <div className="flex justify-between items-center font-semibold text-primary-foreground w-full lg:w-[80%]">
                                         <span>Workflow Progress</span>
-                                        <span>{Math.round(data.progress)}%</span>
+                                        <span>{data?.progress ? Math.round(data.progress) : 0}%</span>
                                     </div>
 
                                     <div className="relative w-full lg:w-[80%] h-2 bg-[#F0F0F0] rounded-full overflow-hidden">

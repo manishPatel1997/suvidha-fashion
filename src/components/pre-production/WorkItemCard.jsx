@@ -38,15 +38,14 @@ function WorkItemCard({ item, onClick, isFabric = false, isYarn = false, isSeque
                 :
                 isYarn ?
                     <div className="space-y-1 py-1">
-                        <ObjVal title="Yarn" value={assignedName} />
-                        <ObjVal title="Yarn num cons" value={assignedName} />
+                        <ObjVal title="Yarn" value={item?.yarn_name} />
+                        <ObjVal title="Yarn num cons" value={item?.yarn_num_cons} />
                     </div>
-
                     :
                     isSequence ?
                         <div className="space-y-1 py-1">
-                            <ObjVal title="Sequence" value={assignedName} />
-                            <ObjVal title="Sequence CD" value={assignedName} />
+                            <ObjVal title="Sequence" value={item?.sequence_name} />
+                            <ObjVal title="Sequence CD" value={item?.sequence_cd} />
                         </div>
                         :
                         <div className="px-3 py-2 flex items-center justify-between">
