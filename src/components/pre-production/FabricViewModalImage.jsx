@@ -16,6 +16,7 @@ import { API_LIST_AUTH } from "@/hooks/api-list"
 import { usePost } from "@/hooks/useApi"
 import { downloadImage, toFormData } from "@/lib/helper"
 import clsx from "clsx"
+import { FormColorPicker } from "../ui/form-color-picker"
 
 export function FabricViewModalImage({
     isDone = false,
@@ -26,13 +27,16 @@ export function FabricViewModalImage({
     onUpdateSuccess,
     title = "fabric"
 }) {
-
     // 🔥 Dynamic prefix
-    const prefix = title?.toLowerCase() === "yarn" ? "yarn" : "fabric"
+    const prefix = title?.toLowerCase() === "yarn" ? "yarn" : title?.toLowerCase() === "fabric" ? "fabric" : title?.toLowerCase() === "sequences" ? "sequence" : "fabric"
     const field = (name) => {
         if (prefix === "yarn") {
             if (name === "quality") return "yarn_num_cons"
             if (name === "meter") return "yarn_num_cons"
+        }
+        if (prefix === "sequence") {
+            if (name === "quality") return "sequence_cd"
+            if (name === "meter") return "sequence_cd"
         }
         return `${prefix}_${name}`
     }
@@ -42,18 +46,78 @@ export function FabricViewModalImage({
     const [previewImage, setPreviewImage] = React.useState('/design-thumb.png')
     const [viewData, setViewData] = React.useState(null)
     const [selectedFile, setSelectedFile] = React.useState(null)
-
+    const { mutate: fabricassignView } = usePost(API_LIST_AUTH.Fabric.assignView, {
+        onSuccess: (res) => {
+            if (res.success) {
+                setViewData(res.data)
+                if (res.data?.fabric_image) {
+                    setPreviewImage(process.env.NEXT_PUBLIC_BASE_URL + res.data.fabric_image)
+                    //     setCurrentImgIndex(res.data.history.length - 1)
+                }
+            }
+        },
+        onError: (error) => {
+            console.error("Error updating target:", error)
+        }
+    })
+    const { mutate: yarnassignView } = usePost(API_LIST_AUTH.Yarn.assignView, {
+        onSuccess: (res) => {
+            if (res.success) {
+                setViewData(res.data)
+                if (res.data?.yarn_image) {
+                    setPreviewImage(process.env.NEXT_PUBLIC_BASE_URL + res.data.yarn_image)
+                    //     setCurrentImgIndex(res.data.history.length - 1)
+                }
+            }
+        },
+        onError: (error) => {
+            console.error("Error updating target:", error)
+        }
+    })
+    const { mutate: sequencesassignView } = usePost(API_LIST_AUTH.Sequences.assignView, {
+        onSuccess: (res) => {
+            if (res.success) {
+                setViewData(res.data)
+                if (res.data?.sequence_image) {
+                    setPreviewImage(process.env.NEXT_PUBLIC_BASE_URL + res.data.sequence_image)
+                    //     setCurrentImgIndex(res.data.history.length - 1)
+                }
+            }
+        },
+        onError: (error) => {
+            console.error("Error updating target:", error)
+        }
+    })
     React.useEffect(() => {
-        if (selectedData) {
-            const imageKey = field("image")
-            setPreviewImage(
-                selectedData?.[imageKey]
-                    ? process.env.NEXT_PUBLIC_BASE_URL + selectedData[imageKey]
-                    : "/design-thumb.png"
-            )
-            setViewData(selectedData)
+        if (selectedData?.id) {
+            if (prefix === "fabric") {
+                fabricassignView({
+                    fabric_assign_id: selectedData?.id.toString()
+                })
+            } else if (prefix === "yarn") {
+                yarnassignView({
+                    yarn_assign_id: selectedData?.id.toString()
+                })
+            } else if (prefix === "sequence") {
+                sequencesassignView({
+                    sequence_assign_id: selectedData?.id.toString()
+                })
+            }
         }
     }, [selectedData])
+
+
+    // React.useEffect(() => {
+    //     if (selectedData) {
+    //         const imageKey = field("image")
+    //         setPreviewImage(
+    //             selectedData?.[imageKey]
+    //                 ? process.env.NEXT_PUBLIC_BASE_URL + selectedData[imageKey]
+    //                 : "/design-thumb.png"
+    //         )
+    //         setViewData(selectedData)
+    //     }
+    // }, [selectedData])
 
     const fileInputRef = React.useRef(null)
 
@@ -67,12 +131,28 @@ export function FabricViewModalImage({
         }
     }
 
+    // const { mutate: updateItem, isPending } = usePost(
+    //     prefix === "fabric"
+    //         ? API_LIST_AUTH.Fabric.assignUpdate
+    //         : API_LIST_AUTH.Yarn.assignUpdate,
+    //     {
+    //         isFormData: true,
+    //         onSuccess: (res) => {
+    //             if (res.success) {
+    //                 if (onUpdateSuccess) onUpdateSuccess(res.data)
+    //                 setIsEditing(false)
+    //             }
+    //         },
+    //     }
+    // )
     const { mutate: updateItem, isPending } = usePost(
         prefix === "fabric"
             ? API_LIST_AUTH.Fabric.assignUpdate
-            : API_LIST_AUTH.Yarn.assignUpdate,
+            : prefix === "sequence"
+                ? API_LIST_AUTH.Sequences.assignUpdate
+                : API_LIST_AUTH.Yarn.assignUpdate,
         {
-            isFormData: true,
+            isFormData: !["fabric", "yarn", "sequence"].includes(prefix),
             onSuccess: (res) => {
                 if (res.success) {
                     if (onUpdateSuccess) onUpdateSuccess(res.data)
@@ -81,11 +161,12 @@ export function FabricViewModalImage({
             },
         }
     )
-
     const { mutate: deleteItem } = usePost(
         prefix === "fabric"
             ? API_LIST_AUTH.Fabric.assignDelete
-            : API_LIST_AUTH.Yarn.assignDelete,
+            : prefix === "sequence"
+                ? API_LIST_AUTH.Sequences.assignDelete
+                : API_LIST_AUTH.Yarn.assignDelete,
         {
             onSuccess: (res, variables) => {
                 if (res.success) {
@@ -102,12 +183,16 @@ export function FabricViewModalImage({
                 [field("name")]: Yup.string().required("Fabric name is required"),
                 [field("meter")]: Yup.number().required("Meter is required"),
             }
-            : {
-                [field("name")]: Yup.string().required("Yarn name is required"),
-                yarn_num_cons: Yup.number().required("Yarn Num Cons is required"),
-            }
-    )
-
+            : prefix === "sequence"
+                ? {
+                    [field("name")]: Yup.string().required("Sequences name is required"),
+                    sequence_cd: Yup.number().required("Sequence CD is required"),
+                }
+                : {
+                    [field("name")]: Yup.string().required("Yarn name is required"),
+                    yarn_num_cons: Yup.number().required("Yarn Num Cons is required"),
+                }
+    );
     const handleSubmit = (values) => {
         const payload = {
             id: selectedData?.id?.toString(),
@@ -119,10 +204,24 @@ export function FabricViewModalImage({
         if (selectedFile) {
             payload[field("image")] = selectedFile
         }
+        if (prefix === "fabric") {
+            payload.fabric_stock_id = selectedData?.fabric_stock_id?.toString()
+        }
+        if (prefix === 'yarn') {
+            payload.yarn_stock_id = selectedData?.yarn_stock_id?.toString()
+            payload.yarn_num_cons = payload.yarn_num_cons.toString()
+        }
+        if (prefix === "sequence") {
+            payload.sequence_cd = values.sequence_cd ? values.sequence_cd.toString() : ""
+            payload.sequence_stock_id = selectedData?.sequence_stock_id?.toString()
+        }
 
-        updateItem(toFormData(payload))
+        if (["fabric", "yarn", "sequence"].includes(prefix)) {
+            updateItem(payload)
+        } else {
+            updateItem(toFormData(payload))
+        }
     }
-
     return (
         <CommonModal
             open={open}
@@ -192,6 +291,7 @@ export function FabricViewModalImage({
                         [field("vender")]: viewData?.[field("vender")] ?? "",
                         [field("meter")]: viewData?.[field("meter")] ?? "",
                         [field("color")]: viewData?.[field("color")] ?? "#D1D3C8",
+                        sequence_cd: viewData?.sequence_cd ?? "",
                         note: viewData?.note ?? "",
                     }}
                     validationSchema={validationSchema}
@@ -214,7 +314,7 @@ export function FabricViewModalImage({
                                             />
                                         )}
 
-                                        {isEditing && (
+                                        {isEditing && !["fabric", "yarn", "sequence"].includes(prefix) && (
                                             <div className="absolute inset-0 flex items-center justify-center bg-black/5">
                                                 <Button
                                                     type="button"
@@ -248,11 +348,21 @@ export function FabricViewModalImage({
                                             name={field("name")}
                                             label={title}
                                             runForm={runForm}
-                                            readOnly={!isEditing}
+                                            readOnly={["fabric", "yarn", "sequence"].includes(prefix) ? true : !isEditing}
                                         />
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-4">
+                                        {prefix === "sequence" && (
+                                            <FloatingInput
+                                                type="number"
+                                                name="sequence_cd"
+                                                label="Sequence CD"
+                                                runForm={runForm}
+                                                readOnly={!isEditing}
+                                                hasEdit={isEditing}
+                                            />
+                                        )}
                                         {prefix === "fabric" && <FloatingInput
                                             name={field("quality")}
                                             label={`${title} Quality`}
@@ -265,7 +375,8 @@ export function FabricViewModalImage({
                                                 name="yarn_num_cons"
                                                 label="Yarn Num Cons"
                                                 runForm={runForm}
-                                                readOnly
+                                                readOnly={!isEditing}
+                                                hasEdit
                                             />
                                         )}
                                         <FloatingInput
@@ -281,6 +392,8 @@ export function FabricViewModalImage({
                                         />
                                     </div>
 
+
+
                                     {prefix === "fabric" ? <div className="grid grid-cols-2 gap-4">
                                         <FloatingInput
                                             name={field("vender")}
@@ -289,6 +402,7 @@ export function FabricViewModalImage({
                                             readOnly
                                         />
                                         <FloatingInput
+                                            hasEdit={isEditing}
                                             name={field("meter")}
                                             label={`${title} Meter`}
                                             runForm={runForm}
@@ -312,7 +426,7 @@ export function FabricViewModalImage({
                                         />
                                     }
 
-                                    <div className="relative">
+                                    {/* <div className="relative">
                                         <div className="flex items-center gap-2 border rounded-md px-3 h-[45px] bg-[#FDFDFD]">
                                             <div
                                                 className="w-5 h-5 rounded-sm border"
@@ -325,7 +439,14 @@ export function FabricViewModalImage({
                                         <label className="absolute -top-2 left-2 bg-white px-1 text-[11px] font-medium">
                                             {title} Color
                                         </label>
-                                    </div>
+                                    </div> */}
+                                    <FormColorPicker
+                                        name={field("color")}
+                                        label={`${title} Color`}
+                                        runForm={runForm}
+                                        readOnly={["fabric", "yarn", "sequence"].includes(prefix) ? true : !isEditing}
+                                        placeholder="Pick a color"
+                                    />
 
                                     <FloatingTextarea
                                         name="note"

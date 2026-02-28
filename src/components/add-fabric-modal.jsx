@@ -40,32 +40,50 @@ const STEP_CONFIG = {
         qualityKey: "yarn_quality",
         priceKey: "yarn_price",
         vendorKey: "yarn_vender",
-        meterKey: "yarn_meter",
+        meterKey: "yarn_num_cons",
         colorKey: "yarn_color",
         imageKey: "yarn_image",
-    }
+    },
+    Sequences: {
+        create: API_LIST_AUTH.Sequences.create,
+        update: API_LIST_AUTH.Sequences.update,
+        delete: API_LIST_AUTH.Sequences.delete,
+        idKey: "sequence_id",
+        nameKey: "sequence_name",
+        // qualityKey: "yarn_quality",
+        priceKey: "sequence_price",
+        vendorKey: "sequence_vender",
+        // meterKey: "yarn_num_cons",
+        colorKey: "sequence_color",
+        imageKey: "sequence_image",
+    },
+
 }
 
 export function AddFabricModal({
     open,
     onOpenChange,
     onAdd,
-    title = "Add Fabric",
+    // title = "Add Fabric",
     isLoading = false,
-    initialData = null
+    initialData = null,
+    isFabric = false,
+    isSequences = false
 }) {
 
     const formikRef = React.useRef(null)
 
-    const isYarn = title === "Add Yarn"
-    const config = isYarn ? STEP_CONFIG.Yarn : STEP_CONFIG.Fabric
-    const isEdit = !!initialData
+    // const isYarn = title === "Add Yarn"
+    const config = isSequences ? STEP_CONFIG.Sequences : isFabric ? STEP_CONFIG.Fabric : STEP_CONFIG.Yarn
+    // const isEdit = !!initialData
 
     const [data, setData] = React.useState({
         fabric_stock_categories: [],
-        fabric_stock_sub_categories: [],
         yarn_stock_categories: [],
+
+        fabric_stock_sub_categories: [],
         yarn_stock_sub_categories: [],
+
         sequence_stock_categories: []
     })
 
@@ -92,29 +110,93 @@ export function AddFabricModal({
         }
     }, [settingData])
 
+    // const validationSchema = React.useMemo(() => {
+    //     const type = isSequences ? "Sequence" : isFabric ? "Fabric" : "Yarn"
+
+    //     const commonFields = {
+    //         [config.idKey]: Yup.string()
+    //             .required(`${type} Id is required`)
+    //             .min(3, `${type} Id must be at least 3 characters`),
+    //         category: Yup.string().required("Category is required"),
+    //         sub_category: Yup.string().required("Sub Category is required"),
+    //         [config.priceKey]: Yup.number()
+    //             .transform((value, originalValue) =>
+    //                 originalValue === "" ? undefined : value
+    //             )
+    //             .required(`${type} price is required`)
+    //             .typeError(`${type} price must be a number`),
+    //         [config.vendorKey]: Yup.string().trim().min(3, "Vendor must be at least 3 characters").required(`${type} vendor is required`),
+    //         [config.colorKey]: Yup.string().required(`${type} color is required`),
+    //         note: Yup.string().optional(),
+    //         [config.imageKey]: Yup.mixed().required(`${type} image is required`),
+    //         // [config.imageKey]: isEdit
+    //         //     ? Yup.mixed().optional()
+    //         //     : Yup.mixed().required(`${type} image is required`),
+    //         [config.nameKey]: Yup.string().required(`${type} name is required`),
+    //     }
+
+    //     if (!isFabric && !isSequences) {
+    //         return Yup.object().shape({
+    //             ...commonFields,
+    //             [config.meterKey]: Yup.string().required("Num cons is required"),
+    //             [config.qualityKey]: Yup.string().required("Sub quality is required"),
+    //         })
+    //     }
+
+    //     if (isSequences) {
+    //         return Yup.object().shape({
+    //             ...commonFields,
+    //             sequence_cd: Yup.string().required("CD is required"),
+    //         })
+    //     }
+
+    //     return Yup.object().shape({
+    //         ...commonFields,
+    //         [config.qualityKey]: Yup.string().trim().min(3, "Quality must be at least 3 characters").required("Quality is required"),
+    //         [config.meterKey]: Yup.number()
+    //             .transform((value, originalValue) =>
+    //                 originalValue === "" ? undefined : value
+    //             )
+    //             .required(!isFabric ? "Num cons is required" : "Meter is required")
+    //             .typeError(!isFabric ? "Num cons must be a number" : "Meter must be a number"),
+    //     })
+    // }, [isFabric,isSequences, config])
     const validationSchema = React.useMemo(() => {
-        const type = isYarn ? "Yarn" : "Fabric"
+        const type = isSequences ? "Sequence" : isFabric ? "Fabric" : "Yarn"
 
         const commonFields = {
-            [config.idKey]: Yup.string().required(`${type} Id is required`),
+            [config.idKey]: Yup.string()
+                .required(`${type} Id is required`)
+                .min(3, `${type} Id must be at least 3 characters`),
+
             category: Yup.string().required("Category is required"),
-            sub_category: Yup.string().required("Sub Category is required"),
+
+            ...(!isSequences && {
+                sub_category: Yup.string().required("Sub Category is required"),
+            }),
+
             [config.priceKey]: Yup.number()
                 .transform((value, originalValue) =>
                     originalValue === "" ? undefined : value
                 )
                 .required(`${type} price is required`)
                 .typeError(`${type} price must be a number`),
-            [config.vendorKey]: Yup.string().trim().min(3, "Vendor must be at least 3 characters").required(`${type} vendor is required`),
+
+            [config.vendorKey]: Yup.string()
+                .trim()
+                .min(3, "Vendor must be at least 3 characters")
+                .required(`${type} vendor is required`),
+
             [config.colorKey]: Yup.string().required(`${type} color is required`),
+
             note: Yup.string().optional(),
-            [config.imageKey]: isEdit
-                ? Yup.mixed().optional()
-                : Yup.mixed().required(`${type} image is required`),
+
+            [config.imageKey]: Yup.mixed().required(`${type} image is required`),
+
             [config.nameKey]: Yup.string().required(`${type} name is required`),
         }
 
-        if (isYarn) {
+        if (!isFabric && !isSequences) {
             return Yup.object().shape({
                 ...commonFields,
                 [config.meterKey]: Yup.string().required("Num cons is required"),
@@ -122,9 +204,22 @@ export function AddFabricModal({
             })
         }
 
+        if (isSequences) {
+            return Yup.object().shape({
+                ...commonFields,
+                sequence_cd: Yup.string()
+                    .required("Sequence CD is required")
+                    .min(3, "Sequence CD must be at least 3 characters"),
+            })
+        }
+
         return Yup.object().shape({
             ...commonFields,
-            [config.qualityKey]: Yup.string().trim().min(3, "Quality must be at least 3 characters").required("Quality is required"),
+            [config.qualityKey]: Yup.string()
+                .trim()
+                .min(3, "Quality must be at least 3 characters")
+                .required("Quality is required"),
+
             [config.meterKey]: Yup.number()
                 .transform((value, originalValue) =>
                     originalValue === "" ? undefined : value
@@ -132,7 +227,9 @@ export function AddFabricModal({
                 .required("Meter is required")
                 .typeError("Meter must be a number"),
         })
-    }, [isYarn, config, isEdit])
+
+    }, [isFabric, isSequences, config])
+    // }, [isFabric, config, isEdit])
 
     const handleOpenChange = (isOpen) => {
         onOpenChange(isOpen)
@@ -142,7 +239,7 @@ export function AddFabricModal({
     }
 
     const { mutate: addFabric, isPending } = usePost(
-        isEdit ? config.update : config.create,
+        config.create,
         {
             onSuccess: (res) => {
                 if (res.success) {
@@ -164,7 +261,7 @@ export function AddFabricModal({
         <CommonModal
             open={open}
             onOpenChange={handleOpenChange}
-            title={title}
+            title={isFabric ? "Add Fabric" : "Add Yarn"}
         >
             <Formik
                 innerRef={formikRef}
@@ -172,7 +269,6 @@ export function AddFabricModal({
                     const common = {
                         [config.idKey]: initialData?.[config.idKey] || "",
                         category: initialData?.category || "",
-                        sub_category: initialData?.sub_category || "",
                         [config.priceKey]: initialData?.[config.priceKey] || "",
                         [config.vendorKey]: initialData?.[config.vendorKey] || "",
                         [config.colorKey]: initialData?.[config.colorKey] || "",
@@ -180,8 +276,11 @@ export function AddFabricModal({
                         [config.imageKey]: "",
                         [config.nameKey]: initialData?.[config.nameKey] || "",
                     }
+                    if (!isSequences) {
+                        common.sub_category = initialData?.sub_category ?? ""
+                    }
 
-                    if (isYarn) {
+                    if (!isFabric && !isSequences) {
                         return {
                             ...common,
                             [config.meterKey]: initialData?.[config.meterKey] || "",
@@ -194,7 +293,7 @@ export function AddFabricModal({
                         [config.qualityKey]: initialData?.[config.qualityKey] || "",
                         [config.meterKey]: initialData?.[config.meterKey] || ""
                     }
-                }, [isYarn, initialData, config])}
+                }, [isFabric, initialData, isSequences, config])}
                 validationSchema={validationSchema}
                 onSubmit={HandleSubmit}
                 enableReinitialize
@@ -208,55 +307,16 @@ export function AddFabricModal({
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-7.5 gap-y-5.25">
                                 <div className="space-y-1.5">
                                     <label className="text-[14px] font-medium text-primary-foreground block">
-                                        {isYarn ? "Yarn Name" : "Fabric Name"}
+                                        {isSequences ? "Sequences Name" : !isFabric ? "Yarn Name" : "Fabric Name"}
                                     </label>
                                     <Input
                                         name={config.nameKey}
-                                        placeholder={isYarn ? "Yarn Name" : "Fabric Name"}
+                                        placeholder={isSequences ? "Sequences Name" : !isFabric ? "Yarn Name" : "Fabric Name"}
                                         runForm={runForm}
                                         className="h-[45px]"
                                     />
                                 </div>
-                                <div className="space-y-1.5">
-                                    <label className="text-[14px] font-medium text-primary-foreground block">
-                                        Id
-                                    </label>
-                                    <Input
-                                        name={config.idKey}
-                                        placeholder={isYarn ? "Yarn Id" : "Id"}
-                                        runForm={runForm}
-                                        className="h-[45px]"
-                                    />
-                                </div>
-
-                                <div className="space-y-1.5">
-                                    <label className="text-[14px] font-medium text-primary-foreground block">
-                                        Category
-                                    </label>
-                                    <FormSelect
-                                        name="category"
-                                        runForm={runForm}
-                                        options={data.fabric_stock_categories}
-                                        placeholder="Select category"
-                                        isSearch
-                                        triggerClassName="h-[45px]!"
-                                    />
-                                </div>
-
-                                <div className="space-y-1.5">
-                                    <label className="text-[14px] font-medium text-primary-foreground block">
-                                        {isYarn ? "Yarn" : "Sub Category"}
-                                    </label>
-                                    <FormSelect
-                                        name={"sub_category"}
-                                        runForm={runForm}
-                                        options={data.fabric_stock_sub_categories}
-                                        placeholder={isYarn ? "Select Sub Category" : "Select Sub Category"}
-                                        isSearch
-                                        triggerClassName="h-[45px]!"
-                                    />
-                                </div>
-                                <div className="space-y-1.5">
+                                {isSequences && <div className="space-y-1.5">
                                     <label className="text-[14px] font-medium text-primary-foreground block">
                                         Attach Image
                                     </label>
@@ -272,20 +332,91 @@ export function AddFabricModal({
                                             }
                                         }}
                                     />
-                                </div>
+                                </div>}
                                 <div className="space-y-1.5">
                                     <label className="text-[14px] font-medium text-primary-foreground block">
-                                        {isYarn ? "Num Cons" : "Quality"}
+                                        Id
                                     </label>
                                     <Input
-                                        name={isYarn ? config.meterKey : config.qualityKey}
-                                        placeholder={isYarn ? "Num cons" : "Quality"}
+                                        name={config.idKey}
+                                        placeholder={isSequences ? "Sequences Id" : !isFabric ? "Yarn Id" : "Id"}
                                         runForm={runForm}
                                         className="h-[45px]"
                                     />
                                 </div>
 
+                                <div className="space-y-1.5">
+                                    <label className="text-[14px] font-medium text-primary-foreground block">
+                                        Category
+                                    </label>
+                                    <FormSelect
+                                        name="category"
+                                        runForm={runForm}
+                                        options={!isFabric ? data.yarn_stock_categories : data.fabric_stock_categories}
+                                        placeholder="Select category"
+                                        isSearch
+                                        triggerClassName="h-[45px]!"
+                                    />
+                                </div>
 
+                                {!isSequences && <div className="space-y-1.5">
+                                    <label className="text-[14px] font-medium text-primary-foreground block">
+                                        Sub Category
+                                    </label>
+                                    <FormSelect
+                                        name={"sub_category"}
+                                        runForm={runForm}
+                                        options={!isFabric ? data.yarn_stock_sub_categories : data.fabric_stock_sub_categories}
+                                        placeholder={"Select Sub Category"}
+                                        isSearch
+                                        triggerClassName="h-[45px]!"
+                                    />
+                                </div>}
+                                {isSequences &&
+                                    <div className="space-y-1.5">
+                                        <label className="text-[14px] font-medium text-primary-foreground block">
+                                            CD
+                                        </label>
+                                        <Input
+                                            type={"number"}
+                                            name={'sequence_cd'}
+                                            placeholder="CD"
+                                            runForm={runForm}
+                                            className="h-[45px]"
+                                        />
+                                    </div>
+                                }
+                                {!isSequences && <div className="space-y-1.5">
+                                    <label className="text-[14px] font-medium text-primary-foreground block">
+                                        Attach Image
+                                    </label>
+                                    <FileInput
+                                        name={config.imageKey}
+                                        accept={ImgAcceptType}
+                                        runForm={runForm}
+                                        icon={<AttachIcon width={16} height={16} color="#858585" />}
+                                        onChange={(e) => {
+                                            const file = e.target.files[0]
+                                            if (file) {
+                                                runForm.setFieldValue(config.imageKey, file)
+                                            }
+                                        }}
+                                    />
+                                </div>}
+                                {!isSequences &&
+                                    <div className="space-y-1.5">
+                                        <label className="text-[14px] font-medium text-primary-foreground block">
+                                            {!isFabric ? "Num Cons" : "Quality"}
+                                        </label>
+                                        <Input
+                                            type={!isFabric ? "number" : "text"}
+                                            name={!isFabric ? config.meterKey : config.qualityKey}
+                                            placeholder={!isFabric ? "Num cons" : "Quality"}
+                                            runForm={runForm}
+                                            className="h-[45px]"
+                                        />
+                                    </div>
+                                }
                                 <div className="space-y-1.5">
                                     <label className="text-[14px] font-medium text-primary-foreground block">
                                         Price
@@ -311,33 +442,40 @@ export function AddFabricModal({
                                     />
                                 </div>
 
-                                <div className="space-y-1.5">
+                                {!isSequences && <div className="space-y-1.5">
                                     <label className="text-[14px] font-medium text-primary-foreground block">
-                                        {isYarn ? "Sub Quality" : "Meter"}
+                                        {!isFabric ? "Sub Quality" : "Meter"}
                                     </label>
                                     <Input
-                                        type="number"
-                                        name={isYarn ? config.qualityKey : config.meterKey}
-                                        placeholder={isYarn ? "Sub quality" : "Meter"}
+                                        type={!isFabric ? "text" : "number"}
+                                        name={!isFabric ? config.qualityKey : config.meterKey}
+                                        placeholder={!isFabric ? "Sub quality" : "Meter"}
                                         runForm={runForm}
                                         className="h-[45px]"
                                     />
-                                </div>
+                                </div>}
                                 <div className="space-y-1.5">
-                                    <label className="text-[14px] font-medium text-primary-foreground block">
+                                    <label className="text-[16px] font-medium text-primary-foreground block">
                                         Color
                                     </label>
-                                    <div className="relative">
-                                        <FormColorPicker
-                                            name={config.colorKey}
-                                            runForm={runForm}
-                                            placeholder="Pick a color"
-                                        />
-                                    </div>
+                                    <FormColorPicker
+                                        name={config.colorKey}
+                                        runForm={runForm}
+                                        placeholder="Pick a color"
+                                        isFloating={false}
+                                    // className="h-[45px]"
+                                    />
                                 </div>
                             </div>
 
-
+                            {!isSequences &&
+                                <FormColorPicker
+                                    name={config.colorKey}
+                                    label="Color"
+                                    runForm={runForm}
+                                    placeholder="Pick a color"
+                                />
+                            }
 
                             <div className="space-y-1.5 mt-6">
                                 <label className="text-[14px] font-medium text-primary-foreground block">
@@ -359,7 +497,7 @@ export function AddFabricModal({
                                 disabled={isPending}
                                 className="bg-[#dcccbd] hover:bg-[#dcccbd]/90 text-primary-foreground h-11.25 px-8 rounded-md font-semibold text-[16px]"
                             >
-                                {isPending ? "Saving..." : isEdit ? "Update" : "Add"}
+                                {isPending ? "Saving..." : "Add"}
                             </Button>
                         </div>
                     </form>

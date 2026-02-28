@@ -66,7 +66,7 @@ function ObjVal({ title, value }) {
     return (
         <div className="px-3 flex items-center justify-between">
             <span className="text-[13px] text-[#A67F6F] font-medium">{title}:</span>
-            <span className="text-[14px] font-semibold text-primary-foreground truncate ml-1">
+            <span className="text-[14px] font-semibold text-primary-foreground truncate ml-1" title={value}>
                 {value}
             </span>
         </div>

@@ -8,32 +8,99 @@ import { Input } from "@/components/ui/input"
 import { FormSelect } from "@/components/ui/form-select"
 import { Button } from "@/components/ui/button"
 import { FormColorPicker } from "@/components/ui/form-color-picker"
+import { StateUpdate } from "@/lib/helper"
+import { API_LIST_AUTH } from "@/hooks/api-list"
+import { usePost } from "@/hooks/useApi"
 
 const validationSchema = Yup.object().shape({
-    yarn: Yup.string().required("Yarn is required"),
-    qualityCon: Yup.string().required("Quality con is required"),
-    sequence: Yup.string().required("Sequence is required"),
-    cdCon: Yup.string().required("CD con is required"),
-    meter: Yup.string().required("Meter is required"),
-    color: Yup.string().required("Color is required"),
-    designNo: Yup.string().required("Design no is required"),
-})
+    mainQuantity: Yup.number().optional().nullable(),
+    yarn_assign_id: Yup.string().nullable(),
+    sequence_assign_id: Yup.string().nullable(),
 
-export function AddDetailsModal({ open, onOpenChange, onAdd }) {
+    quality_con: Yup.string().required("Quality con is required"),
+    sample_cd_con: Yup.string().required("CD con is required"),
+    sample_meter: Yup.number()
+        .typeError("Meter must be a number")
+        .required("Meter is required")
+        .max(
+            Yup.ref("mainQuantity"),
+            ({ max }) => `Meter cannot be greater than ${max ? max : 0}`
+        ),
+    sample_color: Yup.string().required("Color is required"),
+    sample_design_no: Yup.string().required("Design no is required"),
+}).test(
+    "yarn-or-sequence-required",
+    "Either Yarn or Sequence is required",
+    function (values) {
+        const { yarn_assign_id, sequence_assign_id } = values
+
+        if (!yarn_assign_id && !sequence_assign_id) {
+            return this.createError({
+                path: "yarn_assign_id", // error will show on this field
+                message: "Either Yarn or Sequence is required",
+            })
+        }
+
+        return true
+    }
+)
+export function AddDetailsModal({ open, onOpenChange, onAdd, selectData, PreData, assign }) {
+    const [data, setData] = React.useState({
+        yarnOption: [],
+        sequenceOption: []
+    })
+
+    React.useEffect(() => {
+        const formattedSequence = PreData?.sequencesData?.sequences?.map((item) => ({
+            value: item.id.toString(),
+            label: item.sequence_name || item.name || `Sequence ${item.id}`,
+            rawData: item
+        }))
+        const formattedYarn = PreData?.yarnData?.yarns?.map((item) => ({
+            value: item.id.toString(),
+            label: item.yarn_name || item.name || `Yarn ${item.id}`,
+            rawData: item
+        }))
+        StateUpdate({ yarnOption: formattedYarn, sequenceOption: formattedSequence }, setData)
+    }, [PreData])
+
+
+    const { mutate: addDetails, isPending } = usePost(API_LIST_AUTH.Sample.assign, {
+        onSuccess: (res, variables) => {
+            if (res.success) {
+                onAdd(res.data)
+            }
+        },
+        onError: (error) => {
+            console.error("Error updating target:", error)
+        }
+    })
     const formik = useFormik({
+        enableReinitialize: true,
         initialValues: {
-            yarn: "",
-            qualityCon: "",
-            sequence: "",
-            cdCon: "",
-            meter: "",
-            color: "",
-            designNo: "",
+            mainQuantity: (selectData?.fabric_meter - assign) || "",
+            yarn_assign_id: "",
+            sequence_assign_id: "",
+            quality_con: "",
+            sample_cd_con: "",
+            sample_color: "",
+            sample_meter: "",
+            sample_design_no: "",
         },
         validationSchema,
         onSubmit: (values) => {
-            if (onAdd) onAdd(values)
-            handleOpenChange(false)
+
+            const dataVal = { ...values }
+            delete dataVal.mainQuantity
+            if (dataVal?.yarn_assign_id == "") {
+                delete dataVal.yarn_assign_id
+            }
+            if (dataVal?.sequence_assign_id == "") {
+                delete dataVal.sequence_assign_id
+            }
+            dataVal.sample_id = PreData?.sampleData?.id?.toString()
+            dataVal.fabric_assign_id = selectData?.id?.toString()
+            addDetails(dataVal)
         },
     })
 
@@ -43,16 +110,6 @@ export function AddDetailsModal({ open, onOpenChange, onAdd }) {
             formik.resetForm()
         }
     }
-
-    const yarnOptions = [
-        { value: "cotton", label: "Cotton" },
-        { value: "silk", label: "Silk" },
-    ]
-
-    const sequenceOptions = [
-        { value: "seq1", label: "Sequence 1" },
-        { value: "seq2", label: "Sequence 2" },
-    ]
 
     return (
         <CommonModal
@@ -69,10 +126,18 @@ export function AddDetailsModal({ open, onOpenChange, onAdd }) {
                                 Yarn
                             </label>
                             <FormSelect
-                                name="yarn"
-                                options={yarnOptions}
-                                placeholder="Select yarn"
+                                name="yarn_assign_id"
                                 runForm={formik}
+                                options={data.yarnOption}
+                                placeholder="Select yarn"
+                                isSearch
+                                triggerClassName="h-[45px]!"
+                            // onChange={(val) => {
+                            //     const selected = data.yarnOption.find(opt => opt.value === val)
+                            //     if (selected) {
+                            //         StateUpdate({ selectedData: selected.rawData }, setData)
+                            //     }
+                            // }}
                             />
                         </div>
 
@@ -82,7 +147,7 @@ export function AddDetailsModal({ open, onOpenChange, onAdd }) {
                                 Quality Con
                             </label>
                             <Input
-                                name="qualityCon"
+                                name="quality_con"
                                 placeholder="Quality con"
                                 className="h-11.25 border-muted-foreground rounded-md placeholder:text-muted-foreground placeholder:text-[14px] text-[14px]"
                                 runForm={formik}
@@ -95,10 +160,18 @@ export function AddDetailsModal({ open, onOpenChange, onAdd }) {
                                 Sequence
                             </label>
                             <FormSelect
-                                name="sequence"
-                                options={sequenceOptions}
-                                placeholder="Select sequence"
+                                name="sequence_assign_id"
                                 runForm={formik}
+                                options={data.sequenceOption}
+                                placeholder="Select sequence"
+                                isSearch
+                                triggerClassName="h-[45px]!"
+                            // onChange={(val) => {
+                            //     const selected = data.sequenceOption.find(opt => opt.value === val)
+                            //     if (selected) {
+                            //         StateUpdate({ selectedData: selected.rawData }, setData)
+                            //     }
+                            // }}
                             />
                         </div>
 
@@ -108,7 +181,7 @@ export function AddDetailsModal({ open, onOpenChange, onAdd }) {
                                 CD Con
                             </label>
                             <Input
-                                name="cdCon"
+                                name="sample_cd_con"
                                 placeholder="CD con"
                                 className="h-11.25 border-muted-foreground rounded-md placeholder:text-muted-foreground placeholder:text-[14px] text-[14px]"
                                 runForm={formik}
@@ -121,22 +194,22 @@ export function AddDetailsModal({ open, onOpenChange, onAdd }) {
                                 Meter
                             </label>
                             <Input
-                                name="meter"
+                                name="sample_meter"
                                 placeholder="Meter"
                                 className="h-11.25 border-muted-foreground rounded-md placeholder:text-muted-foreground placeholder:text-[14px] text-[14px]"
                                 runForm={formik}
                             />
                         </div>
-
-                        {/* Color */}
                         <div className="space-y-1.5">
                             <label className="text-[16px] font-medium text-primary-foreground block">
                                 Color
                             </label>
                             <FormColorPicker
-                                name="color"
+                                name="sample_color"
+                                label="Color"
                                 runForm={formik}
                                 placeholder="Pick a color"
+                                isFloating={false}
                             />
                         </div>
 
@@ -146,7 +219,7 @@ export function AddDetailsModal({ open, onOpenChange, onAdd }) {
                                 Design No.
                             </label>
                             <Input
-                                name="designNo"
+                                name="sample_design_no"
                                 placeholder="Design no"
                                 className="h-11.25 border-muted-foreground rounded-md placeholder:text-muted-foreground placeholder:text-[14px] text-[14px]"
                                 runForm={formik}

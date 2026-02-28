@@ -79,17 +79,15 @@ export function SketchesCardView({
     title = "1. Inspirations",
     sketchesData = null,
     defaultOpen = false,
-    getVisualDesignersData,
-    getYarnData
+    getVisualDesignersData
 }) {
-    console.log('sketchesData', sketchesData)
+    // console.log('sketchesData', sketchesData)
     const titleName = title.split('.').pop()?.trim() || title
     const modalTitle = `${titleName} Target`
-    const config = titleName === "Fabric" ? STEP_CONFIG.Fabric : STEP_CONFIG[titleName] || STEP_CONFIG.Sketches
+    const config = titleName === "Sequences" ? STEP_CONFIG.Sequences : titleName === "Fabric" ? STEP_CONFIG.Fabric : STEP_CONFIG[titleName] || STEP_CONFIG.Sketches
     const [clickedAction, setClickedAction] = React.useState(null)
 
     const initialAssign = titleName === "Sequences" ? sketchesData?.sequences || [] : sketchesData?.yarns || sketchesData?.fabrics || sketchesData?.assign || []
-    console.log('initialAssign', initialAssign)
     const [data, setData] = React.useState({
         assign: initialAssign,
         IsBlur: sketchesData?.status === "pending",
@@ -104,6 +102,10 @@ export function SketchesCardView({
         isAddImageModalOpen: false,
         InspirationsImg: false,
         isEditModalOpen: false,
+        SequencesViewModalImage: false,
+        FabricViewModalImage: false,
+        YarnViewModalImage: false,
+        DesignViewModalImage: false,
         // flag for modal api call
         IsEditTarget: false,
         [config.targetKey]: 0
@@ -155,6 +157,9 @@ export function SketchesCardView({
         if (val === "Yarn") {
             modalOpen("FabricViewModalImage", true, setOpenModal)
         }
+        if (val === "Sequences") {
+            modalOpen("FabricViewModalImage", true, setOpenModal)
+        }
     }
 
 
@@ -176,76 +181,122 @@ export function SketchesCardView({
     })
 
     const { mutate: assignTo, isPending: isAssignTo } = usePost(config.assign, {
+        // onSuccess: (res) => {
+        //     if (res.success) {
+        //         if (titleName === "Fabric") {
+        //             // {
+        //             //     "success": true,
+        //             //     "code": null,
+        //             //     "message": "Success",
+        //             //     "data": {
+        //             //         "fabric_id": "2",
+        //             //         "fabric_meter": "444",
+        //             //         "fabric_stock_id": "1",
+        //             //         "note": "test 444",
+        //             //         "id": 4,
+        //             //         "fabric_name": "test123456789",
+        //             //         "fabric_image": "/upload/fabrics/Group-1-1771865513783-730084220.png"
+        //             //     }
+        //             // }
+
+        //             const UpadetData = [...data.assign, res.data]
+        //             StateUpdate({
+        //                 assign: UpadetData,
+        //                 progress: (UpadetData.length / Number(data[config.targetKey])) * 100,
+        //                 IsBlur: false,
+        //                 status: "running"
+        //             }, setData)
+        //             StateUpdate({ isAddImageModalOpen: false }, setOpenModal)
+        //         }
+        //         else if (titleName === "Yarn") {
+        //             const UpadetData = [...data.assign, res.data]
+        //             StateUpdate({
+        //                 assign: UpadetData,
+        //                 progress: (UpadetData.length / Number(data[config.targetKey])) * 100,
+        //                 IsBlur: false,
+        //                 status: "running"
+        //             }, setData)
+        //             StateUpdate({ isAddImageModalOpen: false }, setOpenModal)
+        //             //                     {
+        //             //     "yarn_id": "2",
+        //             //     "yarn_num_cons": "99",
+        //             //     "yarn_stock_id": "1",
+        //             //     "note": "99 add nore",
+        //             //     "id": 2,
+        //             //     "yarn_name": "test123456789",
+        //             //     "yarn_image": "/upload/yarns/Group-1-1771865542775-521619552.png"
+        //             // }
+        //         }
+        //         else if (titleName === "Sequences") {
+        //             const UpadetData = [...data.assign, res.data]
+        //             StateUpdate({
+        //                 assign: UpadetData,
+        //                 progress: (UpadetData.length / Number(data[config.targetKey])) * 100,
+        //                 IsBlur: false,
+        //                 status: "running"
+        //             }, setData)
+        //             StateUpdate({ isAddImageModalOpen: false }, setOpenModal)
+        //         }
+        //         else {
+        //             const assignUserId = Number(res.data.assign_user)
+
+        //             const exists = data.assign.some(
+        //                 item => item.assign_user === assignUserId
+        //             )
+        //             let newImages
+
+        //             if (exists) {
+        //                 // Replace existing item
+        //                 newImages = data.assign.map(item =>
+        //                     item.assign_user === assignUserId ? res.data : item
+        //                 )
+        //             } else {
+        //                 // Add new item
+        //                 newImages = [...data.assign, res.data]
+        //             }
+        //             StateUpdate({
+        //                 assign: newImages,
+        //                 progress: newImages.length === 0 ? 0 : (newImages.length / Number(data[config.targetKey])) * 100
+        //             }, setData)
+        //         }
+        //         StateUpdate({ isAddImageModalOpen: false }, setOpenModal)
+        //     }
+        // },
         onSuccess: (res) => {
-            if (res.success) {
-                if (titleName === "Fabric") {
-                    // {
-                    //     "success": true,
-                    //     "code": null,
-                    //     "message": "Success",
-                    //     "data": {
-                    //         "fabric_id": "2",
-                    //         "fabric_meter": "444",
-                    //         "fabric_stock_id": "1",
-                    //         "note": "test 444",
-                    //         "id": 4,
-                    //         "fabric_name": "test123456789",
-                    //         "fabric_image": "/upload/fabrics/Group-1-1771865513783-730084220.png"
-                    //     }
-                    // }
+            if (!res.success) return
 
-                    const UpadetData = [...data.assign, res.data]
-                    StateUpdate({
-                        assign: UpadetData,
-                        progress: (UpadetData.length / Number(data[config.targetKey])) * 100,
-                        IsBlur: false,
-                        status: "running"
-                    }, setData)
-                    StateUpdate({ isAddImageModalOpen: false }, setOpenModal)
-                }
-                else if (titleName === "Yarn") {
-                    const UpadetData = [...data.assign, res.data]
-                    StateUpdate({
-                        assign: UpadetData,
-                        progress: (UpadetData.length / Number(data[config.targetKey])) * 100,
-                        IsBlur: false,
-                        status: "running"
-                    }, setData)
-                    StateUpdate({ isAddImageModalOpen: false }, setOpenModal)
-                    //                     {
-                    //     "yarn_id": "2",
-                    //     "yarn_num_cons": "99",
-                    //     "yarn_stock_id": "1",
-                    //     "note": "99 add nore",
-                    //     "id": 2,
-                    //     "yarn_name": "test123456789",
-                    //     "yarn_image": "/upload/yarns/Group-1-1771865542775-521619552.png"
-                    // }
-                }
-                else {
-                    const assignUserId = Number(res.data.assign_user)
+            let updatedData
 
-                    const exists = data.assign.some(
-                        item => item.assign_user === assignUserId
+            // 👇 Special case (assign_user replace logic)
+            if (!["Fabric", "Yarn", "Sequences"].includes(titleName)) {
+
+                const assignUserId = Number(res.data.assign_user)
+
+                const exists = data.assign.some(
+                    item => item.assign_user === assignUserId
+                )
+
+                updatedData = exists
+                    ? data.assign.map(item =>
+                        item.assign_user === assignUserId ? res.data : item
                     )
-                    let newImages
+                    : [...data.assign, res.data]
 
-                    if (exists) {
-                        // Replace existing item
-                        newImages = data.assign.map(item =>
-                            item.assign_user === assignUserId ? res.data : item
-                        )
-                    } else {
-                        // Add new item
-                        newImages = [...data.assign, res.data]
-                    }
-                    StateUpdate({
-                        assign: newImages,
-                        progress: newImages.length === 0 ? 0 : (newImages.length / Number(data[config.targetKey])) * 100
-                    }, setData)
-                }
-                StateUpdate({ isAddImageModalOpen: false }, setOpenModal)
+            } else {
+                // 👇 Fabric / Yarn / Sequences
+                updatedData = [...data.assign, res.data]
             }
+
+            const target = Number(data[config.targetKey]) || 1
+
+            StateUpdate({
+                assign: updatedData,
+                progress: (updatedData.length / target) * 100,
+                IsBlur: false,
+                status: "running"
+            }, setData)
+
+            StateUpdate({ isAddImageModalOpen: false }, setOpenModal)
         },
         onError: (error) => {
             toast.error(error.message || "Something went wrong")
@@ -256,11 +307,7 @@ export function SketchesCardView({
             setClickedAction(null)
             if (res.success) {
                 StateUpdate({ IsBlur: false, status: variables.status }, setData)
-                if (titleName === "Fabric") {
-                    getYarnData({ design_id: sketchesData?.design_id?.toString() })
-                } else {
-                    getVisualDesignersData({ design_id: sketchesData?.design_id?.toString() })
-                }
+                getVisualDesignersData({ design_id: sketchesData?.design_id?.toString() })
             }
         },
         onError: (error) => {
@@ -289,7 +336,14 @@ export function SketchesCardView({
             payload.yarn_id = sketchesData.id.toString()
             payload.yarn_stock_id = payload.yarn_stock_id.toString()
         }
-        // console.log('payload', payload)
+
+        if (titleName === "Sequences") {
+            delete payload[config.idKey]
+            payload.sequence_id = sketchesData.id.toString()
+            payload.sequence_cd = payload.sequence_cd.toString()
+            payload.sequence_stock_id = payload.sequence_stock_id.toString()
+
+        }
         assignTo(payload)
     }
 
@@ -435,17 +489,15 @@ export function SketchesCardView({
                             <div className="border-b border-[#dcccbd]"></div>
                             {/* Gallery */}
                             <div className="p-6 pt-0 grid grid-cols-2 md:flex flex-wrap items-center gap-4">
-                                {console.log('data.assign', data.assign)}
                                 {data.assign.map((img, idx) => {
                                     const src = (img[config.targetImg] && img[config.targetImg] !== "") ? `${process.env.NEXT_PUBLIC_API_URL}${img[config.targetImg]}` : "/design-thumb.png"
                                     let itemData = { ...img, src: src }
-
-                                    if (titleName === "Yarn" || titleName === "Fabric" || titleName === "Sequence") {
+                                    if (titleName === "Yarn" || titleName === "Fabric" || titleName === "Sequences") {
                                         return (
                                             <WorkItemCard
                                                 isFabric={titleName === "Fabric"}
                                                 isYarn={titleName === "Yarn"}
-                                                isSequence={titleName === "Sequence"}
+                                                isSequence={titleName === "Sequences"}
                                                 key={idx}
                                                 item={itemData}
                                                 priority={idx === 0}
@@ -512,7 +564,7 @@ export function SketchesCardView({
                 onSave={onEditTarget}
                 isLoading={isPending}
                 IsEditTarget={openModal.IsEditTarget}
-                min={data.assign.length}
+                min={data.assign.length > 0 ? data.assign.length : 1}
             />
             {/* taeget modal */}
             {/* taeget modal */}
@@ -573,10 +625,18 @@ export function SketchesCardView({
             {
                 openModal.FabricViewModalImage &&
                 <FabricViewModalImage
+                    isDone={data.status === "completed" || data.status === "skipped"}
                     selectedData={data.selectedData}
                     open={openModal.FabricViewModalImage}
                     onOpenChange={(isOpen) => { modalOpen("FabricViewModalImage", isOpen, setOpenModal) }}
                     title={titleName}
+                    onDelete={(deletedId) => {
+                        const updatedImages = data.assign.filter(img => img.id !== Number(deletedId))
+                        StateUpdate({
+                            assign: updatedImages,
+                            progress: data[config.targetKey] === 0 ? 0 : (updatedImages.length / data[config.targetKey]) * 100
+                        }, setData)
+                    }}
                 />
             }
 

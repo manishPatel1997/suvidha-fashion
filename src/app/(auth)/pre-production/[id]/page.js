@@ -140,6 +140,10 @@ export default async function Page({ params }) {
         {
             key: 'sequencesData',
             url: API_LIST_AUTH.Sequences.get
+        },
+        {
+            key: "sampleData",
+            url: API_LIST_AUTH.Sample.get
         }
     ]
 
@@ -168,6 +172,7 @@ export default async function Page({ params }) {
             fabricData={result.fabricData}
             yarnData={result.yarnData}
             sequencesData={result.sequencesData}
+            sampleData={result.sampleData}
         />
     )
 }

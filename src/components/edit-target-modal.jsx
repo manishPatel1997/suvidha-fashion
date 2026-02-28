@@ -11,7 +11,7 @@ export function EditTargetModal({ open, onOpenChange, onSave, initialValue = 0, 
     const validationSchema = React.useMemo(() => Yup.object().shape({
         target: Yup.number()
             .required("Target is required")
-            .min(min, `Target cannot be less than current ${min} items`),
+            .min(min, `Target cannot be less than ${min}`),
     }), [min])
 
     const formik = useFormik({

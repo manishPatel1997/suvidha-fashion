@@ -1,21 +1,15 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { WorkflowProgressCard } from '@/components/workflow-progress-card'
 import { SampleWorkflowCard } from '@/components/sample-workflow-card'
-import { ChevronLeft } from 'lucide-react'
-import { AddDetailsModal } from '@/components/add-details-modal'
-import { AddDesignModal } from '@/components/add-design-modal'
 import { usePost } from '@/hooks/useApi'
 import { StateUpdate } from '@/lib/helper'
 import { InspirationsCardView } from '@/components/pre-production/inspirations/InspirationsCardView'
 import { API_LIST_AUTH } from '@/hooks/api-list'
 import { SketchesCardView } from '@/components/pre-production/sketches/SketchesCardView'
+import PageHeader from '@/components/PageHeader'
 
-export function PreProductionClient({ id, inspirationData = null, sketchesData = null, visualDesignersData = null, fabricData = null, yarnData = null, sequencesData = null }) {
-    const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
-    const [isDesignModalOpen, setIsDesignModalOpen] = useState(false)
-
+export function PreProductionClient({ id, inspirationData = null, sketchesData = null, visualDesignersData = null, fabricData = null, yarnData = null, sequencesData = null, sampleData = null }) {
     const [PreData, setPreData] = useState({
         inspirationData: inspirationData,
         sketchesData: sketchesData,
@@ -23,6 +17,7 @@ export function PreProductionClient({ id, inspirationData = null, sketchesData =
         fabricData: fabricData,
         yarnData: yarnData,
         sequencesData: sequencesData,
+        sampleData: sampleData,
     })
 
     useEffect(() => {
@@ -34,7 +29,8 @@ export function PreProductionClient({ id, inspirationData = null, sketchesData =
             PreData.visualDesignersData !== visualDesignersData ||
             PreData.fabricData !== fabricData ||
             PreData.yarnData !== yarnData ||
-            PreData.sequencesData !== sequencesData
+            PreData.sequencesData !== sequencesData ||
+            PreData.sampleData !== sampleData
         ) {
             setPreData({
                 inspirationData: inspirationData,
@@ -43,74 +39,75 @@ export function PreProductionClient({ id, inspirationData = null, sketchesData =
                 fabricData: fabricData,
                 yarnData: yarnData,
                 sequencesData: sequencesData,
+                sampleData: sampleData,
             })
         }
-    }, [inspirationData, sketchesData, visualDesignersData, fabricData, yarnData, sequencesData])
-
+    }, [inspirationData, sketchesData, visualDesignersData, fabricData, yarnData, sequencesData, sampleData])
 
     const designId = inspirationData?.design_slug_id
+
+    const useFetchAndStore = (api, stateKey) => {
+        return usePost(api, {
+            onSuccess: (res) => {
+                if (res?.success) {
+                    StateUpdate(
+                        { [stateKey]: res?.data || null },
+                        setPreData
+                    );
+                }
+            },
+            onError: (error) => {
+                console.error(`Error fetching ${stateKey}:`, error);
+            },
+        });
+    };
+
     // const inspirations = inspirationData?.inspirations?.map(img => `${process.env.NEXT_PUBLIC_API_URL}${img.image}`) || []
-    const { mutate: getInspirationData } = usePost(API_LIST_AUTH.Sketches.get, {
-        onSuccess: (res) => {
-            if (res.success) {
-                console.log('4')
-                StateUpdate({
-                    sketchesData: res?.data || null
-                }, setPreData)
-            }
-        },
-        onError: (error) => {
-            console.error("Error updating status:", error)
-        }
-    })
+    const { mutate: getInspirationData } = useFetchAndStore(
+        API_LIST_AUTH.Sketches.get,
+        "sketchesData"
+    );
 
-    const { mutate: getVisualDesignersData } = usePost(API_LIST_AUTH.VisualDesigners.get, {
-        onSuccess: (res) => {
-            if (res.success) {
-                console.log('3')
-                StateUpdate({
-                    visualDesignersData: res?.data || null
-                }, setPreData)
-            }
-        },
-        onError: (error) => {
-            console.error("Error updating status:", error)
-        }
-    })
-    const { mutate: getFabricData } = usePost(API_LIST_AUTH.Fabric.get, {
-        onSuccess: (res) => {
-            console.log('1')
-            if (res.success) {
-                StateUpdate({
-                    fabricData: res?.data || null
-                }, setPreData)
-            }
-        },
-        onError: (error) => {
-            console.error("Error updating status:", error)
-        }
-    })
+    const { mutate: getVisualDesignersData } = useFetchAndStore(
+        API_LIST_AUTH.VisualDesigners.get,
+        "visualDesignersData"
+    );
 
-    const { mutate: getYarnData } = usePost(API_LIST_AUTH.Yarn.get, {
-        onSuccess: (res) => {
-            if (res.success) {
-                console.log('2')
-                StateUpdate({
-                    yarnData: res?.data || null
-                }, setPreData)
-            }
-        },
-        onError: (error) => {
-            console.error("Error updating status:", error)
-        }
-    })
+    const { mutate: getFabricData } = useFetchAndStore(
+        API_LIST_AUTH.Fabric.get,
+        "fabricData"
+    );
+
+    const { mutate: getYarnData } = useFetchAndStore(
+        API_LIST_AUTH.Yarn.get,
+        "yarnData"
+    );
+
+    const { mutate: getSequencesData } = useFetchAndStore(
+        API_LIST_AUTH.Sequences.get,
+        "sequencesData"
+    );
+
+    const { mutate: getSampleData } = useFetchAndStore(
+        API_LIST_AUTH.Sample.get,
+        "sampleData"
+    );
+
+
     return (
         <div className="space-y-8">
             <div className="flex flex-row sm:items-center justify-between gap-4">
-                <h1 className="text-[26px] sm:text-[35px] md:text-[45px] font-serif font-bold text-primary-foreground flex items-center gap-1 sm:gap-3">
-                    <ChevronLeft className="w-[1em] h-[1em] text-primary-foreground" />
-                    <span className='text-nowrap sm:text-normal '>Pre Production</span>
-                </h1>
+                {/* <Link href="/dashboard">
+                    <h1 className="text-[26px] sm:text-[35px] md:text-[45px] font-serif font-bold text-primary-foreground flex items-center gap-1 sm:gap-3">
+                        <ChevronLeft className="w-[1em] h-[1em] text-primary-foreground" />
+                        <span className='text-nowrap sm:text-normal '>Pre Production</span>
+                    </h1>
+                </Link> */}
+                <PageHeader
+                    title="Pre Production"
+                    href="/dashboard"
+                    preserveQuery
+                />
                 <Button
                     className="text-[12px] sm:text-[14px] bg-[#dcccbd] hover:bg-[#dcccbd]/90 text-primary-foreground  sm:px-4 rounded-lg gap-2 font-semibold"
                 >
@@ -121,7 +118,7 @@ export function PreProductionClient({ id, inspirationData = null, sketchesData =
             {PreData.inspirationData &&
                 <InspirationsCardView
                     getInspirationData={getInspirationData}
-                    // defaultOpen
+                    defaultOpen
                     title="1. Inspirations"
                     inspirationData={PreData.inspirationData}
                 />
@@ -135,7 +132,6 @@ export function PreProductionClient({ id, inspirationData = null, sketchesData =
             }
             {PreData.visualDesignersData &&
                 <SketchesCardView
-                    defaultOpen
                     title="3. Design"
                     sketchesData={PreData.visualDesignersData}
                     getVisualDesignersData={getFabricData}
@@ -143,27 +139,32 @@ export function PreProductionClient({ id, inspirationData = null, sketchesData =
             }
             {PreData.fabricData &&
                 <SketchesCardView
-                    defaultOpen
                     title="4. Fabric"
                     // sketchesData={{ ...PreData.fabricData, assign: PreData.fabricData?.assign || [] }}
                     sketchesData={PreData.fabricData}
-                    getYarnData={getYarnData}
+                    getVisualDesignersData={getYarnData}
                 />
             }
             {
                 PreData.yarnData &&
                 <SketchesCardView
-                    defaultOpen
                     title="5. Yarn"
                     sketchesData={PreData.yarnData}
+                    getVisualDesignersData={getSequencesData}
                 />
             }
             {
                 PreData.sequencesData &&
                 <SketchesCardView
-                    defaultOpen
                     title="6. Sequences"
                     sketchesData={PreData.sequencesData}
+                    getVisualDesignersData={getSampleData}
+                />
+            }
+            {PreData.sampleData &&
+                <SampleWorkflowCard
+                    PreData={PreData}
+                    title="7. Sample"
                 />
             }
             {/* <WorkflowProgressCard
@@ -229,17 +230,11 @@ export function PreProductionClient({ id, inspirationData = null, sketchesData =
                 onAddDesign={() => setIsDetailsModalOpen(true)}
             /> */}
 
-            <AddDetailsModal
-                open={isDetailsModalOpen}
-                onOpenChange={setIsDetailsModalOpen}
-                onAdd={(values) => console.log("Added details:", values)}
-            />
-
-            <AddDesignModal
+            {/* <AddDesignModal
                 open={isDesignModalOpen}
                 onOpenChange={setIsDesignModalOpen}
                 onAdd={(values) => console.log("Added design:", values)}
-            />
+            /> */}
         </div>
     )
 }

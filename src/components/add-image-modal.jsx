@@ -33,6 +33,7 @@ export function AddImageModal({
         fabricOptions: [],
         userOptions: [],
         yarnOptions: [],
+        sequencesOptions: [],
         selectedData: null
     })
 
@@ -41,6 +42,7 @@ export function AddImageModal({
     const isDesign = title === "Design"
     const isFabric = title === "Fabric"
     const isYarn = title === "Yarn"
+    const isSequences = title === "Sequences"
 
     /* ---------------- FETCH USERS ---------------- */
     const { mutate: GetUser, isPending: GetUserPending } = usePost(
@@ -65,7 +67,6 @@ export function AddImageModal({
         API_LIST_AUTH.StockFabric.get,
         {
             onSuccess: (res) => {
-                console.log('res', res)
                 if (res.success && res.data) {
                     const formattedFabrics = res.data.map((item) => ({
                         value: item.id.toString(),
@@ -95,6 +96,23 @@ export function AddImageModal({
         }
     )
 
+    /* ---------------- FETCH Sequence ---------------- */
+    const { mutate: GetSequence, isPending: GetSequencePending } = usePost(
+        API_LIST_AUTH.StockSequence.get,
+        {
+            onSuccess: (res) => {
+                if (res.success && res.data) {
+                    const formattedYarns = res.data.map((item) => ({
+                        value: item.id.toString(),
+                        label: item.yarn_name || item.name || `Sequence ${item.id}`,
+                        rawData: item
+                    }))
+                    StateUpdate({ sequencesOptions: formattedYarns }, setData)
+                }
+            }
+        }
+    )
+
     React.useEffect(() => {
         if (open) {
             if (isSketches || isDesign) {
@@ -105,6 +123,9 @@ export function AddImageModal({
             }
             if (isYarn) {
                 GetYarn()
+            }
+            if (isSequences) {
+                GetSequence()
             }
         }
     }, [open, isSketches, isDesign, isFabric, isYarn])
@@ -137,6 +158,14 @@ export function AddImageModal({
                 note: Yup.string().optional(),
             })
         }
+        if (isSequences) {
+            return Yup.object().shape({
+                sequence_stock_id: Yup.string().required("Please select a sequence"),
+                sequence_cd: Yup.string()
+                    .required("Sequence CD is required")
+                    .min(3, "Sequence CD must be at least 3 characters"),
+            })
+        }
         return Yup.object().shape({
             user_id: Yup.string().required("Please select who to assign to"),
             note: Yup.string().optional(),
@@ -154,25 +183,26 @@ export function AddImageModal({
         <CommonModal
             open={open}
             onOpenChange={handleOpenChange}
-            title={isFabric ? null : title}
+            title={isFabric || isYarn || isSequences ? null : title}
             className={cn(
                 "sm:max-w-[550px]",
-                isFabric && "sm:max-w-[650px]"
+                (isFabric || isYarn || isSequences) && "sm:max-w-[650px]"
             )}
             containerClassName={cn(
-                !isFabric && "px-4 sm:px-6 py-10 sm:py-10 lg:pt-18 lg:pb-12",
-                isFabric && "px-4 sm:px-6 py-0! sm:pb-10!"
+                !isFabric && !isYarn && !isSequences && "px-4 sm:px-6 py-10 sm:py-10 lg:pt-18 lg:pb-12",
+                (isFabric || isYarn || isSequences) && "px-4 sm:px-6 py-0! sm:pb-10!"
             )}
             contentClassName={cn(
-                isFabric && "border-none "
+                (isFabric || isYarn || isSequences
+                ) && "border-none "
             )}
-            IsClose={!isFabric}
+            IsClose={!isFabric && !isYarn && !isSequences}
         >
             <div className={clsx(
                 "rounded-[20px] overflow-hidden flex flex-col  overflow-y-auto max-h-[80vh] ",
             )}>
                 {/* Header Actions - Hidden in Edit Mode */}
-                {isFabric &&
+                {(isFabric || isYarn || isSequences) &&
                     <div className="w-full  py-4 flex flex-col items-end">
                         <Button
                             type="button"
@@ -190,22 +220,19 @@ export function AddImageModal({
                                 variant="ghost"
                                 className="h-9 px-6 bg-[#dcccbd] hover:bg-[#dcccbd]/90 text-primary-foreground rounded-md text-[14px] font-semibold"
                             >
-                                + Add Fabric
+                                Add {isSequences ? "Sequences" : isFabric ? "Fabric" : "Yarn"}
                             </Button>
-
                         </div>
-
-
                     </div>
                 }
                 <div className={cn(
-                    isFabric && "px-5"
+                    (isFabric || isYarn || isSequences) && "px-5"
                 )}>
 
                     <div className={cn(
-                        isFabric && 'rounded-[20px] border-2 border-[#dcccbd] overflow-hidden'
+                        (isFabric || isYarn || isSequences) && 'rounded-[20px] border-2 border-[#dcccbd] overflow-hidden'
                     )}>
-                        {isFabric && <div className={cn(
+                        {(isFabric || isYarn || isSequences) && <div className={cn(
                             "text-[20px] p-2.5  font-semibold text-center font-sans tracking-wide text-primary-foreground bg-[#F8F5F2] border-b-2 border-[#dcccbd]  ",
                             !title && "sr-only",
 
@@ -226,6 +253,10 @@ export function AddImageModal({
                                 if (isYarn) {
                                     values.yarn_stock_id = ""
                                     values.yarn_num_cons = ""
+                                }
+                                if (isSequences) {
+                                    values.sequence_stock_id = ""
+                                    values.sequence_cd = ""
                                 }
                                 return values
                             }, [isInspirations, isDesign, isSketches, isFabric])}
@@ -292,7 +323,7 @@ export function AddImageModal({
                                             </div>
                                         )}
 
-                                        {/* Yarn */}
+                                        {/* Yarn Select */}
                                         {isYarn && (
                                             <div className="space-y-1.5">
                                                 <label className="text-[16px] font-medium block">
@@ -316,6 +347,30 @@ export function AddImageModal({
                                             </div>
                                         )}
 
+                                        {/* Sequences Select */}
+                                        {isSequences && (
+                                            <div className="space-y-1.5">
+                                                <label className="text-[16px] font-medium block">
+                                                    Sequence <span className="text-[#ff6b6b]">*</span>
+                                                </label>
+                                                <FormSelect
+                                                    name="sequence_stock_id"
+                                                    runForm={runForm}
+                                                    options={data.sequencesOptions}
+                                                    placeholder="Select Sequence"
+                                                    isSearch
+                                                    isLoading={GetSequencePending}
+                                                    triggerClassName="h-[45px]!"
+                                                    onChange={(val) => {
+                                                        const selected = data.sequencesOptions.find(opt => opt.value === val)
+                                                        if (selected) {
+                                                            StateUpdate({ selectedData: selected.rawData }, setData)
+                                                        }
+                                                    }}
+                                                />
+                                            </div>
+                                        )}
+
                                         {/* Fabric Meter */}
                                         {isYarn && (
                                             <div className="space-y-1.5">
@@ -326,6 +381,20 @@ export function AddImageModal({
                                                     name="yarn_num_cons"
                                                     type="number"
                                                     placeholder="Yarn num cons"
+                                                    runForm={runForm}
+                                                    className="h-[45px]"
+                                                />
+                                            </div>
+                                        )}
+                                        {isSequences && (
+                                            <div className="space-y-1.5">
+                                                <label className="text-[16px] font-medium block">
+                                                    sequence CD <span className="text-[#ff6b6b]">*</span>
+                                                </label>
+                                                <Input
+                                                    name="sequence_cd"
+                                                    type="number"
+                                                    placeholder="sequence CD"
                                                     runForm={runForm}
                                                     className="h-[45px]"
                                                 />
@@ -415,13 +484,40 @@ export function AddImageModal({
                 </div>
             </div>
 
-            {data.isFabricModal && <AddFabricModal
-                open={data.isFabricModal}
-                onOpenChange={(isOpen) => StateUpdate({ isFabricModal: isOpen }, setData)}
-                onAdd={(val) => {
-                    console.log('val', val)
-                }}
-            />}
+            {data.isFabricModal &&
+                <AddFabricModal
+                    isFabric={isFabric}
+                    isSequences={isSequences}
+                    open={data.isFabricModal}
+                    onOpenChange={(isOpen) => StateUpdate({ isFabricModal: isOpen }, setData)}
+                    onAdd={(val) => {
+                        if (isFabric) {
+                            const fabricData = {
+                                value: val.id.toString(),
+                                label: val.fabric_name || val.name || `Fabric ${val.id}`,
+                                rawData: val
+                            }
+                            StateUpdate({ fabricOptions: [...data.fabricOptions, fabricData] }, setData)
+                        }
+                        if (isYarn) {
+                            const yarnData = {
+                                value: val.id.toString(),
+                                label: val.yarn_name || val.name || `Yarn ${val.id}`,
+                                rawData: val
+                            }
+                            StateUpdate({ yarnOptions: [...data.yarnOptions, yarnData] }, setData)
+                        }
+                        if (isSequences) {
+                            const sequencesData = {
+                                value: val.id.toString(),
+                                label: val.sequence_name || val.name || `Sequence ${val.id}`,
+                                rawData: val
+                            }
+                            StateUpdate({ sequencesOptions: [...data.sequencesOptions, sequencesData] }, setData)
+                        }
+                    }
+                    }
+                />}
         </CommonModal>
     )
 }

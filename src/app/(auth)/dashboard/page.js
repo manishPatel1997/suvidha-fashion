@@ -12,7 +12,6 @@ import { usePagination } from "@/hooks/usePagination";
 import { CommonPagination } from "@/components/CommonPagination";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useDebounce } from "use-debounce";
-import { toast } from "sonner";
 
 
 
@@ -23,8 +22,16 @@ function DashboardContent() {
 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [designList, setDesignList] = React.useState([]);
-  const [search, setSearch] = React.useState(searchParams.get("search") || "");
-  const [category, setCategory] = React.useState(searchParams.get("category") || "concept");
+  // const [search, setSearch] = React.useState(searchParams.get("search") || "");
+  // const [category, setCategory] = React.useState(searchParams.get("category") || "concept");
+
+  const initialPage = parseInt(searchParams.get("page")) || 1;
+  const initialLimit = parseInt(searchParams.get("limit")) || 10;
+  const initialSearch = searchParams.get("search") || "";
+  const initialCategory = searchParams.get("category") || "concept";
+
+  const [search, setSearch] = React.useState(initialSearch);
+  const [category, setCategory] = React.useState(initialCategory);
   const [debouncedSearch] = useDebounce(search, 500);
 
   const {
@@ -34,25 +41,32 @@ function DashboardContent() {
     setCurrentPage,
     limit,
     setLimit,
-  } = usePagination(parseInt(searchParams.get("limit")) || 10);
+  } = usePagination(initialLimit);
 
-  // Initial sync from URL
   React.useEffect(() => {
-    const page = parseInt(searchParams.get("page")) || 1;
-    if (page !== currentPage) setCurrentPage(page);
+    setCurrentPage(initialPage);
   }, []);
 
-  // Update URL when states change
+  // // Initial sync from URL
+  // React.useEffect(() => {
+  //   const page = parseInt(searchParams.get("page")) || 1;
+  //   if (page !== currentPage) setCurrentPage(page);
+  // }, []);
+
+
   React.useEffect(() => {
     const params = new URLSearchParams();
+
     if (currentPage > 1) params.set("page", currentPage.toString());
     if (limit !== 10) params.set("limit", limit.toString());
     if (debouncedSearch) params.set("search", debouncedSearch);
-    if (category && category !== "concept") params.set("category", category);
+    if (category !== "concept") params.set("category", category);
 
     const queryString = params.toString();
-    router.push(queryString ? `?${queryString}` : pathname, { scroll: false });
-  }, [currentPage, limit, debouncedSearch, category, pathname, router]);
+    const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
+
+    router.replace(newUrl, { scroll: false });
+  }, [currentPage, limit, debouncedSearch, category]);
 
   const { mutate: getDesigns, isPending } = usePost('/api/v1/design/list', {
     onSuccess: (data) => {
@@ -81,23 +95,11 @@ function DashboardContent() {
 
   React.useEffect(() => {
     getDesigns({ page: currentPage, limit: limit, search: debouncedSearch, category: category });
-    // getDesigns({ page: currentPage, limit: limit, search: debouncedSearch, category: category });
   }, [currentPage, limit, debouncedSearch, category]);
 
-  const { mutate: createDesign, isPending: isAdding } = usePost('/api/v1/design/create', {
-    isFormData: true,
-    onSuccess: (data) => {
-      toast.success("Design added successfully");
-      getDesigns({ page: currentPage, limit: limit, search: debouncedSearch, category: category });
-      setIsModalOpen(false);
-    },
-    onError: (error) => {
-      toast.error(error.message || "Failed to add design");
-    }
-  });
-
-  const handleAddDesign = (values) => {
-    createDesign(values);
+  const handleAddDesign = () => {
+    getDesigns({ page: currentPage, limit: limit, search: debouncedSearch, category: category });
+    setIsModalOpen(false);
   };
 
   return (

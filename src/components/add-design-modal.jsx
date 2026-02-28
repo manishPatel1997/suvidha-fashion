@@ -37,6 +37,9 @@ import { FileInput } from "@/components/ui/file-input"
 import { FormSelect } from "@/components/ui/form-select"
 import { FormDatePicker } from "@/components/ui/form-date-picker"
 import { imageValidation, ImgAcceptType } from "@/lib/validation"
+import { toast } from "sonner"
+import { usePost } from "@/hooks/useApi"
+import { API_LIST_AUTH } from "@/hooks/api-list"
 
 const today = new Date();
 today.setHours(0, 0, 0, 0);
@@ -73,16 +76,25 @@ export function AddDesignModal({ open, onOpenChange, onAdd }) {
     },
     validationSchema,
     onSubmit: (values) => {
-      if (onAdd) onAdd(values)
-      formik.resetForm()
+      createDesign(values)
     },
   })
 
+  const { mutate: createDesign, isPending: isAdding } = usePost(API_LIST_AUTH.Design.create, {
+    isFormData: true,
+    onSuccess: (data) => {
+      toast.success("Design added successfully");
+      formik.resetForm()
+      onAdd()
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to add design");
+    }
+  });
+
+
   const handleOpenChange = (isOpen) => {
     onOpenChange(isOpen)
-    if (!isOpen) {
-      formik.resetForm()
-    }
   }
 
   const categoryOptions = [
@@ -188,10 +200,11 @@ export function AddDesignModal({ open, onOpenChange, onAdd }) {
 
         <div className=" px-6 py-3 md:px-[36px] md:py-[20px] flex justify-end">
           <Button
+            disabled={isAdding}
             type="submit"
             className="bg-[#dcccbd] hover:bg-[#dcccbd]/90 text-primary-foreground h-11.25 px-8 rounded-md font-semibold text-[16px]"
           >
-            Add
+            {isAdding ? "Adding..." : "Add"}
           </Button>
         </div>
       </form>

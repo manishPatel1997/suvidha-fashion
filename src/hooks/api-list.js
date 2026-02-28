@@ -1,4 +1,7 @@
 export const API_LIST_AUTH = {
+    Design: {
+        create: "/api/v1/design/create",
+    },
     Inspirations: {
         status: "/api/v1/design/inspiration/status",
         target: "/api/v1/design/inspiration/target",
@@ -19,7 +22,7 @@ export const API_LIST_AUTH = {
         get: "/api/v1/design/visual_designers/get",
         assign: '/api/v1/design/visual_designers/assign',
         assignView: '/api/v1/design/visual_designers/assign/view',
-        assignUpadte: '/api/v1/design/visual_designers/assign/update',
+        assignUpdate: '/api/v1/design/visual_designers/assign/update',
         assignDelete: '/api/v1/design/visual_designers/assign/delete',
         assignStatus: '/api/v1/design/visual_designers/assign/status',
         target: '/api/v1/design/visual_designers/target',
@@ -28,7 +31,7 @@ export const API_LIST_AUTH = {
         get: '/api/v1/design/fabric/get',
         assign: "/api/v1/design/fabric/assign",
         assignView: '/api/v1/design/fabric/assign/view',
-        assignUpadte: "/api/v1/design/fabric/assign/update",
+        assignUpdate: "/api/v1/design/fabric/assign/update",
         assignDelete: "/api/v1/design/fabric/assign/delete",
         assignStatus: "/api/v1/design/fabric/assign/status",
         target: '/api/v1/design/fabric/target',
@@ -44,12 +47,16 @@ export const API_LIST_AUTH = {
     StockYarn: {
         get: "/api/v1/stock/yarn/get"
     },
+    StockSequence: {
+        get: "/api/v1/stock/sequence/get"
+    },
     Yarn: {
         get: "/api/v1/design/yarn/get",
         assign: "/api/v1/design/yarn/assign",
-        assignUpadte: "/api/v1/design/yarn/assign/update",
+        assignUpdate: "/api/v1/design/yarn/assign/update",
         assignDelete: "/api/v1/design/yarn/assign/delete",
         assignStatus: "/api/v1/design/yarn/assign/status",
+        assignView: "/api/v1/design/yarn/assign/view",
 
         target: "/api/v1/design/yarn/target",
         create: "/api/v1/stock/yarn/create",
@@ -64,6 +71,19 @@ export const API_LIST_AUTH = {
         assignDelete: "/api/v1/design/sequences/assign/delete",
         assignStatus: "/api/v1/design/sequences/assign/status",
         target: "/api/v1/design/sequences/target",
+
+        create: "/api/v1/stock/sequence/create",
+        update: "/api/v1/stock/sequence/update",
+        delete: "/api/v1/stock/sequence/delete",
+    },
+    Sample: {
+        get: "/api/v1/design/samples/get",
+        assign: "/api/v1/design/samples/assigns",
+        assignDelete: "/api/v1/design/samples/assigns/delete",
+        assignStatus: "/api/v1/design/samples/status",
+        // assignUpdate:"/api/v1/design/samples/assign/update",
+        assignView: "/api/v1/design/samples/assigns/view",
+        target: "/api/v1/design/samples/target",
     },
 
     setting: "/api/v1/common/setting",

@@ -79,7 +79,7 @@ export function DesignViewModalImage({
         }
     }
 
-    const { mutate: updateDesign, isPending: IsDesign } = usePost(API_LIST_AUTH.VisualDesigners.assignUpadte, {
+    const { mutate: updateDesign, isPending: IsDesign } = usePost(API_LIST_AUTH.VisualDesigners.assignUpdate, {
         isFormData: true,
         onSuccess: (res) => {
             if (res.success) {
