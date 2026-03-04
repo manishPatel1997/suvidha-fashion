@@ -8,6 +8,7 @@ import { StateUpdate } from "@/lib/helper";
 import { usePost } from "@/hooks/useApi";
 import { API_LIST_AUTH } from "@/hooks/api-list";
 import dynamic from "next/dynamic";
+import usePreProductionStore from "@/store/preProductionStore";
 const AddDetailsModal = dynamic(() =>
   import("@/components/add-details-modal").then((mod) => mod.AddDetailsModal)
 )
@@ -28,6 +29,8 @@ export function SampleWorkflowCard({
   title = "6. Sample",
   PreData,
 }) {
+  const { getFabricAssignData } = usePreProductionStore()
+  const fabricAssignData = getFabricAssignData()
   const modalTitle = `${title} Target`
   const [data, setData] = React.useState({
     status: PreData?.sampleData?.status || "",
@@ -38,13 +41,11 @@ export function SampleWorkflowCard({
     progress: (PreData?.sampleData?.assigns.length / PreData?.sampleData?.sample_target) * 100,
   })
   const [clickedAction, setClickedAction] = React.useState(null)
-
   const [openModal, setOpenModal] = React.useState({
     isEditModalOpen: false,
     isDetailsModalOpen: false,
     selectData: null
   })
-
   React.useEffect(() => {
     if (PreData?.sampleData) {
       StateUpdate({
@@ -53,7 +54,7 @@ export function SampleWorkflowCard({
         assign: PreData?.sampleData?.assigns || [],
         sample_target: PreData?.sampleData?.sample_target || 0,
         note: PreData?.sampleData?.note || "",
-        progress: (PreData?.sampleData?.assigns.length / PreData?.sampleData?.sample_target) * 100,
+        progress: PreData?.sampleData?.sample_target !== 0 ? (PreData?.sampleData?.assigns?.length / PreData?.sampleData?.sample_target) * 100 : 0,
       }, setData)
     }
   }, [PreData?.sampleData])
@@ -134,7 +135,7 @@ export function SampleWorkflowCard({
                   <h3 className="text-[18px] font-semibold text-primary-foreground font-sans">
                     {title}
                   </h3>
-                  <span className=" group-data-[state=open]:hidden">{Math.round(data.progress)}%</span>
+                  <span className=" group-data-[state=open]:hidden">{data?.progress ? Math.round(data.progress) : 0}%</span>
                 </div>
 
                 <div className="relative w-full lg:w-[80%] h-2 bg-[#F0F0F0] rounded-full overflow-hidden  group-data-[state=open]:hidden">
@@ -152,14 +153,16 @@ export function SampleWorkflowCard({
 
           </AccordionTrigger>
           <div className="absolute right-14 top-[50%] -translate-y-1/2 flex items-center space-x-2 z-10 group-data-[state=closed]:hidden">
-            {data.IsBlur && <Button
-              variant="outline"
-              size="xs"
-              onClick={() => StateUpdate({ isEditModalOpen: true }, setOpenModal)}
-              className="h-7 px-4 py-0 border-[#dcccbd] bg-[#7DAA7B] text-[14px] font-medium text-white rounded-md hover:bg-[#5d8d5b]"
-            >
-              Start
-            </Button>}
+            {data.IsBlur &&
+              <Button
+                variant="outline"
+                size="xs"
+                onClick={() => StateUpdate({ isEditModalOpen: true }, setOpenModal)}
+                className="h-7 px-4 py-0 border-[#dcccbd] bg-[#7DAA7B] text-[14px] font-medium text-white rounded-md hover:bg-[#5d8d5b]"
+              >
+                Start
+              </Button>
+            }
             {!data.IsBlur && data.status !== "completed" && data.status !== "skipped" && <Button
               variant="outline"
               size="xs"
@@ -203,7 +206,7 @@ export function SampleWorkflowCard({
           <div className="border-b border-[#dcccbd]"></div>
           {/* Sample Rows */}
           <div className="space-y-4 p-6 pt-6">
-            {PreData?.fabricData?.fabrics?.map((row) => {
+            {fabricAssignData?.map((row) => {
               const filteredAssign =
                 data?.assign?.filter(
                   (item) => item.fabric_assign_id === row.id
@@ -258,20 +261,22 @@ export function SampleWorkflowCard({
                     })}
                   </div>
 
-                  {totalSampleMeter < row.fabric_meter && !data.IsBlur && data.status !== "completed" && data.status !== "skipped" && <div className="flex justify-start lg:justify-end items-start">
-                    <Button
-                      variant="outline"
-                      onClick={() =>
-                        StateUpdate(
-                          { isDetailsModalOpen: true, selectData: row },
-                          setOpenModal
-                        )
-                      }
-                      className="h-[28px] w-fit bg-transparent border border-[#000000] text-[#1A1A1A] rounded-md shadow-none text-sm font-semibold px-3.5 cursor-pointer"
-                    >
-                      + Add
-                    </Button>
-                  </div>}
+                  {totalSampleMeter < row.fabric_meter && !data.IsBlur && data.status !== "completed" && data.status !== "skipped" &&
+                    <div className="flex justify-start lg:justify-end items-start">
+                      <Button
+                        variant="outline"
+                        onClick={() =>
+                          StateUpdate(
+                            { isDetailsModalOpen: true, selectData: row },
+                            setOpenModal
+                          )
+                        }
+                        className="h-[28px] w-fit bg-transparent border border-[#000000] text-[#1A1A1A] rounded-md shadow-none text-sm font-semibold px-3.5 cursor-pointer"
+                      >
+                        + Add
+                      </Button>
+                    </div>
+                  }
                 </div>
               )
             })}

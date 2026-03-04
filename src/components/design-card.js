@@ -97,13 +97,13 @@ export function DesignCard({
           </div>
           <div className="flex-1 min-w-fit flex flex-wrap items-center justify-between gap-y-4">
             <InfoFun label="Category" value={category} className="shrink-0" />
-            <div className="w-px h-[35px] shrink-0 bg-[#dcccbd]" />
+            <div className="w-px h-[50px] shrink-0 bg-[#dcccbd]" />
             <InfoFun label="Start Date" value={startDate} className="shrink-0" />
-            <div className="w-px h-[35px] shrink-0 bg-[#dcccbd]" />
+            <div className="w-px h-[50px] shrink-0 bg-[#dcccbd]" />
             <InfoFun label="Finish Date" value={finishDate} className="shrink-0" />
-            <div className="w-px h-[35px] shrink-0 bg-[#dcccbd]" />
+            <div className="w-px h-[50px] shrink-0 bg-[#dcccbd]" />
             <InfoFun label="Target Date" value={targetDate} className="shrink-0" />
-            <div className="w-px h-[35px] shrink-0 bg-[#dcccbd]" />
+            <div className="w-px h-[50px] shrink-0 bg-[#dcccbd]" />
             <div className="flex items-center gap-10 pl-4 shrink-0">
               <InfoFun className="space-y-[10px] px-0" label="Status" value={status} />
               <Link href={`pre-production/${id}${backUrl}`} className="w-[30px] h-[30px] flex items-center justify-center rounded-[5px] border border-[#dcccbd] text-primary-foreground hover:bg-sidebar-accent transition-colors shrink-0">

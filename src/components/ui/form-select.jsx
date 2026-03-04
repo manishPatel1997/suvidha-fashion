@@ -94,6 +94,7 @@ function FormSelect({
                             ? "h-12 w-full rounded-md border border-muted-foreground bg-transparent px-3 pb-1 text-[16px] text-[#1A1A1A] focus:outline-none focus:ring-1 focus:ring-muted-foreground outline-none!"
                             : "h-11.25! px-4 py-1 border-muted-foreground rounded-md text-muted-foreground text-[14px] w-full bg-white",
                         readOnly && "pointer-events-none select-none",
+                        'text-[16px]',
                         triggerClassName
                     )}
                 >

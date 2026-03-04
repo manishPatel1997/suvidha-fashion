@@ -22,7 +22,8 @@ export function FloatingTextarea({
           isFloating ? "pb-1 pt-6" : "py-3",
           "focus-visible:ring-0 focus-visible:border-primary",
           "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
-          "read-only:focus:ring-0 read-only:border-[#dcccbd] read-only:cursor-default",
+          "read-only:focus:ring-0  read-only:cursor-default",
+          // "read-only:focus:ring-0 read-only:border-[#dcccbd] read-only:cursor-default",
           className,
         )}
         placeholder={isFloating ? " " : label || props.placeholder}

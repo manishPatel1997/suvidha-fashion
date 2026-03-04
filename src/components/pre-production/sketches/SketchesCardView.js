@@ -27,6 +27,7 @@ import { DesignViewModalImage } from "./DesignViewModalImage"
 import { FabricViewModalImage } from "../FabricViewModalImage"
 import { YarnViewModalImage } from "../YarnViewModalImage"
 import { toast } from "sonner"
+import usePreProductionStore from "@/store/preProductionStore"
 
 const SketchesViewImage = dynamic(() =>
     import("@/components/pre-production/sketches/SketchesViewModal").then((mod) => mod.SketchesViewImage)
@@ -81,7 +82,7 @@ export function SketchesCardView({
     defaultOpen = false,
     getVisualDesignersData
 }) {
-    // console.log('sketchesData', sketchesData)
+    const { setFabricAssignData, setYarnAssignData, setSequenceAssignData } = usePreProductionStore()
     const titleName = title.split('.').pop()?.trim() || title
     const modalTitle = `${titleName} Target`
     const config = titleName === "Sequences" ? STEP_CONFIG.Sequences : titleName === "Fabric" ? STEP_CONFIG.Fabric : STEP_CONFIG[titleName] || STEP_CONFIG.Sketches
@@ -302,8 +303,20 @@ export function SketchesCardView({
             toast.error(error.message || "Something went wrong")
         }
     })
+
     const { mutate: updateStatus, isPending: isUpdatingStatus } = usePost(config.assignStatus, {
         onSuccess: (res, variables) => {
+            if (variables.status === "completed") {
+                if (titleName === "Fabric") {
+                    setFabricAssignData(data.assign)
+                }
+                if (titleName === "Yarn") {
+                    setYarnAssignData(data.assign)
+                }
+                if (titleName === "Sequences") {
+                    setSequenceAssignData(data.assign)
+                }
+            }
             setClickedAction(null)
             if (res.success) {
                 StateUpdate({ IsBlur: false, status: variables.status }, setData)

@@ -135,7 +135,8 @@ function FormColorPicker({
             <div
                 onClick={() => !readOnly && inputRef.current?.click()}
                 className={cn(
-                    "flex items-center gap-3 border border-muted-foreground rounded-md px-4 bg-white transition-colors min-h-[45px]",
+                    "flex items-center gap-3 border border-muted-foreground rounded-md px-4  transition-colors min-h-[45px]",
+                    // "flex items-center gap-3 border border-muted-foreground rounded-md px-4 bg-white transition-colors min-h-[45px]",
                     isFloating ? "pt-6 pb-1" : "py-0",
                     readOnly
                         ? "cursor-default select-none"

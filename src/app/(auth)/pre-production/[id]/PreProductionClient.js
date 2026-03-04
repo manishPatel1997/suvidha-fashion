@@ -8,6 +8,7 @@ import { InspirationsCardView } from '@/components/pre-production/inspirations/I
 import { API_LIST_AUTH } from '@/hooks/api-list'
 import { SketchesCardView } from '@/components/pre-production/sketches/SketchesCardView'
 import PageHeader from '@/components/PageHeader'
+import usePreProductionStore from '@/store/preProductionStore'
 
 export function PreProductionClient({ id, inspirationData = null, sketchesData = null, visualDesignersData = null, fabricData = null, yarnData = null, sequencesData = null, sampleData = null }) {
     const [PreData, setPreData] = useState({
@@ -19,6 +20,8 @@ export function PreProductionClient({ id, inspirationData = null, sketchesData =
         sequencesData: sequencesData,
         sampleData: sampleData,
     })
+
+    const { setFabricAssignData, setYarnAssignData, setSequenceAssignData } = usePreProductionStore()
 
     useEffect(() => {
         // Only update if the props are different from what we've already stored
@@ -32,6 +35,8 @@ export function PreProductionClient({ id, inspirationData = null, sketchesData =
             PreData.sequencesData !== sequencesData ||
             PreData.sampleData !== sampleData
         ) {
+
+
             setPreData({
                 inspirationData: inspirationData,
                 sketchesData: sketchesData,
@@ -44,16 +49,35 @@ export function PreProductionClient({ id, inspirationData = null, sketchesData =
         }
     }, [inspirationData, sketchesData, visualDesignersData, fabricData, yarnData, sequencesData, sampleData])
 
+    useEffect(() => {
+        if (fabricData) {
+            setFabricAssignData(fabricData.fabrics)
+        }
+        if (yarnData) {
+            setYarnAssignData(yarnData.yarns)
+        }
+        if (sequencesData) {
+            setSequenceAssignData(sequencesData.sequences)
+        }
+    }, [fabricData, yarnData, sequencesData])
+
     const designId = inspirationData?.design_slug_id
 
-    const useFetchAndStore = (api, stateKey) => {
+    const useFetchAndStore = (api, stateKey, extraOnSuccess) => {
         return usePost(api, {
             onSuccess: (res) => {
                 if (res?.success) {
+                    const data = res?.data || null;
+
                     StateUpdate(
-                        { [stateKey]: res?.data || null },
+                        { [stateKey]: data },
                         setPreData
                     );
+
+                    // 🔥 extra custom logic
+                    if (extraOnSuccess) {
+                        extraOnSuccess(data);
+                    }
                 }
             },
             onError: (error) => {
@@ -75,7 +99,10 @@ export function PreProductionClient({ id, inspirationData = null, sketchesData =
 
     const { mutate: getFabricData } = useFetchAndStore(
         API_LIST_AUTH.Fabric.get,
-        "fabricData"
+        "fabricData",
+        (data) => {
+            setFabricAssignData(data?.fabrics || []);
+        }
     );
 
     const { mutate: getYarnData } = useFetchAndStore(
@@ -92,6 +119,11 @@ export function PreProductionClient({ id, inspirationData = null, sketchesData =
         API_LIST_AUTH.Sample.get,
         "sampleData"
     );
+
+    const getFabricAndSampleData = (payload) => {
+        getFabricData(payload);
+        getSampleData(payload);
+    };
 
 
     return (
@@ -158,7 +190,7 @@ export function PreProductionClient({ id, inspirationData = null, sketchesData =
                 <SketchesCardView
                     title="6. Sequences"
                     sketchesData={PreData.sequencesData}
-                    getVisualDesignersData={getSampleData}
+                    getVisualDesignersData={getFabricAndSampleData}
                 />
             }
             {PreData.sampleData &&

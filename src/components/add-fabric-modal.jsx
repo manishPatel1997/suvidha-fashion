@@ -65,7 +65,6 @@ export function AddFabricModal({
     onOpenChange,
     onAdd,
     // title = "Add Fabric",
-    isLoading = false,
     initialData = null,
     isFabric = false,
     isSequences = false
@@ -199,7 +198,9 @@ export function AddFabricModal({
         if (!isFabric && !isSequences) {
             return Yup.object().shape({
                 ...commonFields,
-                [config.meterKey]: Yup.string().required("Num cons is required"),
+                [config.meterKey]: Yup.string()
+                    .min(3, "Minimum 3 characters required")
+                    .required("Num cons is required"),
                 [config.qualityKey]: Yup.string().required("Sub quality is required"),
             })
         }
@@ -468,14 +469,14 @@ export function AddFabricModal({
                                 </div>
                             </div>
 
-                            {!isSequences &&
+                            {/* {!isSequences && !isFabric &&
                                 <FormColorPicker
                                     name={config.colorKey}
                                     label="Color"
                                     runForm={runForm}
                                     placeholder="Pick a color"
                                 />
-                            }
+                            } */}
 
                             <div className="space-y-1.5 mt-6">
                                 <label className="text-[14px] font-medium text-primary-foreground block">

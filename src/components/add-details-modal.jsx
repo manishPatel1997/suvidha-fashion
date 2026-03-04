@@ -11,6 +11,8 @@ import { FormColorPicker } from "@/components/ui/form-color-picker"
 import { StateUpdate } from "@/lib/helper"
 import { API_LIST_AUTH } from "@/hooks/api-list"
 import { usePost } from "@/hooks/useApi"
+import { toast } from "sonner"
+import usePreProductionStore from "@/store/preProductionStore"
 
 const validationSchema = Yup.object().shape({
     mainQuantity: Yup.number().optional().nullable(),
@@ -45,34 +47,35 @@ const validationSchema = Yup.object().shape({
     }
 )
 export function AddDetailsModal({ open, onOpenChange, onAdd, selectData, PreData, assign }) {
+    const { getYarnAssignData, getSequenceAssignData } = usePreProductionStore()
     const [data, setData] = React.useState({
         yarnOption: [],
         sequenceOption: []
     })
-
     React.useEffect(() => {
-        const formattedSequence = PreData?.sequencesData?.sequences?.map((item) => ({
+        const sequencesAssignData = getSequenceAssignData()
+        const yarnAssignData = getYarnAssignData()
+        const formattedSequence = sequencesAssignData?.map((item) => ({
             value: item.id.toString(),
             label: item.sequence_name || item.name || `Sequence ${item.id}`,
             rawData: item
         }))
-        const formattedYarn = PreData?.yarnData?.yarns?.map((item) => ({
+        const formattedYarn = yarnAssignData?.map((item) => ({
             value: item.id.toString(),
             label: item.yarn_name || item.name || `Yarn ${item.id}`,
             rawData: item
         }))
         StateUpdate({ yarnOption: formattedYarn, sequenceOption: formattedSequence }, setData)
-    }, [PreData])
-
+    }, [])
 
     const { mutate: addDetails, isPending } = usePost(API_LIST_AUTH.Sample.assign, {
-        onSuccess: (res, variables) => {
+        onSuccess: (res) => {
             if (res.success) {
                 onAdd(res.data)
             }
         },
         onError: (error) => {
-            console.error("Error updating target:", error)
+            toast.error(error?.message || "Something went wrong.");
         }
     })
     const formik = useFormik({
@@ -101,6 +104,9 @@ export function AddDetailsModal({ open, onOpenChange, onAdd, selectData, PreData
             dataVal.sample_id = PreData?.sampleData?.id?.toString()
             dataVal.fabric_assign_id = selectData?.id?.toString()
             addDetails(dataVal)
+        },
+        onError: (error) => {
+            toast.error(error?.message || 'Login failed. Please try again.')
         },
     })
 
