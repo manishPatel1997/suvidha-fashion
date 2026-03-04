@@ -182,93 +182,11 @@ export function SketchesCardView({
     })
 
     const { mutate: assignTo, isPending: isAssignTo } = usePost(config.assign, {
-        // onSuccess: (res) => {
-        //     if (res.success) {
-        //         if (titleName === "Fabric") {
-        //             // {
-        //             //     "success": true,
-        //             //     "code": null,
-        //             //     "message": "Success",
-        //             //     "data": {
-        //             //         "fabric_id": "2",
-        //             //         "fabric_meter": "444",
-        //             //         "fabric_stock_id": "1",
-        //             //         "note": "test 444",
-        //             //         "id": 4,
-        //             //         "fabric_name": "test123456789",
-        //             //         "fabric_image": "/upload/fabrics/Group-1-1771865513783-730084220.png"
-        //             //     }
-        //             // }
-
-        //             const UpadetData = [...data.assign, res.data]
-        //             StateUpdate({
-        //                 assign: UpadetData,
-        //                 progress: (UpadetData.length / Number(data[config.targetKey])) * 100,
-        //                 IsBlur: false,
-        //                 status: "running"
-        //             }, setData)
-        //             StateUpdate({ isAddImageModalOpen: false }, setOpenModal)
-        //         }
-        //         else if (titleName === "Yarn") {
-        //             const UpadetData = [...data.assign, res.data]
-        //             StateUpdate({
-        //                 assign: UpadetData,
-        //                 progress: (UpadetData.length / Number(data[config.targetKey])) * 100,
-        //                 IsBlur: false,
-        //                 status: "running"
-        //             }, setData)
-        //             StateUpdate({ isAddImageModalOpen: false }, setOpenModal)
-        //             //                     {
-        //             //     "yarn_id": "2",
-        //             //     "yarn_num_cons": "99",
-        //             //     "yarn_stock_id": "1",
-        //             //     "note": "99 add nore",
-        //             //     "id": 2,
-        //             //     "yarn_name": "test123456789",
-        //             //     "yarn_image": "/upload/yarns/Group-1-1771865542775-521619552.png"
-        //             // }
-        //         }
-        //         else if (titleName === "Sequences") {
-        //             const UpadetData = [...data.assign, res.data]
-        //             StateUpdate({
-        //                 assign: UpadetData,
-        //                 progress: (UpadetData.length / Number(data[config.targetKey])) * 100,
-        //                 IsBlur: false,
-        //                 status: "running"
-        //             }, setData)
-        //             StateUpdate({ isAddImageModalOpen: false }, setOpenModal)
-        //         }
-        //         else {
-        //             const assignUserId = Number(res.data.assign_user)
-
-        //             const exists = data.assign.some(
-        //                 item => item.assign_user === assignUserId
-        //             )
-        //             let newImages
-
-        //             if (exists) {
-        //                 // Replace existing item
-        //                 newImages = data.assign.map(item =>
-        //                     item.assign_user === assignUserId ? res.data : item
-        //                 )
-        //             } else {
-        //                 // Add new item
-        //                 newImages = [...data.assign, res.data]
-        //             }
-        //             StateUpdate({
-        //                 assign: newImages,
-        //                 progress: newImages.length === 0 ? 0 : (newImages.length / Number(data[config.targetKey])) * 100
-        //             }, setData)
-        //         }
-        //         StateUpdate({ isAddImageModalOpen: false }, setOpenModal)
-        //     }
-        // },
         onSuccess: (res) => {
             if (!res.success) return
 
             let updatedData
 
-            // 👇 Special case (assign_user replace logic)
             if (!["Fabric", "Yarn", "Sequences"].includes(titleName)) {
 
                 const assignUserId = Number(res.data.assign_user)
@@ -306,16 +224,14 @@ export function SketchesCardView({
 
     const { mutate: updateStatus, isPending: isUpdatingStatus } = usePost(config.assignStatus, {
         onSuccess: (res, variables) => {
-            if (variables.status === "completed") {
-                if (titleName === "Fabric") {
-                    setFabricAssignData(data.assign)
-                }
-                if (titleName === "Yarn") {
-                    setYarnAssignData(data.assign)
-                }
-                if (titleName === "Sequences") {
-                    setSequenceAssignData(data.assign)
-                }
+            if (titleName === "Fabric") {
+                setFabricAssignData(data.assign)
+            }
+            if (titleName === "Yarn") {
+                setYarnAssignData(data.assign)
+            }
+            if (titleName === "Sequences") {
+                setSequenceAssignData(data.assign)
             }
             setClickedAction(null)
             if (res.success) {

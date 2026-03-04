@@ -219,19 +219,6 @@ function DashboardContent() {
               Cutting
             </TabsTrigger>
           </TabsList>
-
-          {/* Content */}
-          {/* <TabsContent value="concept" className="mt-4">
-            Concept content here
-          </TabsContent>
-
-          <TabsContent value="regular" className="mt-4">
-            Regular content here
-          </TabsContent>
-
-          <TabsContent value="cutting" className="mt-4">
-            Cutting content here
-          </TabsContent> */}
         </Tabs>
       </div>
       {/* */}

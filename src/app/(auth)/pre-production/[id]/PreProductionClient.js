@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { SampleWorkflowCard } from '@/components/sample-workflow-card'
+import { SampleWorkflowCard } from '@/components/pre-production/sample-workflow-card'
 import { usePost } from '@/hooks/useApi'
 import { StateUpdate } from '@/lib/helper'
 import { InspirationsCardView } from '@/components/pre-production/inspirations/InspirationsCardView'
@@ -129,12 +129,6 @@ export function PreProductionClient({ id, inspirationData = null, sketchesData =
     return (
         <div className="space-y-8">
             <div className="flex flex-row sm:items-center justify-between gap-4">
-                {/* <Link href="/dashboard">
-                    <h1 className="text-[26px] sm:text-[35px] md:text-[45px] font-serif font-bold text-primary-foreground flex items-center gap-1 sm:gap-3">
-                        <ChevronLeft className="w-[1em] h-[1em] text-primary-foreground" />
-                        <span className='text-nowrap sm:text-normal '>Pre Production</span>
-                    </h1>
-                </Link> */}
                 <PageHeader
                     title="Pre Production"
                     href="/dashboard"
@@ -199,74 +193,6 @@ export function PreProductionClient({ id, inspirationData = null, sketchesData =
                     title="7. Sample"
                 />
             }
-            {/* <WorkflowProgressCard
-                title="2. Sketches"
-                progress={50}
-                currentCount={5}
-                totalCount={20}
-                images={[
-                    "/design-thumb.png",
-                    "/design-thumb.png",
-                    "/design-thumb.png",
-                ]}
-            // IsBlur
-            />
-            <WorkflowProgressCard
-                title="3. Design"
-                progress={50}
-                currentCount={5}
-                totalCount={20}
-                images={[
-                    "/design-thumb.png",
-                    "/design-thumb.png",
-                    "/design-thumb.png",
-                ]}
-            />
-            <WorkflowProgressCard
-                title="4. Fabric"
-                progress={50}
-                currentCount={5}
-                totalCount={20}
-                images={[
-                    "/design-thumb.png",
-                    "/design-thumb.png",
-                    "/design-thumb.png",
-                ]}
-            />
-            <WorkflowProgressCard
-                title="5. Yarn"
-                progress={50}
-                currentCount={5}
-                totalCount={20}
-                images={[
-                    "/design-thumb.png",
-                    "/design-thumb.png",
-                    "/design-thumb.png",
-                ]}
-            />
-            <WorkflowProgressCard
-                title="6. Sequence"
-                progress={50}
-                currentCount={5}
-                totalCount={20}
-                images={[
-                    "/design-thumb.png",
-                    "/design-thumb.png",
-                    "/design-thumb.png",
-                ]}
-            /> */}
-
-            {/* <SampleWorkflowCard
-                title="7. Sample"
-                progress={50}
-                onAddDesign={() => setIsDetailsModalOpen(true)}
-            /> */}
-
-            {/* <AddDesignModal
-                open={isDesignModalOpen}
-                onOpenChange={setIsDesignModalOpen}
-                onAdd={(values) => console.log("Added design:", values)}
-            /> */}
         </div>
     )
 }

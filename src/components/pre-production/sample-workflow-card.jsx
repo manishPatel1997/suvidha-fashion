@@ -3,7 +3,8 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import clsx from "clsx";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./ui/accordion";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import LockBlur from "@/assets/LockBlur";
 import { StateUpdate } from "@/lib/helper";
 import { usePost } from "@/hooks/useApi";
 import { API_LIST_AUTH } from "@/hooks/api-list";
@@ -205,8 +206,11 @@ export function SampleWorkflowCard({
           </div>
           <div className="border-b border-[#dcccbd]"></div>
           {/* Sample Rows */}
-          <div className="space-y-4 p-6 pt-6">
-            {fabricAssignData?.map((row) => {
+          <div className={clsx("space-y-4 p-6 pt-6", data.IsBlur && "relative min-h-[225px]")}>
+            {data.IsBlur && (
+              <LockBlur className="absolute inset-0 h-full z-50 w-full" />
+            )}
+            {!data.IsBlur && fabricAssignData?.map((row) => {
               const filteredAssign =
                 data?.assign?.filter(
                   (item) => item.fabric_assign_id === row.id
@@ -305,20 +309,23 @@ export function SampleWorkflowCard({
         min={data.assign.length > 0 ? data.assign.length : 1}
       />
 
-      {openModal.isDetailsModalOpen && <AddDetailsModal
-        open={openModal.isDetailsModalOpen}
-        onOpenChange={(isOpen) => { StateUpdate({ isDetailsModalOpen: isOpen, selectData: null }, setOpenModal) }}
-        onAdd={(values) => {
-          StateUpdate({
-            assign: [...data.assign, values],
-            progress: (data.assign.length / Number(data.sample_target)) * 100,
-          }, setData)
-          StateUpdate({ isDetailsModalOpen: false, selectData: null }, setOpenModal)
-        }}
-        selectData={openModal.selectData}
-        assign={data?.assign?.filter((item) => item.fabric_assign_id == openModal.selectData?.id).reduce((acc, item) => acc + item.sample_meter, 0)}
-        PreData={PreData}
-      />}
+      {openModal.isDetailsModalOpen &&
+        <AddDetailsModal
+          open={openModal.isDetailsModalOpen}
+          onOpenChange={(isOpen) => { StateUpdate({ isDetailsModalOpen: isOpen, selectData: null }, setOpenModal) }}
+          onAdd={(values) => {
+            const UpdateData = [...data.assign, values]
+            StateUpdate({
+              assign: UpdateData,
+              progress: (UpdateData.length / Number(data.sample_target)) * 100,
+            }, setData)
+            StateUpdate({ isDetailsModalOpen: false, selectData: null }, setOpenModal)
+          }}
+          selectData={openModal.selectData}
+          assign={data?.assign?.filter((item) => item.fabric_assign_id == openModal.selectData?.id).reduce((acc, item) => acc + item.sample_meter, 0)}
+          PreData={PreData}
+        />
+      }
     </Accordion>
   );
 }
