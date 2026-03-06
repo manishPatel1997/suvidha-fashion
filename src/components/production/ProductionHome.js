@@ -1,13 +1,35 @@
 import React from 'react'
-import { Plus } from 'lucide-react'
+import { PlusIcon } from 'lucide-react'
 import clsx from 'clsx'
 import ProductionItemCard from './ProductionItemCard'
+import { AddProductionModal } from '../add-production-modal'
+import { ProductionViewModal } from './ProductionViewModal'
+import { StateUpdate } from '@/lib/helper'
 
 function ProductionHome({
     title = "Sample",
     progress = 50,
-    items = [{}, {}, {}, {}, {}, {}] // Dummy items for demonstration
+    items = [
+        { id: "S-480", status: "Pending", src: "/design-thumb.png" },
+        { id: "S-481", status: "In Process", src: "/design-thumb.png" },
+        { id: "S-482", status: "Completed", src: "/design-thumb.png" },
+    ] // Dummy items for demonstration
 }) {
+    const [openModal, setOpenModal] = React.useState({
+        isAddModalOpen: false,
+        isViewModalOpen: false,
+        selectedItem: null
+    })
+
+    const handleAddProduction = (values) => {
+        console.log("Adding production:", values)
+        StateUpdate({ isAddModalOpen: false }, setOpenModal)
+    }
+
+    const handleViewItem = (item) => {
+        StateUpdate({ isViewModalOpen: true, selectedItem: item }, setOpenModal)
+    }
+
     return (
         <div className="border border-[#dcccbd] rounded-[10px] bg-white overflow-hidden">
             {/* Header */}
@@ -47,13 +69,44 @@ function ProductionHome({
                 {/* Grid of Items */}
                 <div className='grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(300px,1fr))]'>
                     {items.map((item, idx) => (
-                        <ProductionItemCard key={idx} {...item} />
+                        <ProductionItemCard
+                            key={idx}
+                            {...item}
+                            onClick={() => handleViewItem(item)}
+                        />
                     ))}
-                    <button className="flex items-center justify-center w-[124px] h-[95px] bg-[#F8F5F2] hover:bg-[#F0EDE9] rounded-[10px] transition-colors border border-transparent">
-                        <Plus className="w-10 h-10 text-[#dcccbd]" />
+
+                    <button
+                        onClick={() =>
+                            StateUpdate({ isAddModalOpen: true }, setOpenModal)
+                        }
+                        className="rounded-[10px] bg-[#F8F5F2] flex items-center justify-center hover:bg-[#F0EDE9] w-[124px] h-[95px] transition-colors"
+                    >
+                        <PlusIcon className="text-[#dcccbd] w-10 h-10" />
                     </button>
                 </div>
             </div>
+
+            <AddProductionModal
+                open={openModal.isAddModalOpen}
+                onOpenChange={(isOpen) => StateUpdate({ isAddModalOpen: isOpen }, setOpenModal)}
+                onAdd={handleAddProduction}
+                title={title}
+            />
+
+            <ProductionViewModal
+                open={openModal.isViewModalOpen}
+                onOpenChange={(isOpen) => StateUpdate({ isViewModalOpen: isOpen, selectedItem: isOpen ? openModal.selectedItem : null }, setOpenModal)}
+                selectedData={openModal.selectedItem}
+                onUpdateSuccess={(updated) => {
+                    console.log("Item updated:", updated)
+                    // Update items list logic here
+                }}
+                onDeleteSuccess={(id) => {
+                    console.log("Item deleted:", id)
+                    // Remove from items list logic here
+                }}
+            />
         </div>
     )
 }

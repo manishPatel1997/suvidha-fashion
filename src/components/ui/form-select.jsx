@@ -51,11 +51,12 @@ function FormSelect({
     floatingUi = false,
     readOnly = false,
     onChange,
+    value: propValue,
     ...props
 }) {
     const [searchQuery, setSearchQuery] = React.useState("")
     const id = React.useId()
-    const value = runForm?.values[name] || ""
+    const value = runForm ? (runForm.values[name] || "") : (propValue || "")
     const hasValue = value !== ""
 
     const filteredOptions = React.useMemo(() => {
@@ -107,7 +108,7 @@ function FormSelect({
                     className={cn(
                         "bg-[#F8F5F2] border-[#dcccbd] p-0 overflow-hidden",
                         isSearch &&
-                        "w-[var(--radix-select-trigger-width)]"
+                        "w-(--radix-select-trigger-width)"
                     )}
                 >
                     {isSearch && (

@@ -86,6 +86,41 @@ export const API_LIST_AUTH = {
         target: "/api/v1/design/samples/target",
     },
 
+    // temp add
+    Deko: {
+        assignStatus: "/api/v1/design/deko/assign/status",
+        target: "/api/v1/design/deko/target",
+        assign: "/api/v1/design/deko/assign",
+        targetKey: "deko_target",
+        idKey: "deko_id",
+        targetImg: "deko_image"
+    },
+    Mill: {
+        assignStatus: "/api/v1/design/mill/assign/status",
+        target: "/api/v1/design/mill/target",
+        assign: "/api/v1/design/mill/assign",
+        targetKey: "mill_target",
+        idKey: "mill_id",
+        targetImg: "mill_image"
+    },
+    Photography: {
+        assignStatus: "/api/v1/design/photography/assign/status",
+        target: "/api/v1/design/photography/target",
+        assign: "/api/v1/design/photography/assign",
+        targetKey: "photography_target",
+        targetImg: "photography_image",
+        idKey: "id"
+    },
+    Folder: {
+        assignStatus: "/api/v1/design/folder/assign/status",
+        target: "/api/v1/design/folder/target",
+        assign: "/api/v1/design/folder/assign",
+        targetKey: "folder_target",
+        idKey: "id",
+        targetImg: "folder_image"
+    },
+    // temp add
+
     setting: "/api/v1/common/setting",
     users_get: "/api/v1/common/users_get",
 }

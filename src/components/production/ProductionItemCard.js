@@ -2,15 +2,18 @@ import { statusColors } from '@/lib/helper'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
 
-function ProductionItemCard({ id = "S-480", status = "Pending", src = "/design-thumb.png" }) {
+function ProductionItemCard({ id = "S-480", status = "Pending", src = "/design-thumb.png", onClick }) {
     return (
-        <div className='flex items-center gap-4 p-3 border border-[#dcccbd]/30 rounded-[10px] w-full h-[95px] bg-[#f8f5f2]'>
-            <div className="relative w-[100px] h-[68px] cursor-pointer  hover:opacity-90 ">
+        <div
+            onClick={onClick}
+            className='flex items-center gap-4 p-3 border border-[#dcccbd]/30 rounded-[10px] w-full h-[95px] bg-[#f8f5f2] cursor-pointer hover:bg-[#F0EDE9] transition-colors group'
+        >
+            <div className="relative w-[100px] h-[68px]">
                 <Image
                     src={src}
                     alt="Work item"
                     fill
-                    className="object-cover"
+                    className="object-cover rounded-sm group-hover:scale-105 transition-transform duration-300"
                 />
             </div>
             <div className="flex flex-col gap-2 flex-1">

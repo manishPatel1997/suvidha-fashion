@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useParams, useSearchParams } from "next/navigation"
 import { ChevronRight } from "lucide-react"
 
 import {
@@ -52,9 +52,14 @@ const PRE_PRODUCTION_MENU_ITEMS = [
 
 export function DashboardSidebar() {
   const pathname = usePathname()
+  const params = useParams()
+  const searchParams = useSearchParams()
 
-  const isPreProduction = pathname.startsWith("/pre-production")
-  const currentMenuItems = isPreProduction ? PRE_PRODUCTION_MENU_ITEMS : MENU_ITEMS
+  const isPreProductionPhase =
+    pathname.startsWith("/pre-production") ||
+    pathname.startsWith("/production") ||
+    pathname.startsWith("/post-production")
+  const currentMenuItems = isPreProductionPhase ? PRE_PRODUCTION_MENU_ITEMS : MENU_ITEMS
 
   const handleLogout = () => {
     Cookies.remove("token")
@@ -84,6 +89,19 @@ export function DashboardSidebar() {
                 ? pathname === "/"
                 : pathname.startsWith(href)
 
+            let finalHref = href
+            const isProductionLink = ["/pre-production", "/production", "/post-production"].includes(href)
+
+            if (isProductionLink) {
+              if (params?.id) {
+                finalHref = `${href}/${params.id}`
+              }
+              const queryString = searchParams?.toString()
+              if (queryString) {
+                finalHref = `${finalHref}?${queryString}`
+              }
+            }
+
             return (
               <SidebarMenuItem key={href} className="group/menu-item">
                 <SidebarMenuButton
@@ -104,7 +122,7 @@ export function DashboardSidebar() {
                   `}
                 >
                   <Link
-                    href={href}
+                    href={finalHref}
                     className="relative flex items-center w-full gap-3 group-data-[collapsible=icon]:justify-center"
                   >
                     {/* Active / Hover Indicator */}

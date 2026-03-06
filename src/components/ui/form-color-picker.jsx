@@ -106,12 +106,13 @@ function FormColorPicker({
     isEdit = false,
     readOnly = false,
     isFloating = true,
+    value: propValue,
     ...props
 }) {
     const id = React.useId()
     const inputRef = React.useRef(null)
 
-    const value = runForm?.values[name] || ""
+    const value = runForm ? (runForm.values[name] || "") : (propValue || "")
 
     return (
         <div className={cn("relative w-full", className)}>

@@ -128,49 +128,6 @@ export function DesignViewModalImage({
             IsClose={false}
         >
             <div className="bg-white rounded-[20px] overflow-hidden flex flex-col relative overflow-y-auto max-h-[80vh]">
-                {/* Header Actions - Hidden in Edit Mode */}
-                {/* {!isEditing && (
-                    <div className="px-4 py-4 flex items-center justify-between bg-white">
-                        <Button
-                            variant="ghost"
-                            onClick={() => setIsEditing(true)}
-                            className="h-9 px-6 bg-[#F3F0EC] hover:bg-[#E8E2DA] text-primary-foreground rounded-md text-[14px] font-semibold"
-                        >
-                            Edit
-                        </Button>
-                        <div className="flex items-center gap-2">
-                            <Button
-                                variant="ghost"
-                                onClick={() => setIsDeleteModalOpen(true)}
-                                className="h-9 px-4 bg-[#FDF2F2] hover:bg-[#FBE4E4] text-[#E5484D] rounded-md text-[14px] font-semibold flex items-center gap-2"
-                            >
-                                <Trash2 className="w-4 h-4" />
-                                Delete
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                onClick={() => onOpenChange(false)}
-                                className="text-primary-foreground hover:opacity-70 transition-opacity"
-                            >
-                                <CloseIcon width={17} height={17} color="#1a1a1a" />
-                            </Button>
-                        </div>
-                    </div>
-                )} */}
-
-                {/* Extra padding when header is hidden */}
-                {/* {isEditing && <div className="pt-10" />} */}
-                {/* {isEditing &&
-                    <div className="self-end px-4 md:px-10">
-                        <Button
-                            variant="ghost"
-                            onClick={() => setIsEditing(false)}
-                            className="text-primary-foreground hover:opacity-70 transition-opacity"
-                        >
-                            <CloseIcon width={17} height={17} color="#1a1a1a" />
-                        </Button>
-                    </div>
-                } */}
                 {!isEditing && (
                     <div className="px-4 py-4 flex items-center justify-between bg-white">
                         {!isDone && <Button
@@ -354,39 +311,6 @@ export function DesignViewModalImage({
                                         </Button>
                                     )}
                                 </div>
-
-                                {/* Thumbnail Gallery */}
-                                {/* <div className="order-2 lg:order-3 lg:col-span-full">
-                                    <div className="flex items-center gap-3 w-full overflow-x-auto pb-2 custom-scrollbar">
-                                        {images?.map((thumb, idx) => (
-                                            <div
-                                                key={idx}
-                                                className={cn(
-                                                    "relative w-20 h-20 group cursor-pointer border-5 rounded-md overflow-hidden flex-shrink-0",
-                                                    (currentImgIndex === idx ? "border-[#A67F6F]" : "border-transparent")
-                                                )}
-                                                onClick={() => { setCurrentImgIndex(idx); setPreviewImage(thumb.src) }}
-                                            >
-                                                <div className={cn(
-                                                    "w-full h-full rounded-[12px] overflow-hidden border-2 transition-all border-[#A67F6F]",
-                                                )}>
-                                                    <Image
-                                                        src={thumb.src}
-                                                        alt={`Version ${idx + 1}`}
-                                                        fill
-                                                        className="object-cover"
-                                                    />
-                                                </div>
-                                                <span className="absolute bottom-1 right-1 text-[10px] font-bold bg-white px-1 rounded">
-                                                    V{idx + 1}
-                                                </span>
-                                            </div>
-                                        ))}
-                                        <button className="w-20 h-20 rounded-[12px] bg-[#F8F5F2] border border-[#DCCCBD]/30 flex items-center justify-center text-[#DCCCBD] hover:bg-[#F3F0EC] transition-colors flex-shrink-0">
-                                            <Plus className="w-8 h-8" />
-                                        </button>
-                                    </div>
-                                </div> */}
                                 <div className="order-2 lg:order-3 lg:col-span-full">
                                     <div className="flex items-center gap-3 w-full overflow-x-auto pb-2 custom-scrollbar">
                                         {(viewData?.history)?.map((thumb, idx) => (
