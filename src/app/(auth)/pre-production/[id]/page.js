@@ -57,6 +57,7 @@ export default async function Page({ params }) {
         const step = steps[i]
 
         const data = await fetchStepData(step.url, id)
+        console.log('data', data)
         result[step.key] = data
 
         // Stop execution if status is not valid

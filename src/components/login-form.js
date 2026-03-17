@@ -12,16 +12,12 @@ import { usePost } from '@/hooks/useApi';
 import { toast } from 'sonner';
 import Cookies from 'js-cookie';
 import { API_LIST_NO_AUTH } from '@/hooks/api-list';
+import { PasswordValidation } from '@/lib/validation';
 
 
 const formSchema = Yup.object({
     email: Yup.string().email().required("Email is required"),
-    password: Yup.string()
-        .required("Password is required")
-        .min(6, "Password must be at least 6 characters")
-        .matches(/[a-zA-Z]/, "Password must contain at least one letter")
-        .matches(/[0-9]/, "Password must contain at least one number")
-        .matches(/[\W_]/, "Password must contain at least one special character"),
+    password: PasswordValidation
 })
 
 function LoginForm() {
@@ -53,7 +49,7 @@ function LoginForm() {
         <Formik
             initialValues={{
                 email: "admin@admin.com",
-                password: "Admin@123",
+                password: "admin@123",
             }}
             validationSchema={formSchema}
             onSubmit={handleLogin}

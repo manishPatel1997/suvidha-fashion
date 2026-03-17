@@ -4,7 +4,8 @@ import * as React from "react";
 import Image from "next/image";
 import { Formik } from "formik";
 import * as Yup from "yup";
-import { Loader2, Share2, Download, Pencil } from "lucide-react";
+import { Loader2, Share2, Download, Pencil, Clock } from "lucide-react";
+import { format } from "date-fns";
 
 import {
     Sheet,
@@ -30,13 +31,15 @@ const STOCK_CONFIG = {
         idKey: "fabric_id",
         nameKey: "fabric_name",
         qualityKey: "fabric_quality",
+        subQualityKey: "fabric_sub_quality",
         priceKey: "fabric_price",
         vendorKey: "fabric_vender",
         meterKey: "fabric_meter",
         colorKey: "fabric_color",
         imageKey: "fabric_image",
         categoryOptionsKey: "fabric_stock_categories",
-        subCategoryOptionsKey: "fabric_stock_sub_categories",
+        qualityOptionsKey: "fabric_stock_quality",
+        subQualityOptionsKey: "fabric_stock_sub_quality",
         hasColor: true,
         hasNote: true,
     },
@@ -46,13 +49,15 @@ const STOCK_CONFIG = {
         idKey: "yarn_id",
         nameKey: "yarn_name",
         qualityKey: "yarn_quality",
+        subQualityKey: "yarn_sub_quality",
         priceKey: "yarn_price",
         vendorKey: "yarn_vender",
         meterKey: "yarn_meter",
         colorKey: "yarn_color",
         imageKey: "yarn_image",
         categoryOptionsKey: "yarn_stock_categories",
-        subCategoryOptionsKey: "yarn_stock_sub_categories",
+        qualityOptionsKey: "yarn_stock_quality",
+        subQualityOptionsKey: "yarn_stock_sub_quality",
         hasColor: true,
         hasNote: true,
     },
@@ -68,7 +73,7 @@ const STOCK_CONFIG = {
         colorKey: "sequence_color",
         imageKey: "sequence_image",
         categoryOptionsKey: "sequence_stock_categories",
-        subCategoryOptionsKey: "sequence_stock_sub_categories",
+        qualityOptionsKey: "sequence_stock_quality",
         hasColor: true,
         hasNote: true,
     },
@@ -160,7 +165,7 @@ export function StockDetailsSidebar({
             `${config.nameKey.replace("_", " ")} is required`
         ),
 
-        ...(type !== "Yarn" && type !== "Sequence" && {
+        ...(type !== "Yarn" && type !== "Sequence" && type !== "Fabric" && {
             [config.meterKey]: Yup.number()
                 .typeError("Meter must be a number")
                 .required("Meter is required"),
@@ -168,18 +173,29 @@ export function StockDetailsSidebar({
             [config.qualityKey]: Yup.string().required("Quality is required"),
         }),
 
+        ...((type === "Yarn" || type === "Fabric") && {
+            [config.qualityKey]: Yup.string().required("Quality is required"),
+            [config.subQualityKey]: Yup.string().required("Sub Quality is required"),
+        }),
+
+        ...(type === "Sequence" && {
+            [config.qualityKey]: Yup.string().required("Quality is required"),
+        }),
+
+        ...(type === "Fabric" && {
+            [config.meterKey]: Yup.number()
+                .typeError("Meter must be a number")
+                .required("Meter is required"),
+        }),
+
         ...(type === "Yarn" && {
             yarn_num_cons: Yup.string().required("Yarn num cons is required"),
         }),
 
         category: Yup.string().required("Category is required"),
-        ...(type !== "Sequence" && {
-            sub_category: Yup.string().required("Sub Category is required"),
-        }),
 
         ...(type === "Sequence" && {
             sequence_cd: Yup.string()
-                .min(3, "Minimum 3 characters required")
                 .required("Sequence cd is required"),
         }),
 
@@ -216,18 +232,22 @@ export function StockDetailsSidebar({
     const handleSubmit = (values) => {
         const payload = {
             id: selectedData?.id?.toString(),
-
+            [config.idKey]: values[config.idKey] || "",
             [config.nameKey]: values[config.nameKey] || "",
             [config.priceKey]: values[config.priceKey] || "",
             [config.vendorKey]: values[config.vendorKey] || "",
+            category: values.category || "",
 
-            ...(type !== "Yarn" && type !== "Sequence" && {
+            ...(config.qualityKey && {
                 [config.qualityKey]: values[config.qualityKey] || "",
-                [config.meterKey]: values[config.meterKey] || "",
             }),
 
-            ...(type === "Yarn" && {
-                yarn_num_cons: values.yarn_num_cons || "",
+            ...(config.subQualityKey && {
+                [config.subQualityKey]: values[config.subQualityKey] || "",
+            }),
+
+            ...(config.meterKey && {
+                [config.meterKey]: values[config.meterKey] || "",
             }),
 
             ...(config.hasColor && {
@@ -238,15 +258,13 @@ export function StockDetailsSidebar({
                 note: values.note || "",
             }),
 
-            ...(type !== "Sequence" && {
-                sub_category: values.sub_category || "",
-            }),
-
             ...(type === "Sequence" && {
                 sequence_cd: values.sequence_cd || "",
             }),
 
-            category: values.category || "",
+            ...(type === "Yarn" && {
+                yarn_num_cons: values.yarn_num_cons || "",
+            }),
         };
 
         if (selectedFile) {
@@ -293,12 +311,13 @@ export function StockDetailsSidebar({
                         initialValues={{
                             [config.idKey]: selectedData?.[config.idKey] ?? "",
                             [config.nameKey]: selectedData?.[config.nameKey] ?? "",
-                            ...(type !== "Yarn" && {
-                                [config.qualityKey]: selectedData?.[config.qualityKey] ?? "",
+                            [config.qualityKey]: selectedData?.[config.qualityKey] ?? "",
+                            ...(config.subQualityKey && {
+                                [config.subQualityKey]: selectedData?.[config.subQualityKey] ?? "",
                             }),
                             [config.priceKey]: selectedData?.[config.priceKey] ? selectedData?.[config.priceKey].toString() : "",
                             [config.vendorKey]: selectedData?.[config.vendorKey] ?? "",
-                            ...(type !== "Yarn" && {
+                            ...(config.meterKey && {
                                 [config.meterKey]: selectedData?.[config.meterKey]
                                     ? selectedData?.[config.meterKey].toString()
                                     : "",
@@ -306,9 +325,6 @@ export function StockDetailsSidebar({
                             ...(config.hasColor && { [config.colorKey]: selectedData?.[config.colorKey] ?? "#D1D3C8" }),
                             ...(config.hasNote && { note: selectedData?.note ?? "" }),
                             category: selectedData?.category ?? "",
-                            ...(type !== "Sequence" && {
-                                sub_category: selectedData?.sub_category ?? "",
-                            }),
                             ...(type === "Yarn" && {
                                 yarn_num_cons: selectedData?.yarn_num_cons ?? "",
                             }),
@@ -322,6 +338,7 @@ export function StockDetailsSidebar({
                     >
                         {(runForm) => (
                             <form onSubmit={runForm.handleSubmit} className="flex flex-col h-full">
+                                {console.log('runForm.errors', runForm.errors)}
                                 <div className="p-6 pt-0 space-y-8 flex-1">
                                     {/* Image Section */}
                                     <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-[#dcccbd]/50 shadow-sm group">
@@ -420,32 +437,51 @@ export function StockDetailsSidebar({
                                             />
                                         </div>
 
-                                        {type !== "Sequence" && <div className="space-y-1.5">
+                                        {(type === "Yarn" || type === "Fabric") && (
+                                            <>
+                                                <div className="space-y-1.5">
+                                                    <label className="text-[14px] font-medium text-primary-foreground block">
+                                                        Quality
+                                                    </label>
+                                                    <FormSelect
+                                                        name={config.qualityKey}
+                                                        runForm={runForm}
+                                                        options={convertedOptions[config.qualityOptionsKey] || []}
+                                                        placeholder="Select Quality"
+                                                        isSearch
+                                                        triggerClassName="h-[45px]! bg-[#fcf8f4]/50"
+                                                        readOnly={!isEditing}
+                                                    />
+                                                </div>
+                                                <div className="space-y-1.5">
+                                                    <label className="text-[14px] font-medium text-primary-foreground block">
+                                                        Sub Quality
+                                                    </label>
+                                                    <FormSelect
+                                                        name={config.subQualityKey}
+                                                        runForm={runForm}
+                                                        options={convertedOptions[config.subQualityOptionsKey] || []}
+                                                        placeholder="Select Sub Quality"
+                                                        isSearch
+                                                        triggerClassName="h-[45px]! bg-[#fcf8f4]/50"
+                                                        readOnly={!isEditing}
+                                                    />
+                                                </div>
+                                            </>
+                                        )}
+
+                                        {type === "Sequence" && <div className="space-y-1.5">
                                             <label className="text-[14px] font-medium text-primary-foreground block">
-                                                Sub Category
+                                                Quality
                                             </label>
                                             <FormSelect
-                                                name="sub_category"
+                                                name={config.qualityKey}
                                                 runForm={runForm}
-                                                options={convertedOptions[config.subCategoryOptionsKey] || []}
-                                                placeholder="Select Sub Category"
+                                                options={convertedOptions[config.qualityOptionsKey] || []}
+                                                placeholder="Select Quality"
                                                 isSearch
                                                 triggerClassName="h-[45px]! bg-[#fcf8f4]/50"
                                                 readOnly={!isEditing}
-                                            />
-                                        </div>}
-
-                                        {type !== "Yarn" && type !== "Sequence" && <div className="space-y-1.5">
-                                            <label className="text-[14px] font-medium block text-[#B0826A]">
-                                                {formatLabel(config.qualityKey)}
-                                            </label>
-                                            <FloatingInput
-                                                hasEdit
-                                                name={config.qualityKey}
-                                                runForm={runForm}
-                                                readOnly={!isEditing}
-                                                className="bg-[#fcf8f4]/50"
-                                                isFloating={false}
                                             />
                                         </div>}
 
@@ -561,6 +597,18 @@ export function StockDetailsSidebar({
                                             </div>
                                         )}
 
+
+                                        {selectedData?.updated_at && (
+                                            <div className="space-y-1.5 sm:col-span-2">
+                                                <label className="text-[14px] font-medium flex items-center gap-1.5 text-[#B0826A]">
+                                                    <Clock className="w-3.5 h-3.5" />
+                                                    Last Edited
+                                                </label>
+                                                <div className="h-10 px-4 flex items-center bg-[#fcf8f4]/50 border border-[#dcccbd] rounded-md text-primary-foreground text-[14px]">
+                                                    {format(new Date(selectedData.updated_at), "dd MMM yyyy, hh:mm a")}
+                                                </div>
+                                            </div>
+                                        )}
 
                                         {config.hasNote && (
                                             <div className="col-span-1 sm:col-span-2">

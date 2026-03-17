@@ -63,6 +63,30 @@ const validationSchema = Yup.object().shape({
     .min(today, "Target date cannot be in the past")
     .min(Yup.ref('finish_date'), "Target date cannot be before finish date"),
 })
+// const validationSchema = Yup.object().shape({
+//   image: imageValidation,
+
+//   design_slug_id: Yup.string()
+//     .trim()
+//     .min(3, "Design Id must be at least 3 characters")
+//     .required("Design Id is required"),
+
+//   category: Yup.string().required("Category is required"),
+
+//   start_date: Yup.date()
+//     .required("Start date is required")
+//     .min(today, "Start date cannot be in the past"),
+
+//   finish_date: Yup.date()
+//     .nullable()
+//     .transform((curr, orig) => (orig === "" ? null : curr))
+//     .min(Yup.ref("start_date"), "Finish date cannot be before start date"),
+
+//   target_date: Yup.date()
+//     .nullable()
+//     .transform((curr, orig) => (orig === "" ? null : curr))
+//     .min(Yup.ref("finish_date"), "Target date cannot be before finish date"),
+// });
 
 export function AddDesignModal({ open, onOpenChange, onAdd }) {
   const formik = useFormik({
@@ -70,7 +94,7 @@ export function AddDesignModal({ open, onOpenChange, onAdd }) {
       image: "",
       design_slug_id: "",
       category: "",
-      start_date: null,
+      start_date: today,
       finish_date: null,
       target_date: null,
     },

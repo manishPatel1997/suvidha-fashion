@@ -9,13 +9,18 @@ import { FloatingTextarea } from "./ui/floating-textarea"
 import { FormSelect } from "./ui/form-select"
 import { API_LIST_AUTH } from "@/hooks/api-list"
 import { useGet, usePost } from "@/hooks/useApi"
-import { ImgAcceptType } from "@/lib/validation"
+import { useQuery } from "@tanstack/react-query"
+import { post } from "@/lib/api"
+import { ImgAcceptType, PasswordValidation } from "@/lib/validation"
 import AttachIcon from "@/assets/AttachIcon"
 import { Input } from "./ui/input"
 import { FileInput } from "./ui/file-input"
 import { FormColorPicker } from "./ui/form-color-picker"
 import { StateUpdate, toFormData } from "@/lib/helper"
 import { toast } from "sonner"
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
+import { ChevronDown, Check, EyeOff, Eye } from "lucide-react"
+import PasswordIcon from "@/assets/password-icon"
 
 const STEP_CONFIG = {
     Fabric: {
@@ -25,6 +30,7 @@ const STEP_CONFIG = {
         idKey: "fabric_id",
         nameKey: "fabric_name",
         qualityKey: "fabric_quality",
+        subQualityKey: "fabric_sub_quality",
         priceKey: "fabric_price",
         vendorKey: "fabric_vender",
         meterKey: "fabric_meter",
@@ -38,6 +44,7 @@ const STEP_CONFIG = {
         idKey: "yarn_id",
         nameKey: "yarn_name",
         qualityKey: "yarn_quality",
+        subQualityKey: "yarn_sub_quality",
         priceKey: "yarn_price",
         vendorKey: "yarn_vender",
         meterKey: "yarn_num_cons",
@@ -50,15 +57,42 @@ const STEP_CONFIG = {
         delete: API_LIST_AUTH.Sequences.delete,
         idKey: "sequence_id",
         nameKey: "sequence_name",
-        // qualityKey: "yarn_quality",
+        qualityKey: "sequence_quality",
         priceKey: "sequence_price",
         vendorKey: "sequence_vender",
         // meterKey: "yarn_num_cons",
         colorKey: "sequence_color",
         imageKey: "sequence_image",
     },
+    People: {
+        create: API_LIST_AUTH.User.create,
+        update: API_LIST_AUTH.User.update,
+        delete: API_LIST_AUTH.User.delete,
+        idKey: "user_id",
+        nameKey: "name",
+        emailKey: "email",
+        passwordKey: "password",
+        contactKey: "contact",
+        moduleAccessKey: "module_access",
+    },
+    Vendor: {
+        create: API_LIST_AUTH.Vendor.create,
+        update: API_LIST_AUTH.Vendor.update,
+        delete: API_LIST_AUTH.Vendor.delete,
+        idKey: "id",
+        nameKey: "name",
+        categoryKey: "category",
+        contactKey: "contact",
+        addressKey: "address",
+    },
 
 }
+
+const categoryOptions = [
+    { value: "fabric", label: "Fabric" },
+    { value: "yarn", label: "Yarn" },
+    { value: "sequences", label: "Sequences" },
+]
 
 export function AddFabricModal({
     open,
@@ -67,13 +101,18 @@ export function AddFabricModal({
     // title = "Add Fabric",
     initialData = null,
     isFabric = false,
-    isSequences = false
+    isSequences = false,
+    isPeople = false,
+    isVendor = false
 }) {
 
     const formikRef = React.useRef(null)
+    const [showPassword, setShowPassword] = React.useState(false)
 
     // const isYarn = title === "Add Yarn"
-    const config = isSequences ? STEP_CONFIG.Sequences : isFabric ? STEP_CONFIG.Fabric : STEP_CONFIG.Yarn
+    const config = isPeople ? STEP_CONFIG.People : isVendor ? STEP_CONFIG.Vendor : isSequences ? STEP_CONFIG.Sequences : isFabric ? STEP_CONFIG.Fabric : STEP_CONFIG.Yarn
+    const isEdit = !!initialData
+    const typeLabel = isPeople ? "People" : isVendor ? "Vendor" : isFabric ? "Fabric" : isSequences ? "Sequences" : "Yarn"
     // const isEdit = !!initialData
 
     const [data, setData] = React.useState({
@@ -83,7 +122,8 @@ export function AddFabricModal({
         fabric_stock_sub_categories: [],
         yarn_stock_sub_categories: [],
 
-        sequence_stock_categories: []
+        sequence_stock_categories: [],
+        sequence_stock_quality: []
     })
 
     const { data: settingData } = useGet("setting", API_LIST_AUTH.setting, {}, {
@@ -91,6 +131,26 @@ export function AddFabricModal({
         staleTime: 0,
         gcTime: 0
     })
+
+    const vendorType = isFabric ? "fabric" : isSequences ? "sequences" : "yarn"
+
+    const { data: vendorData } = useQuery({
+        queryKey: ["vendors", vendorType],
+        queryFn: () => post(API_LIST_AUTH.Vendor.type, { type: vendorType }),
+        enabled: open && !isVendor && !isPeople,
+        staleTime: 0,
+        gcTime: 0
+    })
+
+    const vendorOptions = React.useMemo(() => {
+        if (vendorData?.success && Array.isArray(vendorData.data)) {
+            return vendorData.data.map(item => ({
+                label: item.name,
+                value: item.name // or item.id if the backend expects ID
+            }))
+        }
+        return []
+    }, [vendorData])
 
     React.useEffect(() => {
         if (settingData?.success && settingData?.data) {
@@ -117,7 +177,7 @@ export function AddFabricModal({
     //             .required(`${type} Id is required`)
     //             .min(3, `${type} Id must be at least 3 characters`),
     //         category: Yup.string().required("Category is required"),
-    //         sub_category: Yup.string().required("Sub Category is required"),
+    //         yarn_quality: Yup.string().required("Sub Category is required"),
     //         [config.priceKey]: Yup.number()
     //             .transform((value, originalValue) =>
     //                 originalValue === "" ? undefined : value
@@ -161,17 +221,47 @@ export function AddFabricModal({
     //     })
     // }, [isFabric,isSequences, config])
     const validationSchema = React.useMemo(() => {
+        if (isPeople) {
+            return Yup.object().shape({
+                // [config.idKey]: Yup.string()
+                //     .required(`Id is required`),
+                [config.nameKey]: Yup.string().required(`Name is required`),
+                [config.emailKey]: Yup.string().email("Invalid email").required("Email is required"),
+                // [config.passwordKey]: PasswordValidation,
+                [config.passwordKey]: isEdit
+                    ? Yup.string().notRequired()
+                    : PasswordValidation,
+                [config.contactKey]: Yup.string()
+                    .required("Contact is required")
+                    .matches(/^[0-9]{10}$/, "Contact must be 10 digits"),
+                [config.moduleAccessKey]: Yup.array().min(1, "Select at least one module access"),
+            })
+        }
+
+        if (isVendor) {
+            return Yup.object().shape({
+                [config.nameKey]: Yup.string().required(`Name is required`),
+                [config.categoryKey]: Yup.string().required(`Category is required`),
+                [config.contactKey]: Yup.string()
+                    .required("Contact is required")
+                    .matches(/^[0-9]{10}$/, "Contact must be 10 digits"),
+                [config.addressKey]: Yup.string().required(`Address is required`),
+            })
+        }
+
         const type = isSequences ? "Sequence" : isFabric ? "Fabric" : "Yarn"
 
         const commonFields = {
             [config.idKey]: Yup.string()
-                .required(`${type} Id is required`)
-                .min(3, `${type} Id must be at least 3 characters`),
+                .required(`${type} Id is required`),
 
             category: Yup.string().required("Category is required"),
 
             ...(!isSequences && {
-                sub_category: Yup.string().required("Sub Category is required"),
+                [config.qualityKey]: Yup.string().required("Quality is required"),
+            }),
+            ...(!isSequences && {
+                [config.subQualityKey]: Yup.string().required("Sub Quality is required"),
             }),
 
             [config.priceKey]: Yup.number()
@@ -181,10 +271,9 @@ export function AddFabricModal({
                 .required(`${type} price is required`)
                 .typeError(`${type} price must be a number`),
 
-            [config.vendorKey]: Yup.string()
-                .trim()
-                .min(3, "Vendor must be at least 3 characters")
-                .required(`${type} vendor is required`),
+            // [config.vendorKey]: Yup.string()
+            //     .trim()
+            //     .required(`${type} vendor is required`),
 
             [config.colorKey]: Yup.string().required(`${type} color is required`),
 
@@ -199,7 +288,6 @@ export function AddFabricModal({
             return Yup.object().shape({
                 ...commonFields,
                 [config.meterKey]: Yup.string()
-                    .min(3, "Minimum 3 characters required")
                     .required("Num cons is required"),
                 [config.qualityKey]: Yup.string().required("Sub quality is required"),
             })
@@ -209,8 +297,8 @@ export function AddFabricModal({
             return Yup.object().shape({
                 ...commonFields,
                 sequence_cd: Yup.string()
-                    .required("Sequence CD is required")
-                    .min(3, "Sequence CD must be at least 3 characters"),
+                    .required("Sequence CD is required"),
+                [config.qualityKey]: Yup.string().required("Quality is required"),
             })
         }
 
@@ -218,7 +306,6 @@ export function AddFabricModal({
             ...commonFields,
             [config.qualityKey]: Yup.string()
                 .trim()
-                .min(3, "Quality must be at least 3 characters")
                 .required("Quality is required"),
 
             [config.meterKey]: Yup.number()
@@ -229,7 +316,7 @@ export function AddFabricModal({
                 .typeError("Meter must be a number"),
         })
 
-    }, [isFabric, isSequences, config])
+    }, [isFabric, isSequences, isPeople, config, isEdit])
     // }, [isFabric, config, isEdit])
 
     const handleOpenChange = (isOpen) => {
@@ -240,7 +327,7 @@ export function AddFabricModal({
     }
 
     const { mutate: addFabric, isPending } = usePost(
-        config.create,
+        isEdit ? config.update : config.create,
         {
             onSuccess: (res) => {
                 if (res.success) {
@@ -255,19 +342,57 @@ export function AddFabricModal({
     )
 
     const HandleSubmit = (values) => {
-        addFabric(toFormData(values))
+        if (isPeople || isVendor) {
+            const data = { ...values }
+            if (isPeople && isEdit) {
+                delete data.user_id
+                data.id = initialData?.id
+            }
+            addFabric(data)
+        } else {
+            addFabric(toFormData(values))
+        }
     }
 
     return (
         <CommonModal
             open={open}
             onOpenChange={handleOpenChange}
-            title={isFabric ? "Add Fabric" : "Add Yarn"}
+            title={isEdit ? `Edit ${typeLabel}` : `Add ${typeLabel}`}
         >
             <Formik
                 innerRef={formikRef}
                 initialValues={React.useMemo(() => {
+                    const getModuleAccess = (val) => {
+                        if (Array.isArray(val)) return val;
+                        if (typeof val === 'string') return val.split(',').map(s => s.trim()).filter(Boolean);
+                        return [];
+                    };
+                    if (isPeople) {
+                        return {
+                            // id: initialData?.id || "",
+                            [config.idKey]: initialData?.[config.idKey] || "",
+                            [config.nameKey]: initialData?.[config.nameKey] || "",
+                            [config.emailKey]: initialData?.[config.emailKey] || "",
+                            // [config.passwordKey]: initialData?.[config.passwordKey] || "",
+                            ...(!isEdit && { [config.passwordKey]: initialData?.[config.passwordKey] || "" }),
+                            [config.contactKey]: initialData?.[config.contactKey] || "",
+                            [config.moduleAccessKey]: getModuleAccess(initialData?.[config.moduleAccessKey]),
+                        }
+                    }
+
+                    if (isVendor) {
+                        return {
+                            id: initialData?.id || "",
+                            [config.nameKey]: initialData?.[config.nameKey] || "",
+                            [config.categoryKey]: initialData?.[config.categoryKey] || "",
+                            [config.contactKey]: initialData?.[config.contactKey] || "",
+                            [config.addressKey]: initialData?.[config.addressKey] || "",
+                        }
+                    }
+
                     const common = {
+                        id: initialData?.id || "",
                         [config.idKey]: initialData?.[config.idKey] || "",
                         category: initialData?.category || "",
                         [config.priceKey]: initialData?.[config.priceKey] || "",
@@ -278,7 +403,8 @@ export function AddFabricModal({
                         [config.nameKey]: initialData?.[config.nameKey] || "",
                     }
                     if (!isSequences) {
-                        common.sub_category = initialData?.sub_category ?? ""
+                        common[config.qualityKey] = initialData?.[config.qualityKey] ?? ""
+                        common[config.subQualityKey] = initialData?.[config.subQualityKey] ?? ""
                     }
 
                     if (!isFabric && !isSequences) {
@@ -294,7 +420,7 @@ export function AddFabricModal({
                         [config.qualityKey]: initialData?.[config.qualityKey] || "",
                         [config.meterKey]: initialData?.[config.meterKey] || ""
                     }
-                }, [isFabric, initialData, isSequences, config])}
+                }, [isFabric, initialData, isSequences, isPeople, isVendor, config])}
                 validationSchema={validationSchema}
                 onSubmit={HandleSubmit}
                 enableReinitialize
@@ -305,191 +431,413 @@ export function AddFabricModal({
                         className="flex flex-col flex-1"
                     >
                         <div className="px-6 py-5 md:px-9 md:py-10 space-y-4 flex-1 overflow-y-auto max-h-[60vh]">
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-7.5 gap-y-5.25">
-                                <div className="space-y-1.5">
-                                    <label className="text-[14px] font-medium text-primary-foreground block">
-                                        {isSequences ? "Sequences Name" : !isFabric ? "Yarn Name" : "Fabric Name"}
-                                    </label>
-                                    <Input
-                                        name={config.nameKey}
-                                        placeholder={isSequences ? "Sequences Name" : !isFabric ? "Yarn Name" : "Fabric Name"}
-                                        runForm={runForm}
-                                        className="h-[45px]"
-                                    />
-                                </div>
-                                {isSequences && <div className="space-y-1.5">
-                                    <label className="text-[14px] font-medium text-primary-foreground block">
-                                        Attach Image
-                                    </label>
-                                    <FileInput
-                                        name={config.imageKey}
-                                        accept={ImgAcceptType}
-                                        runForm={runForm}
-                                        icon={<AttachIcon width={16} height={16} color="#858585" />}
-                                        onChange={(e) => {
-                                            const file = e.target.files[0]
-                                            if (file) {
-                                                runForm.setFieldValue(config.imageKey, file)
-                                            }
-                                        }}
-                                    />
-                                </div>}
-                                <div className="space-y-1.5">
-                                    <label className="text-[14px] font-medium text-primary-foreground block">
-                                        Id
-                                    </label>
-                                    <Input
-                                        name={config.idKey}
-                                        placeholder={isSequences ? "Sequences Id" : !isFabric ? "Yarn Id" : "Id"}
-                                        runForm={runForm}
-                                        className="h-[45px]"
-                                    />
-                                </div>
-
-                                <div className="space-y-1.5">
-                                    <label className="text-[14px] font-medium text-primary-foreground block">
-                                        Category
-                                    </label>
-                                    <FormSelect
-                                        name="category"
-                                        runForm={runForm}
-                                        options={!isFabric ? data.yarn_stock_categories : data.fabric_stock_categories}
-                                        placeholder="Select category"
-                                        isSearch
-                                        triggerClassName="h-[45px]!"
-                                    />
-                                </div>
-
-                                {!isSequences && <div className="space-y-1.5">
-                                    <label className="text-[14px] font-medium text-primary-foreground block">
-                                        Sub Category
-                                    </label>
-                                    <FormSelect
-                                        name={"sub_category"}
-                                        runForm={runForm}
-                                        options={!isFabric ? data.yarn_stock_sub_categories : data.fabric_stock_sub_categories}
-                                        placeholder={"Select Sub Category"}
-                                        isSearch
-                                        triggerClassName="h-[45px]!"
-                                    />
-                                </div>}
-                                {isSequences &&
-                                    <div className="space-y-1.5">
+                            {isPeople ? (
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-7.5 gap-y-5.25">
+                                    {/* <div className="space-y-1.5">
                                         <label className="text-[14px] font-medium text-primary-foreground block">
-                                            CD
+                                            Id
                                         </label>
                                         <Input
-                                            type={"number"}
-                                            name={'sequence_cd'}
-                                            placeholder="CD"
+                                            name={config.idKey}
+                                            placeholder="Id"
+                                            runForm={runForm}
+                                            className="h-[45px]"
+                                        />
+                                    </div> */}
+                                    <div className="space-y-1.5">
+                                        <label className="text-[14px] font-medium text-primary-foreground block">
+                                            Name
+                                        </label>
+                                        <Input
+                                            name={config.nameKey}
+                                            placeholder="Name"
                                             runForm={runForm}
                                             className="h-[45px]"
                                         />
                                     </div>
-                                }
-                                {!isSequences && <div className="space-y-1.5">
-                                    <label className="text-[14px] font-medium text-primary-foreground block">
-                                        Attach Image
-                                    </label>
-                                    <FileInput
-                                        name={config.imageKey}
-                                        accept={ImgAcceptType}
-                                        runForm={runForm}
-                                        icon={<AttachIcon width={16} height={16} color="#858585" />}
-                                        onChange={(e) => {
-                                            const file = e.target.files[0]
-                                            if (file) {
-                                                runForm.setFieldValue(config.imageKey, file)
-                                            }
-                                        }}
-                                    />
-                                </div>}
-                                {!isSequences &&
+
                                     <div className="space-y-1.5">
                                         <label className="text-[14px] font-medium text-primary-foreground block">
-                                            {!isFabric ? "Num Cons" : "Quality"}
+                                            Role
+                                        </label>
+                                        <Popover>
+                                            <PopoverTrigger asChild className='border-muted-foreground'>
+                                                <Button
+                                                    variant="outline"
+                                                    className="w-full h-[45px] justify-between  font-normal hover:bg-white"
+                                                >
+                                                    {Array.isArray(runForm.values[config.moduleAccessKey]) && runForm.values[config.moduleAccessKey].length > 0
+                                                        ? runForm.values[config.moduleAccessKey]
+                                                            .map(val => val.replace(/_/g, " "))
+                                                            .join(", ")
+                                                        : "Select role"}
+                                                    <ChevronDown className="ml-2 h-4 w-4 " />
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-(--radix-popover-trigger-width) p-0 bg-white border-[#dcccbd]">
+                                                <div className="flex flex-col p-1">
+                                                    {["pre_production", "production", "post_production"].map((option) => {
+                                                        const isSelected = runForm.values[config.moduleAccessKey]?.includes(option);
+                                                        return (
+                                                            <div
+                                                                key={option}
+                                                                onClick={() => {
+                                                                    const current = runForm.values[config.moduleAccessKey] || [];
+                                                                    const next = isSelected
+                                                                        ? current.filter((v) => v !== option)
+                                                                        : [...current, option];
+                                                                    runForm.setFieldValue(config.moduleAccessKey, next);
+                                                                }}
+                                                                className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-[#dcccbd]/20 rounded-sm text-[14px]"
+                                                            >
+                                                                <span className="capitalize">{option.replace("_", " ")}</span>
+                                                                {isSelected && <Check className="h-4 w-4" />}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </PopoverContent>
+                                        </Popover>
+                                        {runForm.touched[config.moduleAccessKey] && runForm.errors[config.moduleAccessKey] && (
+                                            <p className="text-red-500 text-xs mt-1">{runForm.errors[config.moduleAccessKey]}</p>
+                                        )}
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="text-[14px] font-medium text-primary-foreground block">
+                                            Contact
                                         </label>
                                         <Input
-                                            type={!isFabric ? "number" : "text"}
-                                            name={!isFabric ? config.meterKey : config.qualityKey}
-                                            placeholder={!isFabric ? "Num cons" : "Quality"}
+                                            name={config.contactKey}
+                                            placeholder="Contact"
                                             runForm={runForm}
                                             className="h-[45px]"
                                         />
                                     </div>
-                                }
-                                <div className="space-y-1.5">
-                                    <label className="text-[14px] font-medium text-primary-foreground block">
-                                        Price
-                                    </label>
-                                    <Input
-                                        type="number"
-                                        name={config.priceKey}
-                                        placeholder="Price"
-                                        runForm={runForm}
-                                        className="h-[45px]"
-                                    />
-                                </div>
 
-                                <div className="space-y-1.5">
-                                    <label className="text-[14px] font-medium text-primary-foreground block">
-                                        Vendor
-                                    </label>
-                                    <Input
-                                        name={config.vendorKey}
-                                        placeholder="Vendor"
-                                        runForm={runForm}
-                                        className="h-[45px]"
-                                    />
-                                </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[14px] font-medium text-primary-foreground block">
+                                            Email
+                                        </label>
+                                        <Input
+                                            name={config.emailKey}
+                                            placeholder="Email"
+                                            runForm={runForm}
+                                            className="h-[45px]"
+                                        />
+                                    </div>
 
-                                {!isSequences && <div className="space-y-1.5">
+                                    {!isEdit && <div className="space-y-1.5">
+                                        <label className="text-[14px] font-medium text-primary-foreground block">
+                                            Password
+                                        </label>
+                                        {/* <Input
+                                            type="password"
+                                            name={config.passwordKey}
+                                            placeholder="Password"
+                                            runForm={runForm}
+                                            className="h-[45px]"
+                                        /> */}
+
+                                        <div className="relative">
+                                            <Input
+                                                type={showPassword ? "text" : "password"}
+                                                id="password"
+                                                name={config.passwordKey}
+                                                placeholder="Password"
+                                                className={"pl-13 h-[45px]"}
+                                                runForm={runForm}
+                                                icon={<PasswordIcon />}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary-foreground transition-colors"
+                                            >
+                                                {!showPassword ? <EyeOff size={24} /> : <Eye size={24} />}
+                                            </button>
+                                        </div>
+                                    </div>}
+                                </div>
+                            ) : isVendor ? (
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-7.5 gap-y-5.25">
+                                    <div className="space-y-1.5">
+                                        <label className="text-[14px] font-medium text-primary-foreground block">
+                                            Name
+                                        </label>
+                                        <Input
+                                            name={config.nameKey}
+                                            placeholder="Name"
+                                            runForm={runForm}
+                                            className="h-[45px]"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[14px] font-medium text-primary-foreground block">
+                                            Category
+                                        </label>
+                                        <FormSelect
+                                            name={config.categoryKey}
+                                            runForm={runForm}
+                                            options={categoryOptions}
+                                            placeholder="Select category"
+                                        />
+                                        {/* <Input
+                                            name={config.categoryKey}
+                                            placeholder="Category"
+                                            runForm={runForm}
+                                            className="h-[45px]"
+                                        /> */}
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[14px] font-medium text-primary-foreground block">
+                                            Contact
+                                        </label>
+                                        <Input
+                                            name={config.contactKey}
+                                            placeholder="Contact"
+                                            runForm={runForm}
+                                            className="h-[45px]"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5 lg:col-span-2">
+                                        <label className="text-[14px] font-medium text-primary-foreground block">
+                                            Address
+                                        </label>
+                                        <FloatingTextarea
+                                            name={config.addressKey}
+                                            label="Address"
+                                            runForm={runForm}
+                                            isFloating={false}
+                                            className="min-h-[100px]"
+                                        />
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-7.5 gap-y-5.25">
+                                    <div className="space-y-1.5">
+                                        <label className="text-[14px] font-medium text-primary-foreground block">
+                                            {isSequences ? "Sequences Name" : !isFabric ? "Yarn Name" : "Fabric Name"}
+                                        </label>
+                                        <Input
+                                            name={config.nameKey}
+                                            placeholder={isSequences ? "Sequences Name" : !isFabric ? "Yarn Name" : "Fabric Name"}
+                                            runForm={runForm}
+                                            className="h-[45px]"
+                                        />
+                                    </div>
+                                    {isSequences && <div className="space-y-1.5">
+                                        <label className="text-[14px] font-medium text-primary-foreground block">
+                                            Attach Image
+                                        </label>
+                                        <FileInput
+                                            name={config.imageKey}
+                                            accept={ImgAcceptType}
+                                            runForm={runForm}
+                                            icon={<AttachIcon width={16} height={16} color="#858585" />}
+                                            onChange={(e) => {
+                                                const file = e.target.files[0]
+                                                if (file) {
+                                                    runForm.setFieldValue(config.imageKey, file)
+                                                }
+                                            }}
+                                        />
+                                    </div>}
+                                    <div className="space-y-1.5">
+                                        <label className="text-[14px] font-medium text-primary-foreground block">
+                                            Id
+                                        </label>
+                                        <Input
+                                            name={config.idKey}
+                                            placeholder={isSequences ? "Sequences Id" : !isFabric ? "Yarn Id" : "Id"}
+                                            runForm={runForm}
+                                            className="h-[45px]"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="text-[14px] font-medium text-primary-foreground block">
+                                            Category
+                                        </label>
+                                        <FormSelect
+                                            name="category"
+                                            runForm={runForm}
+                                            options={!isFabric ? data.yarn_stock_categories : data.fabric_stock_categories}
+                                            placeholder="Select category"
+                                            isSearch
+                                            triggerClassName="h-[45px]!"
+                                        />
+                                    </div>
+
+                                    {!isSequences && <div className="space-y-1.5">
+                                        <label className="text-[14px] font-medium text-primary-foreground block">
+                                            Quality
+                                        </label>
+                                        <FormSelect
+                                            name={config.qualityKey}
+                                            runForm={runForm}
+                                            options={!isFabric ? data.yarn_stock_quality : data.fabric_stock_quality}
+                                            placeholder={"Quality"}
+                                            isSearch
+                                            triggerClassName="h-[45px]!"
+                                        />
+                                    </div>}
+                                    {!isSequences && <div className="space-y-1.5">
+                                        <label className="text-[14px] font-medium text-primary-foreground block">
+                                            Sub Quality
+                                        </label>
+                                        <FormSelect
+                                            name={config.subQualityKey}
+                                            runForm={runForm}
+                                            options={!isFabric ? data.yarn_stock_sub_quality : data.fabric_stock_sub_quality}
+                                            placeholder={"Sub Quality"}
+                                            isSearch
+                                            triggerClassName="h-[45px]!"
+                                        />
+                                    </div>}
+                                    {isSequences &&
+                                        <div className="space-y-1.5">
+                                            <label className="text-[14px] font-medium text-primary-foreground block">
+                                                CD
+                                            </label>
+                                            <Input
+                                                type={"number"}
+                                                name={'sequence_cd'}
+                                                placeholder="CD"
+                                                runForm={runForm}
+                                                className="h-[45px]"
+                                            />
+                                        </div>
+                                    }
+                                    {isSequences &&
+                                        <div className="space-y-1.5">
+                                            <label className="text-[14px] font-medium text-primary-foreground block">
+                                                Quality
+                                            </label>
+                                            <FormSelect
+                                                name={config.qualityKey}
+                                                runForm={runForm}
+                                                options={data.sequence_stock_quality}
+                                                placeholder="Select quality"
+                                                isSearch
+                                                triggerClassName="h-[45px]!"
+                                            />
+                                        </div>
+                                    }
+                                    {!isSequences && <div className="space-y-1.5">
+                                        <label className="text-[14px] font-medium text-primary-foreground block">
+                                            Attach Image
+                                        </label>
+                                        <FileInput
+                                            name={config.imageKey}
+                                            accept={ImgAcceptType}
+                                            runForm={runForm}
+                                            icon={<AttachIcon width={16} height={16} color="#858585" />}
+                                            onChange={(e) => {
+                                                const file = e.target.files[0]
+                                                if (file) {
+                                                    runForm.setFieldValue(config.imageKey, file)
+                                                }
+                                            }}
+                                        />
+                                    </div>}
+                                    {!isSequences && !isFabric &&
+                                        <div className="space-y-1.5">
+                                            <label className="text-[14px] font-medium text-primary-foreground block">
+                                                Num Cons
+                                            </label>
+                                            <Input
+                                                type={"number"}
+                                                name={config.meterKey}
+                                                placeholder={"Num cons"}
+                                                runForm={runForm}
+                                                className="h-[45px]"
+                                            />
+                                        </div>
+                                    }
+                                    <div className="space-y-1.5">
+                                        <label className="text-[14px] font-medium text-primary-foreground block">
+                                            Price
+                                        </label>
+                                        <Input
+                                            type="number"
+                                            name={config.priceKey}
+                                            placeholder="Price"
+                                            runForm={runForm}
+                                            className="h-[45px]"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="text-[14px] font-medium text-primary-foreground block">
+                                            Vendor
+                                        </label>
+                                        <FormSelect
+                                            name={config.vendorKey}
+                                            runForm={runForm}
+                                            options={vendorOptions}
+                                            placeholder="Select vendor"
+                                            isSearch
+                                            triggerClassName="h-[45px]!"
+                                        />
+                                    </div>
+
+                                    {/* {!isSequences && <div className="space-y-1.5">
+                                        <label className="text-[14px] font-medium text-primary-foreground block">
+                                            {!isFabric ? "Sub Quality" : "Meter"}
+                                        </label>
+                                        <Input
+                                            type={!isFabric ? "text" : "number"}
+                                            name={!isFabric ? config.qualityKey : config.meterKey}
+                                            placeholder={!isFabric ? "Sub quality" : "Meter"}
+                                            runForm={runForm}
+                                            className="h-[45px]"
+                                        />
+                                    </div>} */}
+                                    {isFabric && <div className="space-y-1.5">
+                                        <label className="text-[14px] font-medium text-primary-foreground block">
+                                            Meter
+                                        </label>
+                                        <Input
+                                            type="number"
+                                            name={config.meterKey}
+                                            placeholder="Meter"
+                                            runForm={runForm}
+                                            className="h-[45px]"
+                                        />
+                                    </div>}
+
+
+
+                                    <div className="space-y-1.5">
+                                        <label className="text-[16px] font-medium text-primary-foreground block">
+                                            Color
+                                        </label>
+                                        <FormColorPicker
+                                            name={config.colorKey}
+                                            runForm={runForm}
+                                            placeholder="Pick a color"
+                                            isFloating={false}
+                                        // className="h-[45px]"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {!isPeople && !isVendor && (
+                                <div className="space-y-1.5 mt-6">
                                     <label className="text-[14px] font-medium text-primary-foreground block">
-                                        {!isFabric ? "Sub Quality" : "Meter"}
+                                        Note
                                     </label>
-                                    <Input
-                                        type={!isFabric ? "text" : "number"}
-                                        name={!isFabric ? config.qualityKey : config.meterKey}
-                                        placeholder={!isFabric ? "Sub quality" : "Meter"}
+                                    <FloatingTextarea
+                                        name="note"
+                                        label="Add note"
                                         runForm={runForm}
-                                        className="h-[45px]"
-                                    />
-                                </div>}
-                                <div className="space-y-1.5">
-                                    <label className="text-[16px] font-medium text-primary-foreground block">
-                                        Color
-                                    </label>
-                                    <FormColorPicker
-                                        name={config.colorKey}
-                                        runForm={runForm}
-                                        placeholder="Pick a color"
                                         isFloating={false}
-                                    // className="h-[45px]"
+                                        className="min-h-[100px]"
                                     />
                                 </div>
-                            </div>
-
-                            {/* {!isSequences && !isFabric &&
-                                <FormColorPicker
-                                    name={config.colorKey}
-                                    label="Color"
-                                    runForm={runForm}
-                                    placeholder="Pick a color"
-                                />
-                            } */}
-
-                            <div className="space-y-1.5 mt-6">
-                                <label className="text-[14px] font-medium text-primary-foreground block">
-                                    Note
-                                </label>
-                                <FloatingTextarea
-                                    name="note"
-                                    label="Add note"
-                                    runForm={runForm}
-                                    isFloating={false}
-                                    className="min-h-[100px]"
-                                />
-                            </div>
+                            )}
                         </div>
 
                         <div className="px-6 py-3 md:px-[36px] md:py-[20px] flex justify-end">
@@ -498,7 +846,7 @@ export function AddFabricModal({
                                 disabled={isPending}
                                 className="bg-[#dcccbd] hover:bg-[#dcccbd]/90 text-primary-foreground h-11.25 px-8 rounded-md font-semibold text-[16px]"
                             >
-                                {isPending ? "Saving..." : "Add"}
+                                {isPending ? "Saving..." : isEdit ? "Update" : "Add"}
                             </Button>
                         </div>
                     </form>

@@ -29,6 +29,7 @@ const AddImageModal = dynamic(() =>
 )
 
 export function InspirationsCardView({
+    isLocked,
     title = "1. Inspirations",
     inspirationData = null,
     defaultOpen = false,
@@ -43,7 +44,8 @@ export function InspirationsCardView({
         progress: (inspirationData?.inspiration_target === 0 || !inspirationData) ? 0 : (inspirationData.images.length / inspirationData.inspiration_target) * 100,
         selectedData: null,
         status: inspirationData?.status || "",
-        inspiration_target: inspirationData?.inspiration_target || 0
+        inspiration_target: inspirationData?.inspiration_target || 0,
+        isLocked: false
     })
     const [openModal, setOpenModal] = React.useState({
         isAddImageModalOpen: false,
@@ -61,7 +63,8 @@ export function InspirationsCardView({
                 data.images !== inspirationData.images ||
                 data.status !== inspirationData.status ||
                 data.inspiration_target !== inspirationData.inspiration_target ||
-                data.note !== inspirationData.note
+                data.note !== inspirationData.note ||
+                data.isLocked !== inspirationData.isLocked
             ) {
                 StateUpdate({
                     images: inspirationData.images,
@@ -69,7 +72,8 @@ export function InspirationsCardView({
                     IsBlur: inspirationData.status === "pending",
                     note: inspirationData.note,
                     status: inspirationData.status,
-                    progress: inspirationData.inspiration_target === 0 ? 0 : (inspirationData.images.length / inspirationData.inspiration_target) * 100
+                    progress: inspirationData.inspiration_target === 0 ? 0 : (inspirationData.images.length / inspirationData.inspiration_target) * 100,
+                    isLocked: isLocked
                 }, setData)
             }
         }
@@ -77,7 +81,7 @@ export function InspirationsCardView({
 
     const titleName = title.split('.').pop()?.trim() || title
     const modalTitle = `${titleName} Target`
-
+    console.log('data.isLocked', data.isLocked)
 
     const handleModalOpen = (val, selectedData, index = 0) => {
         StateUpdate({ selectedData: selectedData }, setData)
@@ -121,7 +125,11 @@ export function InspirationsCardView({
         onSuccess: (res, variables) => {
             setClickedAction(null)
             if (res.success) {
-                StateUpdate({ IsBlur: false, status: variables.status }, setData)
+                if (variables.status === "reopen") {
+                    StateUpdate({ status: variables.status, isLocked: false }, setData)
+                } else {
+                    StateUpdate({ IsBlur: false, status: variables.status, isLocked: true }, setData)
+                }
                 getInspirationData({ design_id: inspirationData?.design_id?.toString() })
             }
         },
@@ -205,23 +213,38 @@ export function InspirationsCardView({
 
                     </AccordionTrigger>
                     <div className="absolute right-14 top-[50%] -translate-y-1/2 flex items-center space-x-2 z-10 group-data-[state=closed]:hidden">
-                        {data.IsBlur && <Button
-                            variant="outline"
-                            size="xs"
-                            onClick={() => StateUpdate({ isEditModalOpen: true }, setOpenModal)}
-                            className="h-7 px-4 py-0 border-[#dcccbd] bg-[#7DAA7B] text-[14px] font-medium text-white rounded-md hover:bg-[#5d8d5b]"
-                        >
-                            Start
-                        </Button>}
-                        {!data.IsBlur && data.status !== "completed" && data.status !== "skipped" && <Button
-                            variant="outline"
-                            size="xs"
-                            disabled={data.IsBlur || isUpdatingStatus}
-                            onClick={() => handleOnCompleted("skipped")}
-                            className="h-7 px-4 py-0 border-[#dcccbd] bg-[#F8F5F2] text-[14px] font-medium text-primary-foreground rounded-md hover:bg-[#f1ede9]"
-                        >
-                            {isUpdatingStatus && clickedAction === "skipped" ? "..." : "Skip"}
-                        </Button>}
+                        {data.IsBlur &&
+                            <Button
+                                variant="outline"
+                                size="xs"
+                                onClick={() => StateUpdate({ isEditModalOpen: true }, setOpenModal)}
+                                className="h-7 px-4 py-0 border-[#dcccbd] bg-[#7DAA7B] text-[14px] font-medium text-white rounded-md hover:bg-[#5d8d5b]"
+                            >
+                                Start
+                            </Button>
+                        }
+                        {!data.IsBlur && data.status !== "completed" && data.status !== "skipped" &&
+                            <Button
+                                variant="outline"
+                                size="xs"
+                                disabled={data.IsBlur || isUpdatingStatus}
+                                onClick={() => handleOnCompleted("skipped")}
+                                className="h-7 px-4 py-0 border-[#dcccbd] bg-[#F8F5F2] text-[14px] font-medium text-primary-foreground rounded-md hover:bg-[#f1ede9]"
+                            >
+                                {isUpdatingStatus && clickedAction === "skipped" ? "..." : "Skip"}
+                            </Button>
+                        }
+                        {data.isLocked &&
+                            <Button
+                                variant="outline"
+                                size="xs"
+                                disabled={data.IsBlur || isUpdatingStatus}
+                                onClick={() => handleOnCompleted("reopen")}
+                                className="h-7 px-4 py-0 border-[#dcccbd] bg-[#F8F5F2] text-[14px] font-medium text-primary-foreground rounded-md hover:bg-[#f1ede9]"
+                            >
+                                {isUpdatingStatus && clickedAction === "reopen" ? "..." : "Reopen"}
+                            </Button>
+                        }
                     </div>
                 </div>
 

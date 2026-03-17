@@ -206,6 +206,7 @@ export function FabricViewModalImage({
         }
         if (prefix === "fabric") {
             payload.fabric_stock_id = selectedData?.fabric_stock_id?.toString()
+            payload.fabric_meter = payload.fabric_meter.toString()
         }
         if (prefix === 'yarn') {
             payload.yarn_stock_id = selectedData?.yarn_stock_id?.toString()
@@ -215,6 +216,9 @@ export function FabricViewModalImage({
             payload.sequence_cd = values.sequence_cd ? values.sequence_cd.toString() : ""
             payload.sequence_stock_id = selectedData?.sequence_stock_id?.toString()
         }
+
+        console.log('payload', payload)
+        // return
 
         if (["fabric", "yarn", "sequence"].includes(prefix)) {
             updateItem(payload)

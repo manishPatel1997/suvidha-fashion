@@ -85,6 +85,19 @@ export const API_LIST_AUTH = {
         assignView: "/api/v1/design/samples/assigns/view",
         target: "/api/v1/design/samples/target",
     },
+    User: {
+        get: "/api/v1/user/get",
+        create: "/api/v1/user/create",
+        update: "/api/v1/user/update",
+        delete: "/api/v1/user/delete"
+    },
+    Vendor: {
+        get: "/api/v1/vendor/get",
+        create: "/api/v1/vendor/create",
+        update: "/api/v1/vendor/update",
+        delete: "/api/v1/vendor/delete",
+        type:"/api/v1/vendor/type"
+    },
 
     // temp add
     Deko: {

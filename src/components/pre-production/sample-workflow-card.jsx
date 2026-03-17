@@ -27,6 +27,7 @@ const DetailItem = ({ label, value }) => (
 );
 
 export function SampleWorkflowCard({
+  isLocked,
   title = "6. Sample",
   PreData,
 }) {
@@ -40,6 +41,7 @@ export function SampleWorkflowCard({
     sample_target: PreData?.sampleData?.sample_target || 0,
     note: PreData?.sampleData?.note || "",
     progress: (PreData?.sampleData?.assigns.length / PreData?.sampleData?.sample_target) * 100,
+    isLocked: false
   })
   const [clickedAction, setClickedAction] = React.useState(null)
   const [openModal, setOpenModal] = React.useState({
@@ -51,20 +53,25 @@ export function SampleWorkflowCard({
     if (PreData?.sampleData) {
       StateUpdate({
         status: PreData?.sampleData?.status || "",
-        IsBlur: PreData?.sampleData?.status === "pending",
+        IsBlur: isLocked || PreData?.sampleData?.status === "pending",
         assign: PreData?.sampleData?.assigns || [],
         sample_target: PreData?.sampleData?.sample_target || 0,
         note: PreData?.sampleData?.note || "",
         progress: PreData?.sampleData?.sample_target !== 0 ? (PreData?.sampleData?.assigns?.length / PreData?.sampleData?.sample_target) * 100 : 0,
+        isLocked: PreData?.sampleData?.status === "completed" || PreData?.sampleData?.status === "skipped"
       }, setData)
     }
-  }, [PreData?.sampleData])
+  }, [PreData?.sampleData, isLocked])
 
   const { mutate: updateStatus, isPending: isUpdatingStatus } = usePost(API_LIST_AUTH.Sample.assignStatus, {
     onSuccess: (res, variables) => {
       setClickedAction(null)
       if (res.success) {
-        StateUpdate({ IsBlur: false, status: variables.status }, setData)
+        if (variables.status === "reopen") {
+          StateUpdate({ status: variables.status, isLocked: false }, setData)
+        } else {
+          StateUpdate({ IsBlur: false, status: variables.status, isLocked: true }, setData)
+        }
       }
     },
     onError: (error) => {
@@ -173,6 +180,17 @@ export function SampleWorkflowCard({
             >
               {isUpdatingStatus && clickedAction === "skipped" ? "..." : "Skip"}
             </Button>}
+            {data.isLocked &&
+              <Button
+                variant="outline"
+                size="xs"
+                disabled={data.IsBlur || isUpdatingStatus}
+                onClick={() => handleOnCompleted("reopen")}
+                className="h-7 px-4 py-0 border-[#dcccbd] bg-[#F8F5F2] text-[14px] font-medium text-primary-foreground rounded-md hover:bg-[#f1ede9]"
+              >
+                {isUpdatingStatus && clickedAction === "reopen" ? "..." : "Reopen"}
+              </Button>
+            }
           </div>
         </div>
 

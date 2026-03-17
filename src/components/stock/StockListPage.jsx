@@ -18,9 +18,12 @@ export function StockListPage({
     renderCard,
     renderSidebar,
     renderAddModal,
+    renderEditModal,
+    renderDeleteModal,
     alertComponent: AlertComponent,
     getItemId = (item) => item.id,
     getItemLabel = (item) => item.name || `Item ${item.id}`,
+    listClassName = "flex flex-col gap-6",
 }) {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -33,8 +36,12 @@ export function StockListPage({
 
     const [data, setData] = React.useState({
         isAddModalOpen: false,
+        isEditModalOpen: false,
+        isDeleteModalOpen: false,
         items: [],
         selectedData: null,
+        selectedEditData: null,
+        selectedDeleteData: null,
         isSidebarOpen: false,
         selectedSidebarData: null,
     });
@@ -76,16 +83,23 @@ export function StockListPage({
                     StateUpdate({ items: res.data.data }, setData);
                 }
             },
+            onError: (err) => {
+                toast.error(err.message || "Failed to fetch data");
+            }
         }
     );
 
-    React.useEffect(() => {
+    const refetch = () => {
         fetchItems({
             page: currentPage,
             limit: limit,
             search: debouncedSearch,
             pagination: "true",
         });
+    };
+
+    React.useEffect(() => {
+        refetch();
     }, [currentPage, limit, debouncedSearch]);
 
     const handleAddItem = (newItem) => {
@@ -107,18 +121,39 @@ export function StockListPage({
     // };
 
     const handleUpdateSuccess = (updatedItem) => {
-        const updatedItems = data.items.map((item) =>
-            getItemId(item).toString() ===
-                getItemId(updatedItem).toString()
+        if (!updatedItem) return;
+        const updatedItemId = getItemId(updatedItem);
+
+        const updatedItems = data.items.map((item) => {
+            const itemId = getItemId(item);
+            return itemId !== undefined && itemId !== null && updatedItemId !== undefined && updatedItemId !== null && itemId.toString() === updatedItemId.toString()
                 ? updatedItem
-                : item
-        );
+                : item;
+        });
 
         StateUpdate(
             {
                 items: updatedItems,
                 isSidebarOpen: false,
-                selectedSidebarData: null, // VERY IMPORTANT
+                selectedSidebarData: null,
+                isEditModalOpen: false,
+                selectedEditData: null,
+            },
+            setData
+        );
+    };
+
+    const handleDeleteSuccess = (deletedItemId) => {
+        if (deletedItemId === undefined || deletedItemId === null) return;
+        const updatedItems = data.items.filter((item) => {
+            const itemId = getItemId(item);
+            return itemId !== undefined && itemId !== null && itemId.toString() !== deletedItemId.toString();
+        });
+        StateUpdate(
+            {
+                items: updatedItems,
+                isDeleteModalOpen: false,
+                selectedDeleteData: null,
             },
             setData
         );
@@ -149,6 +184,45 @@ export function StockListPage({
                     onOpenChange: (isOpen) =>
                         StateUpdate({ isAddModalOpen: isOpen }, setData),
                     onAdd: handleAddItem,
+                    refetch,
+                })}
+
+            {/* Edit Modal */}
+            {renderEditModal &&
+                renderEditModal({
+                    open: data.isEditModalOpen,
+                    onOpenChange: (isOpen) =>
+                        StateUpdate(
+                            {
+                                isEditModalOpen: isOpen,
+                                selectedEditData: isOpen
+                                    ? data.selectedEditData
+                                    : null,
+                            },
+                            setData
+                        ),
+                    initialData: data.selectedEditData,
+                    onUpdate: handleUpdateSuccess,
+                    refetch,
+                })}
+
+            {/* Delete Modal */}
+            {renderDeleteModal &&
+                renderDeleteModal({
+                    open: data.isDeleteModalOpen,
+                    onOpenChange: (isOpen) =>
+                        StateUpdate(
+                            {
+                                isDeleteModalOpen: isOpen,
+                                selectedDeleteData: isOpen
+                                    ? data.selectedDeleteData
+                                    : null,
+                            },
+                            setData
+                        ),
+                    selectedData: data.selectedDeleteData,
+                    onDelete: handleDeleteSuccess,
+                    refetch,
                 })}
 
             {/* Search and Filters */}
@@ -178,7 +252,7 @@ export function StockListPage({
                     </p>
                 </div>
             ) : data?.items.length > 0 ? (
-                <div className="flex flex-col gap-6">
+                <div className={listClassName}>
                     {data?.items.map((item) => {
                         const rawItem = item.rawData || item;
                         // return renderCard({
@@ -201,6 +275,22 @@ export function StockListPage({
                                     {
                                         isSidebarOpen: true,
                                         selectedSidebarData: item,
+                                    },
+                                    setData
+                                ),
+                            onEdit: () =>
+                                StateUpdate(
+                                    {
+                                        isEditModalOpen: true,
+                                        selectedEditData: item,
+                                    },
+                                    setData
+                                ),
+                            onDelete: () =>
+                                StateUpdate(
+                                    {
+                                        isDeleteModalOpen: true,
+                                        selectedDeleteData: item,
                                     },
                                     setData
                                 ),

@@ -77,11 +77,13 @@ const STEP_CONFIG = {
 }
 
 export function SketchesCardView({
+    isLocked,
     title = "1. Inspirations",
     sketchesData = null,
     defaultOpen = false,
     getVisualDesignersData
 }) {
+    console.log('sketchesData', sketchesData)
     const { setFabricAssignData, setYarnAssignData, setSequenceAssignData } = usePreProductionStore()
     const titleName = title.split('.').pop()?.trim() || title
     const modalTitle = `${titleName} Target`
@@ -97,8 +99,9 @@ export function SketchesCardView({
         status: sketchesData?.status || "",
         progress: (initialAssign.length === 0 || !sketchesData) ? 0 : (initialAssign.length / sketchesData[config.targetKey]) * 100,
         selectedData: null,
+        isLocked: false
     })
-
+console.log('data.status',data.status)
     const [openModal, setOpenModal] = React.useState({
         isAddImageModalOpen: false,
         InspirationsImg: false,
@@ -120,26 +123,27 @@ export function SketchesCardView({
                 data.assign !== assignData ||
                 data.status !== sketchesData.status ||
                 data[config.targetKey] !== sketchesData[config.targetKey] ||
-                data.note !== sketchesData.note
+                data.note !== sketchesData.note ||
+                data.isLocked !== (sketchesData.status === "completed" || sketchesData.status === "skipped") ||
+                data.IsBlur !== (isLocked || (sketchesData.status === "pending" && data.status !== "completed"))
             ) {
                 StateUpdate({
                     assign: assignData,
-                    IsBlur: sketchesData.status === "pending" && data.status !== "completed",
+                    IsBlur: isLocked || (sketchesData.status === "pending" && data.status !== "completed"),
                     note: sketchesData.note,
                     [config.targetKey]: sketchesData[config.targetKey],
                     status: sketchesData.status,
-                    progress: assignData.length === 0 ? 0 : (assignData.length / sketchesData[config.targetKey]) * 100
+                    progress: assignData.length === 0 ? 0 : (assignData.length / sketchesData[config.targetKey]) * 100,
+                    isLocked: sketchesData.status === "completed" || sketchesData.status === "skipped"
                 }, setData)
             }
         }
     }, [
-        sketchesData?.assign,
-        sketchesData?.status,
-        sketchesData?.[config.targetKey],
-        sketchesData?.note
+        sketchesData,
+        isLocked
     ])
 
-
+    console.log('sketchesData.status', sketchesData?.status)
 
     const handleModalOpen = (val, selectedData, index = 0) => {
         StateUpdate({ selectedData: selectedData }, setData)
@@ -235,7 +239,11 @@ export function SketchesCardView({
             }
             setClickedAction(null)
             if (res.success) {
-                StateUpdate({ IsBlur: false, status: variables.status }, setData)
+                if (variables.status === "reopen") {
+                    StateUpdate({ status: variables.status, isLocked: false }, setData)
+                } else {
+                    StateUpdate({ IsBlur: false, status: variables.status, isLocked: true }, setData)
+                }
                 getVisualDesignersData({ design_id: sketchesData?.design_id?.toString() })
             }
         },
@@ -358,6 +366,17 @@ export function SketchesCardView({
                         >
                             {isUpdatingStatus && clickedAction === "skipped" ? "..." : "Skip"}
                         </Button>}
+                        {data.isLocked &&
+                            <Button
+                                variant="outline"
+                                size="xs"
+                                disabled={data.IsBlur || isUpdatingStatus}
+                                onClick={() => handleOnCompleted("reopen")}
+                                className="h-7 px-4 py-0 border-[#dcccbd] bg-[#F8F5F2] text-[14px] font-medium text-primary-foreground rounded-md hover:bg-[#f1ede9]"
+                            >
+                                {isUpdatingStatus && clickedAction === "reopen" ? "..." : "Reopen"}
+                            </Button>
+                        }
                     </div>
                 </div>
 
