@@ -36,7 +36,7 @@ export function SampleWorkflowCard({
   const modalTitle = `${title} Target`
   const [data, setData] = React.useState({
     status: PreData?.sampleData?.status || "",
-    IsBlur: PreData?.sampleData?.status === "pending",
+    IsBlur: PreData?.sampleData?.status ? PreData?.sampleData?.status === "pending" : true,
     assign: PreData?.sampleData?.assigns || [],
     sample_target: PreData?.sampleData?.sample_target || 0,
     note: PreData?.sampleData?.note || "",
@@ -161,7 +161,7 @@ export function SampleWorkflowCard({
 
           </AccordionTrigger>
           <div className="absolute right-14 top-[50%] -translate-y-1/2 flex items-center space-x-2 z-10 group-data-[state=closed]:hidden">
-            {data.IsBlur &&
+            {data.IsBlur && data.status === "pending" &&
               <Button
                 variant="outline"
                 size="xs"

@@ -81,9 +81,10 @@ export function SketchesCardView({
     title = "1. Inspirations",
     sketchesData = null,
     defaultOpen = false,
-    getVisualDesignersData
+    getVisualDesignersData,
+    onStatusChange
 }) {
-    console.log('sketchesData', sketchesData)
+
     const { setFabricAssignData, setYarnAssignData, setSequenceAssignData } = usePreProductionStore()
     const titleName = title.split('.').pop()?.trim() || title
     const modalTitle = `${titleName} Target`
@@ -93,7 +94,7 @@ export function SketchesCardView({
     const initialAssign = titleName === "Sequences" ? sketchesData?.sequences || [] : sketchesData?.yarns || sketchesData?.fabrics || sketchesData?.assign || []
     const [data, setData] = React.useState({
         assign: initialAssign,
-        IsBlur: sketchesData?.status === "pending",
+        IsBlur: isLocked || (sketchesData?.status === "pending" && sketchesData?.status !== "completed"),
         note: sketchesData?.note || "",
         [config.targetKey]: sketchesData?.[config.targetKey] || 0,
         status: sketchesData?.status || "",
@@ -101,7 +102,6 @@ export function SketchesCardView({
         selectedData: null,
         isLocked: false
     })
-console.log('data.status',data.status)
     const [openModal, setOpenModal] = React.useState({
         isAddImageModalOpen: false,
         InspirationsImg: false,
@@ -115,26 +115,42 @@ console.log('data.status',data.status)
         [config.targetKey]: 0
     })
 
+    if (title === "2. Sketches") {
+        // console.log('data.IsBlur', data.IsBlur)
+        // console.log('isLocked', isLocked)
+        // console.log('data.isLocked', data.isLocked)
+        // console.log('sketchesData.status', sketchesData.status)
+        // console.table({
+        //     isLocked,
+        //     sketchesData,
+        //     data
+        // });
+    }
+
     React.useEffect(() => {
         if (sketchesData) {
             const assignData = titleName === "Sequences" ? sketchesData?.sequences || [] : sketchesData?.yarns || sketchesData.fabrics || sketchesData.assign || []
+
+            const currentStepDone = (sketchesData?.status === "completed" || sketchesData?.status === "skipped")
+            const shouldBeBlurred = isLocked || (sketchesData?.status === "pending" && sketchesData?.status !== "completed")
+
             // Only update if something actually changed
             if (
                 data.assign !== assignData ||
-                data.status !== sketchesData.status ||
+                data.status !== sketchesData?.status ||
                 data[config.targetKey] !== sketchesData[config.targetKey] ||
                 data.note !== sketchesData.note ||
-                data.isLocked !== (sketchesData.status === "completed" || sketchesData.status === "skipped") ||
-                data.IsBlur !== (isLocked || (sketchesData.status === "pending" && data.status !== "completed"))
+                data.isLocked !== currentStepDone ||
+                data.IsBlur !== shouldBeBlurred
             ) {
                 StateUpdate({
                     assign: assignData,
-                    IsBlur: isLocked || (sketchesData.status === "pending" && data.status !== "completed"),
+                    IsBlur: shouldBeBlurred,
                     note: sketchesData.note,
                     [config.targetKey]: sketchesData[config.targetKey],
-                    status: sketchesData.status,
+                    status: sketchesData?.status,
                     progress: assignData.length === 0 ? 0 : (assignData.length / sketchesData[config.targetKey]) * 100,
-                    isLocked: sketchesData.status === "completed" || sketchesData.status === "skipped"
+                    isLocked: currentStepDone
                 }, setData)
             }
         }
@@ -142,8 +158,6 @@ console.log('data.status',data.status)
         sketchesData,
         isLocked
     ])
-
-    console.log('sketchesData.status', sketchesData?.status)
 
     const handleModalOpen = (val, selectedData, index = 0) => {
         StateUpdate({ selectedData: selectedData }, setData)
@@ -240,11 +254,14 @@ console.log('data.status',data.status)
             setClickedAction(null)
             if (res.success) {
                 if (variables.status === "reopen") {
-                    StateUpdate({ status: variables.status, isLocked: false }, setData)
+                    StateUpdate({ status: variables.status, isLocked: false, IsBlur: false }, setData)
                 } else {
                     StateUpdate({ IsBlur: false, status: variables.status, isLocked: true }, setData)
                 }
-                getVisualDesignersData({ design_id: sketchesData?.design_id?.toString() })
+                if (onStatusChange) {
+                    onStatusChange(variables.status)
+                }
+                getVisualDesignersData({ design_id: sketchesData?.design_id?.toString(), ...data, status: variables.status })
             }
         },
         onError: (error) => {
@@ -349,7 +366,7 @@ console.log('data.status',data.status)
 
                     </AccordionTrigger>
                     <div className="absolute right-14 top-[50%] -translate-y-1/2 flex items-center space-x-2 z-10 group-data-[state=closed]:hidden">
-                        {data.IsBlur && <Button
+                        {data.IsBlur && data.status === "pending" && <Button
                             variant="outline"
                             size="xs"
                             onClick={() => StateUpdate({ isEditModalOpen: true }, setOpenModal)}
@@ -357,7 +374,7 @@ console.log('data.status',data.status)
                         >
                             Start
                         </Button>}
-                        {!data.IsBlur && data.status !== "completed" && data.status !== "skipped" && <Button
+                        {data.IsBlur === false && data.status !== "completed" && data.status !== "skipped" && <Button
                             variant="outline"
                             size="xs"
                             disabled={data.IsBlur || isUpdatingStatus}
@@ -605,6 +622,6 @@ console.log('data.status',data.status)
                 onAdd={handleAddImage}
                 isLoading={isAssignTo}
             />
-        </Accordion>
+        </Accordion >
     )
 }

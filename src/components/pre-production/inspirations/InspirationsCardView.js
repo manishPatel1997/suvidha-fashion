@@ -39,7 +39,7 @@ export function InspirationsCardView({
         images: inspirationData?.images || [],
         currentCount: 0,
         target_count: 0,
-        IsBlur: inspirationData?.status === "pending",
+        IsBlur: inspirationData?.status === "pending" || true,
         note: inspirationData?.note || "",
         progress: (inspirationData?.inspiration_target === 0 || !inspirationData) ? 0 : (inspirationData.images.length / inspirationData.inspiration_target) * 100,
         selectedData: null,
@@ -54,7 +54,6 @@ export function InspirationsCardView({
         // flag for modal api call
         IsEditTarget: false
     })
-
     const [clickedAction, setClickedAction] = React.useState(null)
     React.useEffect(() => {
         if (inspirationData) {
@@ -81,7 +80,7 @@ export function InspirationsCardView({
 
     const titleName = title.split('.').pop()?.trim() || title
     const modalTitle = `${titleName} Target`
-    console.log('data.isLocked', data.isLocked)
+
 
     const handleModalOpen = (val, selectedData, index = 0) => {
         StateUpdate({ selectedData: selectedData }, setData)
@@ -130,7 +129,7 @@ export function InspirationsCardView({
                 } else {
                     StateUpdate({ IsBlur: false, status: variables.status, isLocked: true }, setData)
                 }
-                getInspirationData({ design_id: inspirationData?.design_id?.toString() })
+                getInspirationData({ design_id: inspirationData?.design_id?.toString(), ...data, status: variables.status })
             }
         },
         onError: (error) => {
@@ -152,7 +151,7 @@ export function InspirationsCardView({
         const body = {
             design_id: inspirationData.design_id.toString(),
             inspiration_target: val.toString(),
-            status: "running", // running
+            status: data?.status === "reopen" ? "reopen" : "running", // running
             note: ""
         }
         updateTarget(body)
@@ -224,7 +223,7 @@ export function InspirationsCardView({
                             </Button>
                         }
                         {!data.IsBlur && data.status !== "completed" && data.status !== "skipped" &&
-                            <Button
+                            < Button
                                 variant="outline"
                                 size="xs"
                                 disabled={data.IsBlur || isUpdatingStatus}
@@ -234,7 +233,7 @@ export function InspirationsCardView({
                                 {isUpdatingStatus && clickedAction === "skipped" ? "..." : "Skip"}
                             </Button>
                         }
-                        {data.isLocked &&
+                        {data.isLocked && data.status !== "reopen" &&
                             <Button
                                 variant="outline"
                                 size="xs"
@@ -247,7 +246,6 @@ export function InspirationsCardView({
                         }
                     </div>
                 </div>
-
                 {/* CONTENT */}
                 <AccordionContent className="p-0">
                     <div className={clsx(data.IsBlur && "relative")}>

@@ -11,7 +11,6 @@ import PageHeader from '@/components/PageHeader'
 import usePreProductionStore from '@/store/preProductionStore'
 
 export function PreProductionClient({ id, inspirationData = null, sketchesData = null, visualDesignersData = null, fabricData = null, yarnData = null, sequencesData = null, sampleData = null }) {
-    console.log('yarnData', yarnData)
     const [PreData, setPreData] = useState({
         inspirationData: inspirationData,
         sketchesData: sketchesData,
@@ -88,15 +87,31 @@ export function PreProductionClient({ id, inspirationData = null, sketchesData =
     };
 
     // const inspirations = inspirationData?.inspirations?.map(img => `${process.env.NEXT_PUBLIC_API_URL}${img.image}`) || []
-    const { mutate: getInspirationData } = useFetchAndStore(
+    const { mutate: getSketchData } = useFetchAndStore(
         API_LIST_AUTH.Sketches.get,
         "sketchesData"
     );
+
+    const getSketchDataClick = (payload) => {
+        const updatedInspirationData = { ...PreData.inspirationData, images: payload.images, status: payload.status, inspiration_target: payload.inspiration_target, note: payload.note }
+        setPreData({
+            inspirationData: updatedInspirationData,
+        })
+        getSketchData({ design_id: payload.design_id })
+    }
 
     const { mutate: getVisualDesignersData } = useFetchAndStore(
         API_LIST_AUTH.VisualDesigners.get,
         "visualDesignersData"
     );
+
+    const getVisualDesignersDataClick = (payload) => {
+        const updatedInspirationData = { ...PreData.sketchesData, assign: payload.assign, note: payload.note, status: payload.status, sketche_target: payload.sketche_target }
+        setPreData({
+            sketchesData: updatedInspirationData,
+        })
+        getVisualDesignersData({ design_id: payload.design_id })
+    }
 
     const { mutate: getFabricData } = useFetchAndStore(
         API_LIST_AUTH.Fabric.get,
@@ -106,33 +121,93 @@ export function PreProductionClient({ id, inspirationData = null, sketchesData =
         }
     );
 
+    const getFabricDataClick = (payload) => {
+        const updatedInspirationData = {
+            ...PreData.visualDesignersData,
+            assign: payload.assign,
+            note: payload.note,
+            status: payload.status,
+            visual_designer_target: payload.visual_designer_target
+        }
+        setPreData({
+            visualDesignersData: updatedInspirationData,
+        })
+        getFabricData({ design_id: payload.design_id })
+    }
+
     const { mutate: getYarnData } = useFetchAndStore(
         API_LIST_AUTH.Yarn.get,
         "yarnData"
     );
+    const getYarnDataClick = (payload) => {
+        const updatedInspirationData = {
+            ...PreData.fabricData,
+            fabrics: payload.assign,
+            note: payload.note,
+            status: payload.status,
+            fabric_target: payload.fabric_target
+        }
+        setPreData({
+            fabricData: updatedInspirationData,
+        })
+        getYarnData({ design_id: payload.design_id })
+    }
 
     const { mutate: getSequencesData } = useFetchAndStore(
         API_LIST_AUTH.Sequences.get,
         "sequencesData"
     );
 
+    const getSequencesDataClick = (payload) => {
+        const updatedInspirationData = {
+            ...PreData.yarnData,
+            yarns: payload.assign,
+            note: payload.note,
+            status: payload.status,
+            yarn_target: payload.yarn_target
+        }
+        setPreData({
+            yarnData: updatedInspirationData,
+        })
+        getSequencesData({ design_id: payload.design_id })
+    }
+
     const { mutate: getSampleData } = useFetchAndStore(
         API_LIST_AUTH.Sample.get,
         "sampleData"
     );
 
+    const getSampleDataClick = (payload) => {
+        const updatedInspirationData = {
+            ...PreData.sequencesData,
+            sequences: payload.assign,
+            note: payload.note,
+            status: payload.status,
+            sequence_target: payload.sequence_target
+        }
+        setPreData({
+            sequencesData: updatedInspirationData,
+        })
+        getSampleData({ design_id: payload.design_id })
+    }
+
     const getFabricAndSampleData = (payload) => {
         getFabricData(payload);
-        getSampleData(payload);
+        getSampleDataClick(payload);
     };
-
 
     const [stepStatuses, setStepStatuses] = useState({})
 
-    const isStepDone = (stepData, stepKey) => {
+    const isStepDone = (OvenData, stepData, stepKey) => {
         const trackedStatus = stepStatuses[stepKey]
         const dataStatus = stepData?.status
         const status = trackedStatus || dataStatus
+        if (OvenData?.status === "completed" || OvenData?.status === "skipped" || OvenData?.status === "reopen") {
+            return true
+        }
+        if (status === "reopen") {
+            return true
+        }
         return status === "completed" || status === "skipped"
     }
 
@@ -159,52 +234,51 @@ export function PreProductionClient({ id, inspirationData = null, sketchesData =
                     Design ID: {designId || `${id}`}
                 </Button>
             </div>
-
             <InspirationsCardView
-                isLocked={isStepDone(PreData.inspirationData, 'inspirationData')}
-                getInspirationData={getInspirationData}
+                isLocked={isStepDone(PreData.inspirationData, PreData.inspirationData, 'inspirationData')}
+                getInspirationData={getSketchDataClick}
                 defaultOpen
                 title="1. Inspirations"
                 inspirationData={PreData.inspirationData}
                 onStatusChange={(status) => updateStepStatus('inspirationData', status)}
             />
             <SketchesCardView
-                isLocked={!isStepDone(PreData.inspirationData, 'inspirationData')}
+                isLocked={!isStepDone(PreData.sketchesData, PreData.inspirationData, 'inspirationData')}
                 title="2. Sketches"
                 sketchesData={PreData.sketchesData}
-                getVisualDesignersData={getVisualDesignersData}
+                getVisualDesignersData={getVisualDesignersDataClick}
                 onStatusChange={(status) => updateStepStatus('sketchesData', status)}
             />
             <SketchesCardView
-                isLocked={!isStepDone(PreData.sketchesData, 'sketchesData')}
+                isLocked={!isStepDone(PreData.visualDesignersData, PreData.sketchesData, 'sketchesData')}
                 title="3. Design"
                 sketchesData={PreData.visualDesignersData}
-                getVisualDesignersData={getFabricData}
+                getVisualDesignersData={getFabricDataClick}
                 onStatusChange={(status) => updateStepStatus('visualDesignersData', status)}
             />
             <SketchesCardView
-                isLocked={!isStepDone(PreData.visualDesignersData, 'visualDesignersData')}
+                isLocked={!isStepDone(PreData.fabricData, PreData.visualDesignersData, 'visualDesignersData')}
                 title="4. Fabric"
                 sketchesData={PreData.fabricData}
-                getVisualDesignersData={getYarnData}
+                getVisualDesignersData={getYarnDataClick}
                 onStatusChange={(status) => updateStepStatus('fabricData', status)}
             />
             <SketchesCardView
-                isLocked={!isStepDone(PreData.fabricData, 'fabricData')}
+                isLocked={!isStepDone(PreData.yarnData, PreData.fabricData, 'fabricData')}
                 title="5. Yarn"
                 sketchesData={PreData.yarnData}
-                getVisualDesignersData={getSequencesData}
+                getVisualDesignersData={getSequencesDataClick}
                 onStatusChange={(status) => updateStepStatus('yarnData', status)}
             />
             <SketchesCardView
-                isLocked={!isStepDone(PreData.yarnData, 'yarnData')}
+                isLocked={!isStepDone(PreData.sequencesData, PreData.yarnData, 'yarnData')}
                 title="6. Sequences"
                 sketchesData={PreData.sequencesData}
                 getVisualDesignersData={getFabricAndSampleData}
                 onStatusChange={(status) => updateStepStatus('sequencesData', status)}
             />
             <SampleWorkflowCard
-                isLocked={!isStepDone(PreData.sequencesData, 'sequencesData')}
+                isLocked={!isStepDone(PreData.sampleData, PreData.sequencesData, 'sequencesData')}
                 PreData={PreData}
                 title="7. Sample"
                 onStatusChange={(status) => updateStepStatus('sampleData', status)}
