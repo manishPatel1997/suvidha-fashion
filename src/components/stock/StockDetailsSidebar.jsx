@@ -189,7 +189,7 @@ export function StockDetailsSidebar({
         }),
 
         ...(type === "Yarn" && {
-            yarn_num_cons: Yup.string().required("Yarn num cons is required"),
+            yarn_num_cons: Yup.string().trim().min(3, "Minimum 3 characters required").required("Yarn num cons is required"),
         }),
 
         category: Yup.string().required("Category is required"),

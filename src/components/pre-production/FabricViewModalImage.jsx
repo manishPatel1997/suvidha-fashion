@@ -190,7 +190,8 @@ export function FabricViewModalImage({
                 }
                 : {
                     [field("name")]: Yup.string().required("Yarn name is required"),
-                    yarn_num_cons: Yup.number().required("Yarn Num Cons is required"),
+                    yarn_num_cons: Yup.number().min(3, "Minimum value must be 3")
+                        .required("Yarn Num Cons is required")
                 }
     );
     const handleSubmit = (values) => {

@@ -40,7 +40,7 @@ export function SampleWorkflowCard({
     assign: PreData?.sampleData?.assigns || [],
     sample_target: PreData?.sampleData?.sample_target || 0,
     note: PreData?.sampleData?.note || "",
-    progress: (PreData?.sampleData?.assigns.length / PreData?.sampleData?.sample_target) * 100,
+    progress: PreData?.sampleData?.sample_target !== 0 ? (PreData?.sampleData?.sample_target / PreData?.sampleData?.assigns?.length) * 100 : 0,
     isLocked: false
   })
   const [clickedAction, setClickedAction] = React.useState(null)
@@ -51,13 +51,14 @@ export function SampleWorkflowCard({
   })
   React.useEffect(() => {
     if (PreData?.sampleData) {
+      const prgrssVar = PreData?.sampleData?.sample_target !== 0 ? (PreData?.sampleData?.sample_target / PreData?.sampleData?.assigns?.length) * 100 : 0
       StateUpdate({
         status: PreData?.sampleData?.status || "",
         IsBlur: isLocked || PreData?.sampleData?.status === "pending",
         assign: PreData?.sampleData?.assigns || [],
         sample_target: PreData?.sampleData?.sample_target || 0,
         note: PreData?.sampleData?.note || "",
-        progress: PreData?.sampleData?.sample_target !== 0 ? (PreData?.sampleData?.assigns?.length / PreData?.sampleData?.sample_target) * 100 : 0,
+        progress: prgrssVar,
         isLocked: PreData?.sampleData?.status === "completed" || PreData?.sampleData?.status === "skipped"
       }, setData)
     }
@@ -193,7 +194,6 @@ export function SampleWorkflowCard({
             }
           </div>
         </div>
-
         {/* CONTENT */}
         <AccordionContent className="p-0">
           <div

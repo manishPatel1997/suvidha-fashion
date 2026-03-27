@@ -225,7 +225,10 @@ export function AddFabricModal({
             return Yup.object().shape({
                 // [config.idKey]: Yup.string()
                 //     .required(`Id is required`),
-                [config.nameKey]: Yup.string().required(`Name is required`),
+                [config.nameKey]: Yup.string()
+                    .trim()
+                    .min(3, "Minimum 3 characters required")
+                    .required("Name is required"),
                 [config.emailKey]: Yup.string().email("Invalid email").required("Email is required"),
                 // [config.passwordKey]: PasswordValidation,
                 [config.passwordKey]: isEdit
@@ -240,7 +243,10 @@ export function AddFabricModal({
 
         if (isVendor) {
             return Yup.object().shape({
-                [config.nameKey]: Yup.string().required(`Name is required`),
+                [config.nameKey]: Yup.string()
+                    .trim()
+                    .min(3, "Minimum 3 characters required")
+                    .required("Name is required"),
                 [config.categoryKey]: Yup.string().required(`Category is required`),
                 [config.contactKey]: Yup.string()
                     .required("Contact is required")
@@ -287,7 +293,7 @@ export function AddFabricModal({
         if (!isFabric && !isSequences) {
             return Yup.object().shape({
                 ...commonFields,
-                [config.meterKey]: Yup.string()
+                [config.meterKey]: Yup.string().trim().min(3, "Minimum 3 characters required")
                     .required("Num cons is required"),
                 [config.qualityKey]: Yup.string().required("Sub quality is required"),
             })
