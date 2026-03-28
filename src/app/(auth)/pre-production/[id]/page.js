@@ -2,20 +2,21 @@ import { post } from '@/lib/server-api'
 import { redirect } from 'next/navigation'
 import { PreProductionClient } from './PreProductionClient'
 import { API_LIST_AUTH } from '@/hooks/api-list'
+import { fetchStepData } from '@/lib/helperServer'
 
 // ✅ Common Fetch Function
-const fetchStepData = async (url, id) => {
-    try {
-        const response = await post(url, { design_id: id })
-        return response?.data || null
-    } catch (error) {
-        if (error.digest?.startsWith('NEXT_REDIRECT')) {
-            throw error
-        }
-        console.error(`Error fetching ${url}:`, error)
-        redirect('/dashboard')
-    }
-}
+// const fetchStepData = async (url, id) => {
+//     try {
+//         const response = await post(url, { design_id: id })
+//         return response?.data || null
+//     } catch (error) {
+//         if (error.digest?.startsWith('NEXT_REDIRECT')) {
+//             throw error
+//         }
+//         console.error(`Error fetching ${url}:`, error)
+//         redirect('/dashboard')
+//     }
+// }
 
 export default async function Page({ params }) {
     const { id } = await params

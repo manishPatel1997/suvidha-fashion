@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 import CloseIcon from "@/assets/CloseIcon"
 import { usePost } from "@/hooks/useApi"
 import { downloadImage, toFormData, StateUpdate } from "@/lib/helper"
-import { API_LIST_AUTH } from "@/hooks/api-list"
+import { API_LIST_AUTH, API_PRODUCTION } from "@/hooks/api-list"
 import { CommonModal } from "@/components/CommonModal"
 import { DeleteConfirmationModal } from "@/components/delete-confirmation-modal"
 import { FloatingTextarea } from "@/components/ui/floating-textarea"
@@ -31,15 +31,58 @@ export function ProductionViewModal({
     const [selectedFile, setSelectedFile] = React.useState(null)
     const fileInputRef = React.useRef(null)
 
-    const { mutate: deleteSample, isPending: isDeleting } = usePost(API_LIST_AUTH.Sample.assignDelete, {
+    const { mutate: deleteSample, isPending: isDeleting } = usePost(API_PRODUCTION.delete, {
         onSuccess: (res, variables) => {
             if (res.success) {
-                if (onDeleteSuccess) onDeleteSuccess(variables.id)
+                if (onDeleteSuccess) onDeleteSuccess(variables.production_items_id)
                 onOpenChange(false)
             }
         },
         onError: (error) => {
             console.error("Error deleting sample:", error)
+        }
+    })
+
+    const { mutate: getSampleDetails, isPending: isLoadingDetails } = usePost(API_PRODUCTION.sample_get, {
+        onSuccess: (res) => {
+            if (res.success && res.data) {
+                const data = res.data;
+                const details = data.details || {};
+                setFormData(prev => ({
+                    ...prev,
+                    sample_id: data.sample_id ? String(data.sample_id) : prev.sample_id,
+                    design_id: details.sample_design_no || prev.design_id,
+                    status: data.status ? (data.status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')) : prev.status,
+                    edit_note: data.edit_note ?? prev.edit_note ?? "",
+                    note: data.note ?? prev.note ?? "",
+                    yarn: details.yarn_name || prev.yarn,
+                    quality_con: details.quality_con || prev.quality_con,
+                    sequence: details.sequence_name || prev.sequence,
+                    cd_con: details.sample_cd_con || prev.cd_con,
+                    meter: details.sample_meter || prev.meter,
+                    sample_design_no: details.sample_design_no || prev.sample_design_no,
+                    yarn_color: details.yarn_color || prev.yarn_color,
+                }));
+                if (data.image) {
+                    setPreviewImage(`${process.env.NEXT_PUBLIC_API_URL}${data.image}`);
+                }
+            }
+        },
+        onError: (error) => {
+            console.error("Error fetching sample details:", error);
+        }
+    })
+ 
+    const { mutate: updateProduction, isPending: isUpdating } = usePost(API_PRODUCTION.update, {
+        isFormData: true,
+        onSuccess: (res) => {
+            if (res.success) {
+                if (onUpdateSuccess) onUpdateSuccess()
+                setIsEditing(false)
+            }
+        },
+        onError: (error) => {
+            console.error("Error updating production:", error)
         }
     })
 
@@ -50,24 +93,28 @@ export function ProductionViewModal({
             setIsDeleteModalOpen(false)
             setSelectedFile(null)
         }
-        if (selectedData) {
+        if (open && selectedData?.id) {
+            // Initial load from selectedData as fallback/placeholder
             setFormData({
-                sample_id: selectedData.id || "S-480",
-                design_id: selectedData.design_id || "D-1425",
+                sample_id: selectedData.id || "",
+                design_id: selectedData.design_id || "",
                 status: selectedData.status || "In Process",
-                edit: selectedData.edit || "",
+                edit_note: selectedData.edit_note || selectedData.edit || "",
                 note: selectedData.note || "",
-                yarn: selectedData.yarn || "Cotton Yarn",
-                quality_con: selectedData.quality_con || "Approved",
-                sequence: selectedData.sequence || "Round Sequin",
-                cd_con: selectedData.cd_con || "SEQ-101",
-                meter: selectedData.meter || "2",
-                sample_design_no: selectedData.sample_design_no || "D-1425",
-                yarn_color: selectedData.yarn_color || "#B0826A",
+                yarn: selectedData.yarn || "",
+                quality_con: selectedData.quality_con || "",
+                sequence: selectedData.sequence || "",
+                cd_con: selectedData.cd_con || "",
+                meter: selectedData.meter || "",
+                sample_design_no: selectedData.sample_design_no || "",
+                yarn_color: selectedData.yarn_color || "",
             })
             setPreviewImage(selectedData.image_url ? `${process.env.NEXT_PUBLIC_API_URL}${selectedData.image_url}` : "/design-thumb.png")
+            console.log('selectedData', selectedData)
+            // Fetch latest data from API
+            getSampleDetails({ production_items_id: String(selectedData.sample_id) })
         }
-    }, [open, selectedData])
+    }, [open, selectedData, getSampleDetails])
 
     const handleImageChange = (e) => {
         const file = e.target.files?.[0]
@@ -86,9 +133,12 @@ export function ProductionViewModal({
     }
 
     const handleSubmit = () => {
-        console.log("Submitting update:", { ...formData, image: selectedFile })
-        // Implement update logic if API exists
-        setIsEditing(false)
+        const payload = {
+            ...formData,
+            production_items_id: String(selectedData.sample_id),
+            image: selectedFile,
+        }
+        updateProduction(toFormData(payload))
     }
 
     const statusOptions = [
@@ -197,18 +247,18 @@ export function ProductionViewModal({
                                         <label className="text-[12px] font-medium text-[#B0826A] ml-2">Sample Id</label>
                                         <Input
                                             value={formData.sample_id}
-                                            readOnly={!isEditing}
+                                            readOnly={true}
                                             onChange={(e) => handleFieldChange("sample_id", e.target.value)}
-                                            className="h-11 rounded-[10px] border-[#dcccbd]"
+                                            className="h-11 rounded-[10px] border-[#dcccbd] bg-gray-50!"
                                         />
                                     </div>
                                     <div className="space-y-1">
                                         <label className="text-[12px] font-medium text-[#B0826A] ml-2">Design Id</label>
                                         <Input
                                             value={formData.design_id}
-                                            readOnly={!isEditing}
+                                            readOnly={true}
                                             onChange={(e) => handleFieldChange("design_id", e.target.value)}
-                                            className="h-11 rounded-[10px] border-[#dcccbd]"
+                                            className="h-11 rounded-[10px] border-[#dcccbd] bg-gray-50!"
                                         />
                                     </div>
                                 </div>
@@ -218,18 +268,18 @@ export function ProductionViewModal({
                                     <FormSelect
                                         options={statusOptions}
                                         value={formData.status}
-                                        readOnly={!isEditing}
+                                        readOnly={true}
                                         onValueChange={(val) => handleFieldChange("status", val)}
-                                        triggerClassName="h-11 rounded-[10px] border-[#dcccbd]!"
+                                        triggerClassName="h-11 rounded-[10px] border-[#dcccbd]! bg-gray-50!"
                                     />
                                 </div>
 
                                 <div className="space-y-1">
                                     <label className="text-[12px] font-medium text-[#B0826A] ml-2">Edit</label>
                                     <FloatingTextarea
-                                        value={formData.edit}
+                                        value={formData.edit_note}
                                         readOnly={!isEditing}
-                                        onChange={(e) => handleFieldChange("edit", e.target.value)}
+                                        onChange={(e) => handleFieldChange("edit_note", e.target.value)}
                                         isFloating={false}
                                         className="min-h-[80px] rounded-[10px] border-[#dcccbd]"
                                     />
@@ -262,64 +312,64 @@ export function ProductionViewModal({
                                     <label className="text-[12px] font-medium text-[#B0826A] ml-2">Yarn</label>
                                     <Input
                                         value={formData.yarn}
-                                        readOnly={!isEditing}
+                                        readOnly={true}
                                         onChange={(e) => handleFieldChange("yarn", e.target.value)}
-                                        className="h-11 rounded-[10px] border-[#dcccbd]"
+                                        className="h-11 rounded-[10px] border-[#dcccbd] bg-gray-50!"
                                     />
                                 </div>
                                 <div className="space-y-1">
                                     <label className="text-[12px] font-medium text-[#B0826A] ml-2">Quality Con</label>
                                     <Input
                                         value={formData.quality_con}
-                                        readOnly={!isEditing}
+                                        readOnly={true}
                                         onChange={(e) => handleFieldChange("quality_con", e.target.value)}
-                                        className="h-11 rounded-[10px] border-[#dcccbd]"
+                                        className="h-11 rounded-[10px] border-[#dcccbd] bg-gray-50!"
                                     />
                                 </div>
                                 <div className="space-y-1">
                                     <label className="text-[12px] font-medium text-[#B0826A] ml-2">Sequence</label>
                                     <Input
                                         value={formData.sequence}
-                                        readOnly={!isEditing}
+                                        readOnly={true}
                                         onChange={(e) => handleFieldChange("sequence", e.target.value)}
-                                        className="h-11 rounded-[10px] border-[#dcccbd]"
+                                        className="h-11 rounded-[10px] border-[#dcccbd] bg-gray-50!"
                                     />
                                 </div>
                                 <div className="space-y-1">
                                     <label className="text-[12px] font-medium text-[#B0826A] ml-2">CD Con</label>
                                     <Input
                                         value={formData.cd_con}
-                                        readOnly={!isEditing}
+                                        readOnly={true}
                                         onChange={(e) => handleFieldChange("cd_con", e.target.value)}
-                                        className="h-11 rounded-[10px] border-[#dcccbd]"
+                                        className="h-11 rounded-[10px] border-[#dcccbd] bg-gray-50!"
                                     />
                                 </div>
                                 <div className="space-y-1">
                                     <label className="text-[12px] font-medium text-[#B0826A] ml-2">Meter</label>
                                     <Input
                                         value={formData.meter}
-                                        readOnly={!isEditing}
+                                        readOnly={true}
                                         onChange={(e) => handleFieldChange("meter", e.target.value)}
-                                        className="h-11 rounded-[10px] border-[#dcccbd]"
+                                        className="h-11 rounded-[10px] border-[#dcccbd] bg-gray-50!"
                                     />
                                 </div>
                                 <div className="space-y-1">
                                     <label className="text-[12px] font-medium text-[#B0826A] ml-2">Design No</label>
                                     <Input
                                         value={formData.sample_design_no}
-                                        readOnly={!isEditing}
+                                        readOnly={true}
                                         onChange={(e) => handleFieldChange("sample_design_no", e.target.value)}
-                                        className="h-11 rounded-[10px] border-[#dcccbd]"
+                                        className="h-11 rounded-[10px] border-[#dcccbd] bg-gray-50!"
                                     />
                                 </div>
                                 <div className="space-y-1 select-none">
                                     <label className="text-[12px] font-medium text-[#B0826A] ml-2">Yarn Colors</label>
                                     <FormColorPicker
                                         value={formData.yarn_color}
-                                        readOnly={!isEditing}
+                                        readOnly={true}
                                         onChange={(val) => handleFieldChange("yarn_color", val)}
                                         isFloating={false}
-                                        className="h-11 rounded-[10px] border-[#dcccbd]!"
+                                        className="h-11 rounded-[10px] border-[#dcccbd]! bg-gray-50!"
                                     />
                                 </div>
                             </div>
@@ -332,9 +382,10 @@ export function ProductionViewModal({
                     <div className="px-6 py-6 md:px-10 flex justify-end bg-white border-t border-[#dcccbd]/30">
                         <Button
                             onClick={handleSubmit}
+                            disabled={isUpdating}
                             className="bg-[#DCCCBD] hover:bg-[#DCCCBD]/90 text-primary-foreground font-semibold h-11 px-16 rounded-lg transition-all"
                         >
-                            Submit Changes
+                            {isUpdating ? "Submitting..." : "Submit Changes"}
                         </Button>
                     </div>
                 )}
@@ -345,7 +396,7 @@ export function ProductionViewModal({
                 open={isDeleteModalOpen}
                 onOpenChange={setIsDeleteModalOpen}
                 onConfirm={() => {
-                    deleteSample({ id: selectedData?.id?.toString() })
+                    deleteSample({ production_items_id: String(selectedData?.sample_id) })
                 }}
             />
         </CommonModal>

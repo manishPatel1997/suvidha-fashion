@@ -96,7 +96,7 @@ export const API_LIST_AUTH = {
         create: "/api/v1/vendor/create",
         update: "/api/v1/vendor/update",
         delete: "/api/v1/vendor/delete",
-        type:"/api/v1/vendor/type"
+        type: "/api/v1/vendor/type"
     },
 
     // temp add
@@ -140,4 +140,11 @@ export const API_LIST_AUTH = {
 
 export const API_LIST_NO_AUTH = {
     login: "/api/v1/auth/login",
+}
+
+export const API_PRODUCTION = {
+    get: "/api/v1/production/get",
+    update: "/api/v1/production/update_sample",
+    delete: "/api/v1/production/delete",
+    sample_get: "/api/v1/production/sample_get"
 }

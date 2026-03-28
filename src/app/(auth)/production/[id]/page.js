@@ -1,7 +1,10 @@
-'use client'
 import ProductionHome from '@/components/production/ProductionHome'
+import { API_PRODUCTION } from '@/hooks/api-list'
+import { fetchStepData } from '@/lib/helperServer'
 
-function page() {
+async function page({ params }) {
+    const ProductionParams = await params
+    const productionData = await fetchStepData(API_PRODUCTION.get, ProductionParams.id)
     return (
         <div className="space-y-8">
             <div className="flex flex-row sm:items-center justify-between gap-4">
@@ -10,7 +13,7 @@ function page() {
                 </h1>
             </div>
 
-            <ProductionHome />
+            <ProductionHome productionData={productionData} />
 
         </div>
     )

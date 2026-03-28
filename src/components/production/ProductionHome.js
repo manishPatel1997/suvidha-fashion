@@ -1,3 +1,4 @@
+"use client"
 import React from 'react'
 import { PlusIcon } from 'lucide-react'
 import clsx from 'clsx'
@@ -7,14 +8,19 @@ import { ProductionViewModal } from './ProductionViewModal'
 import { StateUpdate } from '@/lib/helper'
 
 function ProductionHome({
+    productionData = null,
     title = "Sample",
     progress = 50,
-    items = [
-        { id: "S-480", status: "Pending", src: "/design-thumb.png" },
-        { id: "S-481", status: "In Process", src: "/design-thumb.png" },
-        { id: "S-482", status: "Completed", src: "/design-thumb.png" },
-    ] // Dummy items for demonstration
 }) {
+
+    const [PreProductionData, setPreProductionData] = React.useState({})
+    React.useEffect(() => {
+        if (productionData) {
+            setPreProductionData(productionData)
+        }
+    }, [productionData])
+
+
     const [openModal, setOpenModal] = React.useState({
         isAddModalOpen: false,
         isViewModalOpen: false,
@@ -68,22 +74,22 @@ function ProductionHome({
 
                 {/* Grid of Items */}
                 <div className='grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(300px,1fr))]'>
-                    {items.map((item, idx) => (
+                    {PreProductionData?.samples?.map((item, idx) => (
                         <ProductionItemCard
-                            key={idx}
+                            key={item?.sample_id || idx}
                             {...item}
                             onClick={() => handleViewItem(item)}
                         />
                     ))}
 
-                    <button
+                    {/* <button
                         onClick={() =>
                             StateUpdate({ isAddModalOpen: true }, setOpenModal)
                         }
                         className="rounded-[10px] bg-[#F8F5F2] flex items-center justify-center hover:bg-[#F0EDE9] w-[124px] h-[95px] transition-colors"
                     >
                         <PlusIcon className="text-[#dcccbd] w-10 h-10" />
-                    </button>
+                    </button> */}
                 </div>
             </div>
 
@@ -103,8 +109,10 @@ function ProductionHome({
                     // Update items list logic here
                 }}
                 onDeleteSuccess={(id) => {
-                    console.log("Item deleted:", id)
-                    // Remove from items list logic here
+                    setPreProductionData(prev => ({
+                        ...prev,
+                        samples: prev?.samples?.filter((item) => String(item.sample_id) !== String(id))
+                    }))
                 }}
             />
         </div>
