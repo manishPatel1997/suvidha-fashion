@@ -72,7 +72,7 @@ export function ProductionViewModal({
             console.error("Error fetching sample details:", error);
         }
     })
- 
+
     const { mutate: updateProduction, isPending: isUpdating } = usePost(API_PRODUCTION.update, {
         isFormData: true,
         onSuccess: (res) => {
@@ -110,9 +110,8 @@ export function ProductionViewModal({
                 yarn_color: selectedData.yarn_color || "",
             })
             setPreviewImage(selectedData.image_url ? `${process.env.NEXT_PUBLIC_API_URL}${selectedData.image_url}` : "/design-thumb.png")
-            console.log('selectedData', selectedData)
             // Fetch latest data from API
-            getSampleDetails({ production_items_id: String(selectedData.sample_id) })
+            getSampleDetails({ production_items_id: String(selectedData.id) })
         }
     }, [open, selectedData, getSampleDetails])
 
