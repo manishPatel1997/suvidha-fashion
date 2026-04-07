@@ -110,7 +110,7 @@ function ProductionHome({
                 onDeleteSuccess={(id) => {
                     setPreProductionData(prev => ({
                         ...prev,
-                        samples: prev?.samples?.filter((item) => String(item.sample_id) !== String(id))
+                        samples: prev?.samples?.filter((item) => String(item.id) !== String(id))
                     }))
                 }}
             />

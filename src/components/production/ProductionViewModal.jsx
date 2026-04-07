@@ -134,7 +134,7 @@ export function ProductionViewModal({
     const handleSubmit = () => {
         const payload = {
             ...formData,
-            production_items_id: String(selectedData.sample_id),
+            production_items_id: String(selectedData.id),
             image: selectedFile,
         }
         updateProduction(toFormData(payload))
@@ -395,7 +395,7 @@ export function ProductionViewModal({
                 open={isDeleteModalOpen}
                 onOpenChange={setIsDeleteModalOpen}
                 onConfirm={() => {
-                    deleteSample({ production_items_id: String(selectedData?.sample_id) })
+                    deleteSample({ production_items_id: String(selectedData.id) })
                 }}
             />
         </CommonModal>
