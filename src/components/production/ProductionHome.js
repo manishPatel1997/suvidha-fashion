@@ -28,7 +28,6 @@ function ProductionHome({
     })
 
     const handleAddProduction = (values) => {
-        console.log("Adding production:", values)
         StateUpdate({ isAddModalOpen: false }, setOpenModal)
     }
 

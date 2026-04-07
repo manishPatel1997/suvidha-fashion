@@ -218,9 +218,6 @@ export function FabricViewModalImage({
             payload.sequence_stock_id = selectedData?.sequence_stock_id?.toString()
         }
 
-        console.log('payload', payload)
-        // return
-
         if (["fabric", "yarn", "sequence"].includes(prefix)) {
             updateItem(payload)
         } else {

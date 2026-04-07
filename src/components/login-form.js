@@ -30,7 +30,11 @@ function LoginForm() {
             if (data?.data?.token) {
                 toast.success('Login successful!')
                 Cookies.set('token', data.data.token, { expires: 7, secure: true })
-                redirectTo('/dashboard')
+                if (data.data.role === 'admin') {
+                    redirectTo('/dashboard')
+                } else {
+                    redirectTo('/tasks')
+                }
             }
         },
         onError: (error) => {

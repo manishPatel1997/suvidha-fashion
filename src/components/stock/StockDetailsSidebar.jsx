@@ -338,7 +338,6 @@ export function StockDetailsSidebar({
                     >
                         {(runForm) => (
                             <form onSubmit={runForm.handleSubmit} className="flex flex-col h-full">
-                                {console.log('runForm.errors', runForm.errors)}
                                 <div className="p-6 pt-0 space-y-8 flex-1">
                                     {/* Image Section */}
                                     <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-[#dcccbd]/50 shadow-sm group">

@@ -148,3 +148,14 @@ export const API_PRODUCTION = {
     delete: "/api/v1/production/delete",
     sample_get: "/api/v1/production/sample_get"
 }
+
+export const API_NOT_ADMIN = {
+    get: "/api/v1/task/get",
+    update: "/api/v1/task/update",
+    submit_request: "/api/v1/task/submit_request"
+}
+
+export const User_DATA = {
+    get: "/api/v1/common/profile",
+    update: "/api/v1/common/profile_update"
+}

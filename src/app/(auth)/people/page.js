@@ -91,7 +91,6 @@ function PeopleDeleteModal({ open, onOpenChange, selectedData, onDeleteSuccess }
             }
         }
     );
-    console.log('selectedData?.id', selectedData?.id)
     return (
         <DeleteConfirmationModal
             open={open}
