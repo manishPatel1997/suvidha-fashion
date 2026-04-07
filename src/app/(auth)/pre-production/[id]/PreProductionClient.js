@@ -10,7 +10,7 @@ import { SketchesCardView } from '@/components/pre-production/sketches/SketchesC
 import PageHeader from '@/components/PageHeader'
 import usePreProductionStore from '@/store/preProductionStore'
 
-export function PreProductionClient({ id, inspirationData = null, sketchesData = null, visualDesignersData = null, fabricData = null, yarnData = null, sequencesData = null, sampleData = null }) {
+export function PreProductionClient({ designData, id, inspirationData = null, sketchesData = null, visualDesignersData = null, fabricData = null, yarnData = null, sequencesData = null, sampleData = null }) {
     const [PreData, setPreData] = useState({
         inspirationData: inspirationData,
         sketchesData: sketchesData,
@@ -20,7 +20,6 @@ export function PreProductionClient({ id, inspirationData = null, sketchesData =
         sequencesData: sequencesData,
         sampleData: sampleData,
     })
-
     const { setFabricAssignData, setYarnAssignData, setSequenceAssignData } = usePreProductionStore()
 
     useEffect(() => {
@@ -231,7 +230,7 @@ export function PreProductionClient({ id, inspirationData = null, sketchesData =
                 <Button
                     className="text-[12px] sm:text-[14px] bg-[#dcccbd] hover:bg-[#dcccbd]/90 text-primary-foreground  sm:px-4 rounded-lg gap-2 font-semibold"
                 >
-                    Design ID: {designId || `${id}`}
+                    Design ID: {designData?.design_slug_id || `${id}`}
                 </Button>
             </div>
             <InspirationsCardView

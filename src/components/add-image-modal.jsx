@@ -154,7 +154,7 @@ export function AddImageModal({
         if (isYarn) {
             return Yup.object().shape({
                 yarn_stock_id: Yup.string().required("Please select a yarn"),
-                yarn_num_cons: Yup.string().trim().min(3, "Minimum 3 characters required").required("Yarn num cons is required"),
+                yarn_num_cons: Yup.string().trim().min(1, "Minimum 1 characters required").required("Yarn num cons is required"),
                 note: Yup.string().optional(),
             })
         }
@@ -163,7 +163,7 @@ export function AddImageModal({
                 sequence_stock_id: Yup.string().required("Please select a sequence"),
                 sequence_cd: Yup.string()
                     .required("Sequence CD is required")
-                    .min(3, "Sequence CD must be at least 3 characters"),
+                    .min(1, "Sequence CD must be at least 1 character"),
             })
         }
         return Yup.object().shape({

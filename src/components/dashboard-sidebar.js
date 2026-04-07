@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname, useParams, useSearchParams } from "next/navigation"
-import { ChevronRight } from "lucide-react"
+import { ChevronRight, Settings } from "lucide-react"
 
 import {
   Sidebar,
@@ -42,6 +42,7 @@ const MENU_ITEMS = [
   { name: "Vendor", href: "/vendor", Icon: VendorIcon, hasArrow: true },
   { name: "Ideas", href: "/ideas", Icon: IdeasIcon, hasArrow: true },
   { name: "Sketches", href: "/sketches", Icon: SketchesIcon, hasArrow: true },
+  { name: "Settings", href: "/settings", Icon: Settings, hasArrow: false },
 ]
 
 const PRE_PRODUCTION_MENU_ITEMS = [

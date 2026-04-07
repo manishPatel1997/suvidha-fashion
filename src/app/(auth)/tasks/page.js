@@ -28,12 +28,19 @@ function TaskCard({ task, onSubmitClick, onEditClick, submitRequestPending }) {
                                 <Clock className="w-4.5 h-4.5" />
                                 <span>Pending</span>
                             </div>
-                        ) : (
+                        ) : task?.status === "review_request" ? (
                             <div className="flex items-center gap-1.5 text-[#D4A017] font-semibold text-[18px]">
-                                <Loader2 className="w-4.5 h-4.5 animate-spin" />
-                                <span>In Progress</span>
+                                <span>Review Request</span>
                             </div>
                         )
+                            :
+
+                            (
+                                <div className="flex items-center gap-1.5 text-[#D4A017] font-semibold text-[18px]">
+                                    <Loader2 className="w-4.5 h-4.5 animate-spin" />
+                                    <span>In Progress</span>
+                                </div>
+                            )
 
                         }
                     </div>

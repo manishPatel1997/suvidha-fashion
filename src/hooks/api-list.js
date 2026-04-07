@@ -136,6 +136,7 @@ export const API_LIST_AUTH = {
 
     setting: "/api/v1/common/setting",
     users_get: "/api/v1/common/users_get",
+    setting_update: "/api/v1/common/setting",
 }
 
 export const API_LIST_NO_AUTH = {

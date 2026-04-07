@@ -1,4 +1,4 @@
-import { post } from '@/lib/server-api'
+import { post, get } from '@/lib/server-api'
 import { redirect } from 'next/navigation'
 import { PreProductionClient } from './PreProductionClient'
 import { API_LIST_AUTH } from '@/hooks/api-list'
@@ -20,6 +20,14 @@ import { fetchStepData } from '@/lib/helperServer'
 
 export default async function Page({ params }) {
     const { id } = await params
+
+    let designData = null;
+    try {
+        const res = await get(`/api/v1/design/${id}`);
+        designData = res?.data || null;
+    } catch (error) {
+        console.error(`Error fetching design for ${id}:`, error);
+    }
 
     const steps = [
         {
@@ -71,6 +79,7 @@ export default async function Page({ params }) {
     return (
         <PreProductionClient
             id={id}
+            designData={designData}
             inspirationData={result.inspirationData}
             sketchesData={result.sketchesData}
             visualDesignersData={result.visualDesignersData}

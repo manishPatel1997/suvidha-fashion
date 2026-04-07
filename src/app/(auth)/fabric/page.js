@@ -3,7 +3,7 @@ import * as React from "react";
 import { FabricDesignCard } from "@/components/fabric/FabricDesignCard";
 import { AddFabricModal } from "@/components/add-fabric-modal";
 import { API_LIST_AUTH } from "@/hooks/api-list";
-import StokeAlertCard from "@/components/fabric/StokeAlertCard";
+// import StokeAlertCard from "@/components/fabric/StokeAlertCard";
 import { StockDetailsSidebar } from "@/components/stock/StockDetailsSidebar";
 import { StockListPage } from "@/components/stock/StockListPage";
 
@@ -14,7 +14,7 @@ function DashboardContent() {
             addButtonText="Add Fabric"
             searchPlaceholder="Search fabrics name..."
             fetchApiEndpoint={API_LIST_AUTH.StockFabric.get}
-            alertComponent={StokeAlertCard}
+            // alertComponent={StokeAlertCard}
             getItemId={(item) => item.id}
             getItemLabel={(item) => item.fabric_name || `Fabric ${item.id}`}
             renderCard={({ key, item, onViewDetails }) => (
