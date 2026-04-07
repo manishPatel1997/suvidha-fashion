@@ -116,7 +116,7 @@ export function AddImageModal({
     React.useEffect(() => {
         if (open) {
             if (isSketches || isDesign) {
-                GetUser()
+                GetUser({ role: isSketches ? "sketcher" : "designer" })
             }
             if (isFabric) {
                 GetFabric()

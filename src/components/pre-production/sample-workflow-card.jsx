@@ -17,12 +17,26 @@ const EditTargetModal = dynamic(() =>
   import("@/components/edit-target-modal").then((mod) => mod.EditTargetModal)
 )
 
-const DetailItem = ({ label, value }) => (
+const getContrastYIQ = (hexcolor) => {
+  if (!hexcolor) return "#1A1A1A";
+  let hex = hexcolor.replace("#", "");
+  if (hex.length === 3) {
+    hex = hex.split("").map((c) => c + c).join("");
+  }
+  if (hex.length !== 6) return "#1A1A1A";
+  const r = parseInt(hex.substr(0, 2), 16);
+  const g = parseInt(hex.substr(2, 2), 16);
+  const b = parseInt(hex.substr(4, 2), 16);
+  const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+  return yiq >= 128 ? "#1A1A1A" : "#FFFFFF";
+};
+
+const DetailItem = ({ label, value, textColor = "#1A1A1A" }) => (
   <div className="flex justify-between items-center text-[13px] leading-tight">
-    <span className="text-[#1A1A1A] font-medium text-sm min-w-[80px]">
+    <span className="font-medium text-sm min-w-[80px]" style={{ color: textColor }}>
       {label}:
     </span>
-    <span className="text-[#1A1A1A] text-right ml-2 text-sm">{value}</span>
+    <span className="text-right ml-2 text-sm" style={{ color: textColor }}>{value}</span>
   </div>
 );
 
@@ -238,10 +252,11 @@ export function SampleWorkflowCard({
                 (sum, item) => sum + Number(item.sample_meter || 0),
                 0
               )
+              const textColor = getContrastYIQ(row.fabric_color)
               return (
                 <div
                   key={row.id}
-                  style={{ backgroundColor: row.fabric_color }}
+                  style={{ backgroundColor: row.fabric_color, color: textColor }}
                   className="grid grid-cols-1 lg:grid-cols-4 gap-5 rounded-[10px] p-5 min-h-[225px]"
                 >
                   <div className="col-span-1 lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
@@ -265,12 +280,12 @@ export function SampleWorkflowCard({
                               "xl:border-r xl:border-[#B0826A] xl:pr-5"
                             )}
                           >
-                            <DetailItem label="Yarn" value={item.yarn_name} />
-                            <DetailItem label="Quality con" value={item.quality_con} />
-                            <DetailItem label="Sequence" value={item.sequence_name} />
-                            <DetailItem label="CD Con" value={item.sample_cd_con} />
-                            <DetailItem label="Meter" value={item.sample_meter} />
-                            <DetailItem label="Design No" value={item.sample_design_no} />
+                            <DetailItem label="Yarn" value={item.yarn_name} textColor={textColor} />
+                            <DetailItem label="Quality con" value={item.quality_con} textColor={textColor} />
+                            <DetailItem label="Sequence" value={item.sequence_name} textColor={textColor} />
+                            <DetailItem label="CD Con" value={item.sample_cd_con} textColor={textColor} />
+                            <DetailItem label="Meter" value={item.sample_meter} textColor={textColor} />
+                            <DetailItem label="Design No" value={item.sample_design_no} textColor={textColor} />
 
                             <div className="pt-2 space-y-1.5">
                               <div className="h-[3px] w-full bg-[#B0826A] rounded-full" />
@@ -293,7 +308,8 @@ export function SampleWorkflowCard({
                             setOpenModal
                           )
                         }
-                        className="h-[28px] w-fit bg-transparent border border-[#000000] text-[#1A1A1A] rounded-md shadow-none text-sm font-semibold px-3.5 cursor-pointer"
+                        className="h-[28px] w-fit bg-transparent border rounded-md shadow-none text-sm font-semibold px-3.5 cursor-pointer"
+                        style={{ color: textColor, borderColor: textColor }}
                       >
                         + Add
                       </Button>
