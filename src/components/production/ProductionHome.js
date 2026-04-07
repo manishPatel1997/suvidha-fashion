@@ -104,8 +104,16 @@ function ProductionHome({
                 onOpenChange={(isOpen) => StateUpdate({ isViewModalOpen: isOpen, selectedItem: isOpen ? openModal.selectedItem : null }, setOpenModal)}
                 selectedData={openModal.selectedItem}
                 onUpdateSuccess={(updated) => {
-                    // console.log("Item updated:", updated)
-                    // Update items list logic here
+                    setPreProductionData(prev => ({
+                        ...prev,
+                        samples: prev?.samples?.map((item) => {
+                            if (String(item.id) === String(updated.id)) {
+                                return updated
+                            }
+                            return item
+                        })
+                    }))
+                    StateUpdate({ isViewModalOpen: false, selectedItem: null }, setOpenModal)
                 }}
                 onDeleteSuccess={(id) => {
                     setPreProductionData(prev => ({

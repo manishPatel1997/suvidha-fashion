@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Image from "next/image"
-import { Trash2, Share2, Download, Plus } from "lucide-react"
+import { Trash2, Share2, Download, Plus, Edit2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import CloseIcon from "@/assets/CloseIcon"
@@ -15,7 +15,6 @@ import { FloatingTextarea } from "@/components/ui/floating-textarea"
 import { Input } from "@/components/ui/input"
 import { FormSelect } from "@/components/ui/form-select"
 import { FormColorPicker } from "@/components/ui/form-color-picker"
-import clsx from "clsx"
 
 export function ProductionViewModal({
     open,
@@ -77,7 +76,7 @@ export function ProductionViewModal({
         isFormData: true,
         onSuccess: (res) => {
             if (res.success) {
-                if (onUpdateSuccess) onUpdateSuccess()
+                if (onUpdateSuccess) onUpdateSuccess(res.data)
                 setIsEditing(false)
             }
         },
@@ -134,6 +133,7 @@ export function ProductionViewModal({
     const handleSubmit = () => {
         const payload = {
             ...formData,
+            status: formData.status?.toLowerCase().replace(" ", "_"),
             production_items_id: String(selectedData.id),
             image: selectedFile,
         }
@@ -142,7 +142,7 @@ export function ProductionViewModal({
 
     const statusOptions = [
         { value: "Pending", label: "Pending" },
-        { value: "In Process", label: "In Process" },
+        // { value: "In Process", label: "In Process" },
         { value: "Completed", label: "Completed" },
     ]
 
@@ -162,12 +162,13 @@ export function ProductionViewModal({
                         variant="ghost"
                         onClick={() => setIsEditing(!isEditing)}
                         className={cn(
-                            "h-9 px-6 rounded-md text-[14px] font-semibold transition-colors",
+                            "h-9 px-4 flex items-center gap-2 rounded-md text-[14px] font-semibold transition-colors",
                             isEditing
                                 ? "bg-[#DCCCBD] text-primary-foreground hover:bg-[#DCCCBD]/90"
                                 : "bg-[#F3F0EC] hover:bg-[#E8E2DA] text-primary-foreground"
                         )}
                     >
+                        {!isEditing && <Edit2 className="w-4 h-4" />}
                         {isEditing ? "Cancel" : "Edit"}
                     </Button>
 
@@ -267,9 +268,12 @@ export function ProductionViewModal({
                                     <FormSelect
                                         options={statusOptions}
                                         value={formData.status}
-                                        readOnly={true}
+                                        readOnly={!isEditing}
                                         onValueChange={(val) => handleFieldChange("status", val)}
-                                        triggerClassName="h-11 rounded-[10px] border-[#dcccbd]! bg-gray-50!"
+                                        triggerClassName={cn(
+                                            "h-11 rounded-[10px] border-[#dcccbd]!",
+                                            !isEditing && "bg-gray-50!"
+                                        )}
                                     />
                                 </div>
 
