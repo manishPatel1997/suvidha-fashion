@@ -40,6 +40,25 @@ export function DesignViewModalImage({
     const [currentImgIndex, setCurrentImgIndex] = React.useState(-1)
     const [viewData, setViewData] = React.useState(null)
     const [selectedFile, setSelectedFile] = React.useState(null)
+    const [userOptions, setUserOptions] = React.useState([])
+    const { mutate: getUsers } = usePost(API_LIST_AUTH.users_get, {
+        onSuccess: (res) => {
+            if (res.success && res.data) {
+                const options = res.data.map(user => ({
+                    label: user.name,
+                    value: user.id.toString()
+                }))
+                setUserOptions(options)
+            }
+        }
+    })
+
+    React.useEffect(() => {
+        if (open) {
+            getUsers({ role: "designer" })
+        }
+    }, [open])
+
     const { mutate: assignView, isPending } = usePost(API_LIST_AUTH.VisualDesigners.assignView, {
         onSuccess: (res) => {
             if (res.success) {
@@ -95,6 +114,7 @@ export function DesignViewModalImage({
     const handleSubmit = (values) => {
         const payload = {
             visual_designer_assign_id: selectedData?.id.toString(),
+            user_id: values.assigned_to,
             note: values.note || "",
             status: values.status || ""
         }
@@ -179,10 +199,11 @@ export function DesignViewModalImage({
                 <Formik
                     initialValues={{
                         design_no: viewData?.design_no || "",
-                        assigned_to: viewData?.assign_user_name || "",
+                        assigned_to: viewData?.assign_user?.toString() || "",
                         submitted_by: viewData?.task_viewer_name || "",
                         status: viewData?.status || "",
-                        note: viewData?.note || "",
+                        note: viewData?.viewer_note || "",
+                        task_note: viewData?.note || "",
                         visual_designer_pdf: viewData?.visual_designer_pdf || "",
                     }}
                     validationSchema={validationSchema}
@@ -250,11 +271,14 @@ export function DesignViewModalImage({
                                             value={assignedTo}
                                             readOnly={!isEditing}
                                         /> */}
-                                        <FloatingInput
+                                        <FormSelect
+                                            triggerClassName="h-[45px]!"
                                             name="assigned_to"
                                             label="Assigned To"
                                             runForm={runForm}
-                                            readOnly={true}
+                                            readOnly={!isEditing}
+                                            floatingUi={true}
+                                            options={userOptions}
                                         />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
@@ -278,6 +302,13 @@ export function DesignViewModalImage({
                                             ]}
                                         />
                                     </div>
+                                    <FloatingTextarea
+                                        name="task_note"
+                                        label="Task Note"
+                                        runForm={runForm}
+                                        readOnly={true}
+                                        className="min-h-[100px]"
+                                    />
                                     <FloatingTextarea
                                         name="note"
                                         label="Note"

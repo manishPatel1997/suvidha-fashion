@@ -39,6 +39,25 @@ export function SketchesViewImage({
     const [currentImgIndex, setCurrentImgIndex] = React.useState(-1)
     const [viewData, setViewData] = React.useState(null)
     const [selectedFile, setSelectedFile] = React.useState(null)
+    const [userOptions, setUserOptions] = React.useState([])
+    const { mutate: getUsers } = usePost(API_LIST_AUTH.users_get, {
+        onSuccess: (res) => {
+            if (res.success && res.data) {
+                const options = res.data.map(user => ({
+                    label: user.name,
+                    value: user.id.toString()
+                }))
+                setUserOptions(options)
+            }
+        }
+    })
+
+    React.useEffect(() => {
+        if (open) {
+            getUsers({ role: "sketcher" })
+        }
+    }, [open])
+
     const { mutate: assignView, isPending } = usePost(API_LIST_AUTH.Sketches.assignView, {
         onSuccess: (res) => {
             if (res.success) {
@@ -90,9 +109,11 @@ export function SketchesViewImage({
 
     const handleSubmit = (values) => {
         const payload = {
+            user_id: values.assigned_to,
             sketche_assign_id: selectedData?.id.toString(),
             note: values.note || "",
-            status: values.status || ""
+            status: values.status || "",
+            assign_user: values.assigned_to
         }
         if (previewImage !== '/design-thumb.png') {
             payload.sketche_image = selectedFile
@@ -174,10 +195,11 @@ export function SketchesViewImage({
 
                 <Formik
                     initialValues={{
-                        assigned_to: viewData?.assign_user_name || "",
+                        assigned_to: viewData?.assign_user?.toString() || "",
                         submitted_by: viewData?.task_viewer_name || "",
                         status: viewData?.status || "",
-                        note: viewData?.note || "",
+                        note: viewData?.viewer_note || "",
+                        task_note: viewData?.note || "",
                     }}
                     validationSchema={validationSchema}
                     onSubmit={handleSubmit}
@@ -233,11 +255,14 @@ export function SketchesViewImage({
                                 {/* Details Column */}
                                 <div className="order-3 lg:order-2 flex flex-col gap-6">
                                     <div className="grid grid-cols-2 gap-4">
-                                        <FloatingInput
+                                        <FormSelect
+                                            triggerClassName="h-[45px]!"
                                             name="assigned_to"
                                             label="Assigned To"
                                             runForm={runForm}
-                                            readOnly={true}
+                                            readOnly={!isEditing}
+                                            floatingUi={true}
+                                            options={userOptions}
                                         />
                                         <FloatingInput
                                             name="submitted_by"
@@ -259,6 +284,14 @@ export function SketchesViewImage({
                                             { label: "In Progress", value: "running" },
                                             { label: "Completed", value: "completed" },
                                         ]}
+                                    />
+
+                                    <FloatingTextarea
+                                        name="task_note"
+                                        label="Task Note"
+                                        runForm={runForm}
+                                        readOnly={true}
+                                        className="min-h-[100px]"
                                     />
 
                                     <FloatingTextarea

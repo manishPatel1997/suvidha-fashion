@@ -313,6 +313,7 @@ export function SketchesCardView({
 
     const handleOnCompleted = (type) => {
         setClickedAction(type)
+        console.log('sketchesData', sketchesData)
         const body = {
             design_id: sketchesData.design_id.toString(),
             status: type
@@ -540,7 +541,7 @@ export function SketchesCardView({
                     isDone={data.status === "completed" || data.status === "skipped"}
                     onUpdateSuccess={(res) => {
                         let newImages = data.assign.map(item =>
-                            Number(item.assign_user) === res.assign_user ? res : item
+                            Number(item.id) === Number(res.id) ? res : item
                         )
                         StateUpdate({
                             assign: newImages,
@@ -577,8 +578,9 @@ export function SketchesCardView({
                     }}
                     onUpdateSuccess={(res) => {
                         let newImages = data.assign.map(item =>
-                            Number(item.assign_user) === res.assign_user ? res : item
+                            Number(item.id) === Number(res.id) ? res : item
                         )
+
                         StateUpdate({
                             assign: newImages,
                         }, setData)
@@ -595,6 +597,15 @@ export function SketchesCardView({
                     open={openModal.FabricViewModalImage}
                     onOpenChange={(isOpen) => { modalOpen("FabricViewModalImage", isOpen, setOpenModal) }}
                     title={titleName}
+                    onUpdateSuccess={(res) => {
+                        let newImages = data.assign.map(item =>
+                            Number(item.id) === Number(res.id) ? res : item
+                        )
+                        StateUpdate({
+                            assign: newImages,
+                        }, setData)
+                        modalOpen("FabricViewModalImage", false, setOpenModal)
+                    }}
                     onDelete={(deletedId) => {
                         const updatedImages = data.assign.filter(img => img.id !== Number(deletedId))
                         StateUpdate({

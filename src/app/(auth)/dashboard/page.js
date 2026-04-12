@@ -28,7 +28,7 @@ function DashboardContent() {
   const initialPage = parseInt(searchParams.get("page")) || 1;
   const initialLimit = parseInt(searchParams.get("limit")) || 10;
   const initialSearch = searchParams.get("search") || "";
-  const initialCategory = searchParams.get("category") || "concept";
+  const initialCategory = searchParams.get("category") || "";
 
   const [search, setSearch] = React.useState(initialSearch);
   const [category, setCategory] = React.useState(initialCategory);
@@ -60,7 +60,7 @@ function DashboardContent() {
     if (currentPage > 1) params.set("page", currentPage.toString());
     if (limit !== 10) params.set("limit", limit.toString());
     if (debouncedSearch) params.set("search", debouncedSearch);
-    if (category !== "concept") params.set("category", category);
+    if (category) params.set("category", category);
 
     const queryString = params.toString();
     const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
@@ -85,7 +85,7 @@ function DashboardContent() {
           summary: item.note,
           image: `${process.env.NEXT_PUBLIC_API_URL}${item.image}`,
           isLocked: false,
-          backUrl: `?page=${currentPage}&limit=${limit}${debouncedSearch ? `&search=${debouncedSearch}` : ""}${category && category !== "concept" ? `&category=${category}` : ""}`
+          backUrl: `?page=${currentPage}&limit=${limit}${debouncedSearch ? `&search=${debouncedSearch}` : ""}${category ? `&category=${category}` : ""}`
         }));
 
         setDesignList(mappedDesigns);
@@ -153,71 +153,30 @@ function DashboardContent() {
           p-1
         "
           >
-            <TabsTrigger
-              value="concept"
-              className="
-            flex-1
-            h-full
-            rounded-md
-            font-semibold
-            text-[14px] sm:text-[16px]
-            whitespace-nowrap
-            text-muted-foreground
-            transition-all duration-200
+            {["all", "concept", "regular", "cutting"].map((tab) => (
+              <TabsTrigger
+                key={tab}
+                value={tab === "all" ? "" : tab}
+                className="
+                  flex-1
+                  h-full
+                  rounded-md
+                  font-semibold
+                  text-[14px] sm:text-[16px]
+                  whitespace-nowrap
+                  text-muted-foreground
+                  transition-all duration-200
 
-            data-[state=active]:bg-[#dcccbd]
-            data-[state=active]:text-primary-foreground
+                  data-[state=active]:bg-[#dcccbd]
+                  data-[state=active]:text-primary-foreground
 
-            focus-visible:outline-none
-            focus-visible:ring-0
-          "
-            >
-              Concept
-            </TabsTrigger>
-
-            <TabsTrigger
-              value="regular"
-              className="
-            flex-1
-            h-full
-            rounded-md
-            font-semibold
-            text-[14px] sm:text-[16px]
-            whitespace-nowrap
-            text-muted-foreground
-            transition-all duration-200
-
-            data-[state=active]:bg-[#dcccbd]
-            data-[state=active]:text-primary-foreground
-
-            focus-visible:outline-none
-            focus-visible:ring-0
-          "
-            >
-              Regular
-            </TabsTrigger>
-
-            <TabsTrigger
-              value="cutting"
-              className="
-            flex-1
-            h-full
-            rounded-md
-            font-semibold
-            text-[14px] sm:text-[16px]
-            whitespace-nowrap
-            text-muted-foreground
-            transition-all duration-200
-
-            data-[state=active]:bg-[#dcccbd]
-            data-[state=active]:text-primary-foreground
-
-            focus-visible:outline-none
-            focus-visible:ring-0
-          "
-            >
-              Cutting
-            </TabsTrigger>
+                  focus-visible:outline-none
+                  focus-visible:ring-0
+                "
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </TabsTrigger>
+            ))}
           </TabsList>
         </Tabs>
       </div>
