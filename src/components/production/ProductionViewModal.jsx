@@ -173,14 +173,14 @@ export function ProductionViewModal({
                     </Button>
 
                     <div className="flex items-center gap-4">
-                        <Button
+                        {/* <Button
                             variant="ghost"
                             onClick={() => setIsDeleteModalOpen(true)}
                             className="h-9 px-4 bg-[#FDF2F2] hover:bg-[#FBE4E4] text-[#E5484D] rounded-md text-[14px] font-semibold flex items-center gap-2"
                         >
                             <Trash2 className="w-4 h-4" />
                             Delete
-                        </Button>
+                        </Button> */}
                         <Button
                             variant="ghost"
                             onClick={() => onOpenChange(false)}

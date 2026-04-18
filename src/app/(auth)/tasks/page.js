@@ -65,6 +65,11 @@ function TaskCard({ task, onSubmitClick, onEditClick, submitRequestPending }) {
 
                         <span className="text-[#A67F6F] font-medium">Note:</span>
                         <p className="text-[#1A1A1A] leading-relaxed">
+                            {task?.viewer_note || "No notes provided."}
+                        </p>
+
+                        <span className="text-[#A67F6F] font-medium">My Note:</span>
+                        <p className="text-[#1A1A1A] leading-relaxed">
                             {task?.note || "No notes provided."}
                         </p>
                     </div>

@@ -93,9 +93,10 @@ export function PreProductionClient({ designData, id, inspirationData = null, sk
 
     const getSketchDataClick = (payload) => {
         const updatedInspirationData = { ...PreData.inspirationData, images: payload.images, status: payload.status, inspiration_target: payload.inspiration_target, note: payload.note }
-        setPreData({
+        setPreData(prev => ({
+            ...prev,
             inspirationData: updatedInspirationData,
-        })
+        }))
         getSketchData({ design_id: payload.design_id })
     }
 
@@ -106,9 +107,10 @@ export function PreProductionClient({ designData, id, inspirationData = null, sk
 
     const getVisualDesignersDataClick = (payload) => {
         const updatedInspirationData = { ...PreData.sketchesData, assign: payload.assign, note: payload.note, status: payload.status, sketche_target: payload.sketche_target }
-        setPreData({
+        setPreData(prev => ({
+            ...prev,
             sketchesData: updatedInspirationData,
-        })
+        }))
         getVisualDesignersData({ design_id: payload.design_id })
     }
 
@@ -128,9 +130,10 @@ export function PreProductionClient({ designData, id, inspirationData = null, sk
             status: payload.status,
             visual_designer_target: payload.visual_designer_target
         }
-        setPreData({
+        setPreData(prev => ({
+            ...prev,
             visualDesignersData: updatedInspirationData,
-        })
+        }))
         getFabricData({ design_id: payload.design_id })
     }
 
@@ -146,9 +149,10 @@ export function PreProductionClient({ designData, id, inspirationData = null, sk
             status: payload.status,
             fabric_target: payload.fabric_target
         }
-        setPreData({
+        setPreData(prev => ({
+            ...prev,
             fabricData: updatedInspirationData,
-        })
+        }))
         getYarnData({ design_id: payload.design_id })
     }
 
@@ -165,9 +169,10 @@ export function PreProductionClient({ designData, id, inspirationData = null, sk
             status: payload.status,
             yarn_target: payload.yarn_target
         }
-        setPreData({
+        setPreData(prev => ({
+            ...prev,
             yarnData: updatedInspirationData,
-        })
+        }))
         getSequencesData({ design_id: payload.design_id })
     }
 
@@ -184,9 +189,10 @@ export function PreProductionClient({ designData, id, inspirationData = null, sk
             status: payload.status,
             sequence_target: payload.sequence_target
         }
-        setPreData({
+        setPreData(prev => ({
+            ...prev,
             sequencesData: updatedInspirationData,
-        })
+        }))
         getSampleData({ design_id: payload.design_id })
     }
 

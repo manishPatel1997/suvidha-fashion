@@ -12,15 +12,23 @@ import { StateUpdate } from "@/lib/helper"
 import { API_LIST_AUTH } from "@/hooks/api-list"
 import { usePost } from "@/hooks/useApi"
 import { toast } from "sonner"
-import usePreProductionStore from "@/store/preProductionStore"
+
 
 const validationSchema = Yup.object().shape({
     mainQuantity: Yup.number().optional().nullable(),
-    yarn_assign_id: Yup.string().nullable(),
-    sequence_assign_id: Yup.string().nullable(),
+    yarn_assign_id: Yup.string().optional().nullable(),
+    sequence_assign_id: Yup.string().optional().nullable(),
 
-    quality_con: Yup.string().required("Quality con is required"),
-    sample_cd_con: Yup.string().required("CD con is required"),
+    // quality_con: Yup.string().when("yarn_assign_id", {
+    //     is: (val) => !!val,
+    //     then: (schema) => schema.required("Quality con is required"),
+    //     otherwise: (schema) => schema.optional(),
+    // }),
+    // sample_cd_con: Yup.string().when("sequence_assign_id", {
+    //     is: (val) => !!val,
+    //     then: (schema) => schema.required("CD con is required"),
+    //     otherwise: (schema) => schema.optional(),
+    // }),
     sample_meter: Yup.number()
         .typeError("Meter must be a number")
         .required("Meter is required")
@@ -30,43 +38,31 @@ const validationSchema = Yup.object().shape({
         ),
     sample_color: Yup.string().required("Color is required"),
     sample_design_no: Yup.string().required("Design no is required"),
-}).test(
-    "yarn-or-sequence-required",
-    "Either Yarn or Sequence is required",
-    function (values) {
-        const { yarn_assign_id, sequence_assign_id } = values
+})
+// .test(
+//     "yarn-or-sequence-required",
+//     "Either Yarn or Sequence is required",
+//     function (values) {
+//         const { yarn_assign_id, sequence_assign_id } = values
 
-        if (!yarn_assign_id && !sequence_assign_id) {
-            return this.createError({
-                path: "yarn_assign_id", // error will show on this field
-                message: "Either Yarn or Sequence is required",
-            })
-        }
+//         if (!yarn_assign_id && !sequence_assign_id) {
+//             return this.createError({
+//                 path: "yarn_assign_id", // error will show on this field
+//                 message: "Either Yarn or Sequence is required",
+//             })
+//         }
 
-        return true
-    }
-)
+//         return true
+//     }
+// )
 export function AddDetailsModal({ open, onOpenChange, onAdd, selectData, PreData, assign }) {
-    const { getYarnAssignData, getSequenceAssignData } = usePreProductionStore()
+
     const [data, setData] = React.useState({
         yarnOption: [],
-        sequenceOption: []
+        sequenceOption: [],
+        visualDesignerOption: []
     })
-    React.useEffect(() => {
-        const sequencesAssignData = getSequenceAssignData()
-        const yarnAssignData = getYarnAssignData()
-        const formattedSequence = sequencesAssignData?.map((item) => ({
-            value: item.id.toString(),
-            label: item.sequence_name || item.name || `Sequence ${item.id}`,
-            rawData: item
-        }))
-        const formattedYarn = yarnAssignData?.map((item) => ({
-            value: item.id.toString(),
-            label: item.yarn_name || item.name || `Yarn ${item.id}`,
-            rawData: item
-        }))
-        StateUpdate({ yarnOption: formattedYarn, sequenceOption: formattedSequence }, setData)
-    }, [])
+
 
     const { mutate: addDetails, isPending } = usePost(API_LIST_AUTH.Sample.assign, {
         onSuccess: (res) => {
@@ -78,6 +74,64 @@ export function AddDetailsModal({ open, onOpenChange, onAdd, selectData, PreData
             toast.error(error?.message || "Something went wrong.");
         }
     })
+
+    const { mutate: getVisualDesignersData } = usePost(API_LIST_AUTH.VisualDesigners.get, {
+        onSuccess: (res) => {
+            if (res.success && res.data) {
+                const formatted = [
+                    { value: "none", label: "None" },
+                    ...(res.data.assign?.map((item) => ({
+                        value: item.design_no,
+                        label: item.design_no,
+                    })) || [])
+                ]
+                StateUpdate({ visualDesignerOption: formatted }, setData)
+            }
+        }
+    })
+
+    const { mutate: getYarnData } = usePost(API_LIST_AUTH.Yarn.get, {
+        onSuccess: (res) => {
+            if (res.success && res.data) {
+                const formatted = [
+                    { value: "none", label: "None" },
+                    ...(res.data.yarns?.map((item) => ({
+                        value: item.id.toString(),
+                        label: item.yarn_name,
+                        rawData: item
+                    })) || [])
+                ]
+                StateUpdate({ yarnOption: formatted }, setData)
+            }
+        }
+    })
+
+    const { mutate: getSequencesData } = usePost(API_LIST_AUTH.Sequences.get, {
+        onSuccess: (res) => {
+            if (res.success && res.data) {
+                const formatted = [
+                    { value: "none", label: "None" },
+                    ...(res.data.sequences?.map((item) => ({
+                        value: item.id.toString(),
+                        label: item.sequence_name,
+                        rawData: item
+                    })) || [])
+                ]
+                StateUpdate({ sequenceOption: formatted }, setData)
+            }
+        }
+    })
+
+    React.useEffect(() => {
+        if (open && PreData?.sampleData?.design_id) {
+            const design_id = PreData.sampleData.design_id.toString()
+            getVisualDesignersData({ design_id })
+            getYarnData({ design_id })
+            getSequencesData({ design_id })
+        }
+    }, [open, PreData?.sampleData?.design_id])
+
+
     const formik = useFormik({
         enableReinitialize: true,
         initialValues: {
@@ -95,11 +149,15 @@ export function AddDetailsModal({ open, onOpenChange, onAdd, selectData, PreData
 
             const dataVal = { ...values }
             delete dataVal.mainQuantity
-            if (dataVal?.yarn_assign_id == "") {
+
+            if (!dataVal?.yarn_assign_id) {
                 delete dataVal.yarn_assign_id
+                delete dataVal.quality_con
             }
-            if (dataVal?.sequence_assign_id == "") {
+
+            if (!dataVal?.sequence_assign_id) {
                 delete dataVal.sequence_assign_id
+                delete dataVal.sample_cd_con
             }
             dataVal.sample_id = PreData?.sampleData?.id?.toString()
             dataVal.fabric_assign_id = selectData?.id?.toString()
@@ -126,71 +184,29 @@ export function AddDetailsModal({ open, onOpenChange, onAdd, selectData, PreData
             <form onSubmit={formik.handleSubmit} className="flex flex-col flex-1">
                 <div className="px-6 py-5 md:px-[60px] md:py-8 space-y-6 flex-1">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12.5 gap-y-7">
-                        {/* Yarn */}
-                        <div className="space-y-1.5">
+                        {/* Design No. */}
+                        <div className="md:col-span-2 space-y-1.5">
                             <label className="text-[16px] font-medium text-primary-foreground block">
-                                Yarn
+                                Design No.
                             </label>
-                            <FormSelect
-                                name="yarn_assign_id"
+                            {/* <Input
+                                name="sample_design_no"
+                                placeholder="Design no"
+                                className="h-11.25 border-muted-foreground rounded-md placeholder:text-muted-foreground placeholder:text-[14px] text-[14px]"
                                 runForm={formik}
-                                options={data.yarnOption}
+                            /> */}
+                            <FormSelect
+                                name="sample_design_no"
+                                runForm={formik}
+                                options={data.visualDesignerOption}
                                 placeholder="Select yarn"
                                 isSearch
                                 triggerClassName="h-[45px]!"
-                            // onChange={(val) => {
-                            //     const selected = data.yarnOption.find(opt => opt.value === val)
-                            //     if (selected) {
-                            //         StateUpdate({ selectedData: selected.rawData }, setData)
-                            //     }
-                            // }}
-                            />
-                        </div>
-
-                        {/* Quality Con */}
-                        <div className="space-y-1.5">
-                            <label className="text-[16px] font-medium text-primary-foreground block">
-                                Quality Con
-                            </label>
-                            <Input
-                                name="quality_con"
-                                placeholder="Quality con"
-                                className="h-11.25 border-muted-foreground rounded-md placeholder:text-muted-foreground placeholder:text-[14px] text-[14px]"
-                                runForm={formik}
-                            />
-                        </div>
-
-                        {/* Sequence */}
-                        <div className="space-y-1.5">
-                            <label className="text-[16px] font-medium text-primary-foreground block">
-                                Sequence
-                            </label>
-                            <FormSelect
-                                name="sequence_assign_id"
-                                runForm={formik}
-                                options={data.sequenceOption}
-                                placeholder="Select sequence"
-                                isSearch
-                                triggerClassName="h-[45px]!"
-                            // onChange={(val) => {
-                            //     const selected = data.sequenceOption.find(opt => opt.value === val)
-                            //     if (selected) {
-                            //         StateUpdate({ selectedData: selected.rawData }, setData)
-                            //     }
-                            // }}
-                            />
-                        </div>
-
-                        {/* CD Con */}
-                        <div className="space-y-1.5">
-                            <label className="text-[16px] font-medium text-primary-foreground block">
-                                CD Con
-                            </label>
-                            <Input
-                                name="sample_cd_con"
-                                placeholder="CD con"
-                                className="h-11.25 border-muted-foreground rounded-md placeholder:text-muted-foreground placeholder:text-[14px] text-[14px]"
-                                runForm={formik}
+                                onChange={(val) => {
+                                    if (!val || val === "none") {
+                                        formik.setFieldValue("sample_design_no", "")
+                                    }
+                                }}
                             />
                         </div>
 
@@ -219,18 +235,81 @@ export function AddDetailsModal({ open, onOpenChange, onAdd, selectData, PreData
                             />
                         </div>
 
-                        {/* Design No. */}
-                        <div className="md:col-span-2 space-y-1.5">
+                        {/* Yarn */}
+                        <div className="space-y-1.5">
                             <label className="text-[16px] font-medium text-primary-foreground block">
-                                Design No.
+                                Yarn
                             </label>
-                            <Input
-                                name="sample_design_no"
-                                placeholder="Design no"
-                                className="h-11.25 border-muted-foreground rounded-md placeholder:text-muted-foreground placeholder:text-[14px] text-[14px]"
+                            <FormSelect
+                                name="yarn_assign_id"
                                 runForm={formik}
+                                options={data.yarnOption}
+                                placeholder="Select yarn"
+                                isSearch
+                                triggerClassName="h-[45px]!"
+                                onChange={(val) => {
+                                    if (!val || val === "none") {
+                                        formik.setFieldValue("yarn_assign_id", "")
+                                        formik.setFieldValue("quality_con", "")
+                                    }
+                                }}
                             />
                         </div>
+
+                        {/* Quality Con */}
+                        {formik.values.yarn_assign_id && (
+                            <div className="space-y-1.5">
+                                <label className="text-[16px] font-medium text-primary-foreground block">
+                                    Quality Con
+                                </label>
+                                <Input
+                                    name="quality_con"
+                                    placeholder="Quality con"
+                                    className="h-11.25 border-muted-foreground rounded-md placeholder:text-muted-foreground placeholder:text-[14px] text-[14px]"
+                                    runForm={formik}
+                                />
+                            </div>
+                        )}
+
+                        {/* Sequence */}
+                        <div className="space-y-1.5">
+                            <label className="text-[16px] font-medium text-primary-foreground block">
+                                Sequence
+                            </label>
+                            <FormSelect
+                                name="sequence_assign_id"
+                                runForm={formik}
+                                options={data.sequenceOption}
+                                placeholder="Select sequence"
+                                isSearch
+                                triggerClassName="h-[45px]!"
+                                onChange={(val) => {
+                                    if (!val || val === "none") {
+                                        formik.setFieldValue("sequence_assign_id", "")
+                                        formik.setFieldValue("sample_cd_con", "")
+                                    }
+                                }}
+                            />
+                        </div>
+
+                        {/* CD Con */}
+                        {formik.values.sequence_assign_id && (
+                            <div className="space-y-1.5">
+                                <label className="text-[16px] font-medium text-primary-foreground block">
+                                    CD Con
+                                </label>
+                                <Input
+                                    name="sample_cd_con"
+                                    placeholder="CD con"
+                                    className="h-11.25 border-muted-foreground rounded-md placeholder:text-muted-foreground placeholder:text-[14px] text-[14px]"
+                                    runForm={formik}
+                                />
+                            </div>
+                        )}
+
+
+
+
                     </div>
                 </div>
 
