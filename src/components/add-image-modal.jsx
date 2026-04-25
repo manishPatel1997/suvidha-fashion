@@ -139,7 +139,7 @@ export function AddImageModal({
         }
         if (isDesign) {
             return Yup.object().shape({
-                design_no: Yup.string().required("Design number is required"),
+                design_no: Yup.string().required("Design number is required").trim().min(5, "Minimum 5 characters required"),
                 user_id: Yup.string().required("Please select who to assign to"),
                 note: Yup.string().optional(),
             })

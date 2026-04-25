@@ -514,62 +514,67 @@ export function AddFabricModal({
                                         />
                                     </div>
 
-                                    <div className="space-y-1.5">
-                                        <label className="text-[14px] font-medium text-primary-foreground block">
-                                            Module Access
-                                        </label>
-                                        <Popover>
-                                            <PopoverTrigger asChild className='border-muted-foreground'>
-                                                <Button
-                                                    variant="outline"
-                                                    className="w-full h-[45px] justify-between font-normal hover:bg-white overflow-hidden"
+                                    {runForm.values.role && (
+                                        <div className="space-y-1.5">
+                                            <label className="text-[14px] font-medium text-primary-foreground block">
+                                                Module Access
+                                            </label>
+                                            <Popover>
+                                                <PopoverTrigger asChild className='border-muted-foreground'>
+                                                    <Button
+                                                        variant="outline"
+                                                        className="w-full h-[45px] justify-between font-normal hover:bg-white overflow-hidden"
+                                                    >
+                                                        <span className="truncate text-left flex-1">
+                                                            {Array.isArray(runForm.values[config.moduleAccessKey]) && runForm.values[config.moduleAccessKey].length > 0
+                                                                ? runForm.values[config.moduleAccessKey]
+                                                                    .map(val => val.replace(/_/g, " "))
+                                                                    .join(", ")
+                                                                : "Select Module Access"}
+                                                        </span>
+                                                        <ChevronDown className="ml-2 h-4 w-4 shrink-0" />
+                                                    </Button>
+                                                </PopoverTrigger>
+                                                <PopoverContent 
+                                                    onWheel={(e) => e.stopPropagation()}
+                                                    className="w-(--radix-popover-trigger-width) p-0 bg-white border-[#dcccbd] overflow-y-auto max-h-[300px]"
                                                 >
-                                                    <span className="truncate text-left flex-1">
-                                                        {Array.isArray(runForm.values[config.moduleAccessKey]) && runForm.values[config.moduleAccessKey].length > 0
-                                                            ? runForm.values[config.moduleAccessKey]
-                                                                .map(val => val.replace(/_/g, " "))
-                                                                .join(", ")
-                                                            : "Select Module Access"}
-                                                    </span>
-                                                    <ChevronDown className="ml-2 h-4 w-4 shrink-0" />
-                                                </Button>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-(--radix-popover-trigger-width) p-0 bg-white border-[#dcccbd] overflow-y-auto max-h-[300px]">
-                                                <div className="flex flex-col p-1">
-                                                    {(runForm.values.role === "admin"
-                                                        ? module_access.filter(i => i !== "task")
-                                                        : runForm.values.role
-                                                            ? ["task"]
-                                                            : []).map((option) => {
-                                                                const isSelected = runForm.values[config.moduleAccessKey]?.includes(option);
-                                                                return (
-                                                                    <div
-                                                                        key={option}
-                                                                        onClick={() => {
-                                                                            if (runForm.values.role !== "admin") return;
-                                                                            const current = runForm.values[config.moduleAccessKey] || [];
-                                                                            const next = isSelected
-                                                                                ? current.filter((v) => v !== option)
-                                                                                : [...current, option];
-                                                                            runForm.setFieldValue(config.moduleAccessKey, next);
-                                                                        }}
-                                                                        className={cn(
-                                                                            "flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-[#dcccbd]/20 rounded-sm text-[14px]",
-                                                                            runForm.values.role !== "admin" && "opacity-80 cursor-not-allowed"
-                                                                        )}
-                                                                    >
-                                                                        <span className="capitalize">{option.replace("_", " ")}</span>
-                                                                        {isSelected && <Check className="h-4 w-4" />}
-                                                                    </div>
-                                                                );
-                                                            })}
-                                                </div>
-                                            </PopoverContent>
-                                        </Popover>
-                                        {runForm.touched[config.moduleAccessKey] && runForm.errors[config.moduleAccessKey] && (
-                                            <p className="text-red-500 text-xs mt-1">{runForm.errors[config.moduleAccessKey]}</p>
-                                        )}
-                                    </div>
+                                                    <div className="flex flex-col p-1">
+                                                        {(runForm.values.role === "admin"
+                                                            ? module_access.filter(i => i !== "task")
+                                                            : runForm.values.role
+                                                                ? ["task"]
+                                                                : []).map((option) => {
+                                                                    const isSelected = runForm.values[config.moduleAccessKey]?.includes(option);
+                                                                    return (
+                                                                        <div
+                                                                            key={option}
+                                                                            onClick={() => {
+                                                                                if (runForm.values.role !== "admin") return;
+                                                                                const current = runForm.values[config.moduleAccessKey] || [];
+                                                                                const next = isSelected
+                                                                                    ? current.filter((v) => v !== option)
+                                                                                    : [...current, option];
+                                                                                runForm.setFieldValue(config.moduleAccessKey, next);
+                                                                            }}
+                                                                            className={cn(
+                                                                                "flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-[#dcccbd]/20 rounded-sm text-[14px]",
+                                                                                runForm.values.role !== "admin" && "opacity-80 cursor-not-allowed"
+                                                                            )}
+                                                                        >
+                                                                            <span className="capitalize">{option.replace("_", " ")}</span>
+                                                                            {isSelected && <Check className="h-4 w-4" />}
+                                                                        </div>
+                                                                    );
+                                                                })}
+                                                    </div>
+                                                </PopoverContent>
+                                            </Popover>
+                                            {runForm.touched[config.moduleAccessKey] && runForm.errors[config.moduleAccessKey] && (
+                                                <p className="text-red-500 text-xs mt-1">{runForm.errors[config.moduleAccessKey]}</p>
+                                            )}
+                                        </div>
+                                    )}
 
                                     <div className="space-y-1.5">
                                         <label className="text-[14px] font-medium text-primary-foreground block">

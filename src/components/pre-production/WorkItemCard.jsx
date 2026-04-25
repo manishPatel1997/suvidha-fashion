@@ -16,7 +16,7 @@ function WorkItemCard({ item, onClick, isFabric = false, isYarn = false, isSeque
                     src={item.src}
                     alt="Work item"
                     fill
-                    className="object-cover"
+                    className="object-cover hover:scale-110 hover:opacity-90 transition-all duration-500"
                     sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 150px"
                     priority={priority}
                     loading={priority ? undefined : "lazy"}

@@ -35,7 +35,7 @@ export function FabricDesignCard({
                                 src={image}
                                 alt={`${isFabric ? 'Fabric' : isSequences ? 'Sequences' : 'Yarn'} ${fabric_id}`}
                                 fill
-                                className="object-bottom-left"
+                                className="object-bottom-left hover:scale-110 hover:opacity-90 transition-all duration-500"
                                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                 quality={100}
                             />
@@ -86,7 +86,7 @@ export function FabricDesignCard({
                             src={image}
                             alt={`Fabric ${fabric_id}`}
                             fill
-                            className="object-cover object-center"
+                            className="object-cover object-center hover:scale-110 hover:opacity-90 transition-all duration-500"
                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 256px"
                             quality={90}
                         />

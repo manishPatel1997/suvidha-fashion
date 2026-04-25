@@ -77,15 +77,13 @@ const STEP_CONFIG = {
 }
 
 export function SketchesCardView({
-    isLocked,
     title = "1. Inspirations",
     sketchesData = null,
     defaultOpen = false,
     getVisualDesignersData,
     onStatusChange
 }) {
-
-    const { setFabricAssignData, setYarnAssignData, setSequenceAssignData } = usePreProductionStore()
+    const { setFabricAssignData, setYarnAssignData, setSequenceAssignData, setDesignAssignData } = usePreProductionStore()
     const titleName = title.split('.').pop()?.trim() || title
     const modalTitle = `${titleName} Target`
     const config = titleName === "Sequences" ? STEP_CONFIG.Sequences : titleName === "Fabric" ? STEP_CONFIG.Fabric : STEP_CONFIG[titleName] || STEP_CONFIG.Sketches
@@ -94,13 +92,12 @@ export function SketchesCardView({
     const initialAssign = titleName === "Sequences" ? sketchesData?.sequences || [] : sketchesData?.yarns || sketchesData?.fabrics || sketchesData?.assign || []
     const [data, setData] = React.useState({
         assign: initialAssign,
-        IsBlur: isLocked || (sketchesData?.status === "pending" && sketchesData?.status !== "completed"),
+        IsBlur: !sketchesData || sketchesData?.status === "pending",
         note: sketchesData?.note || "",
         [config.targetKey]: sketchesData?.[config.targetKey] || 0,
-        status: sketchesData?.status || "",
+        status: sketchesData?.status || "pending",
         progress: (initialAssign.length === 0 || !sketchesData) ? 0 : (initialAssign.length / sketchesData[config.targetKey]) * 100,
         selectedData: null,
-        isLocked: false
     })
     const [openModal, setOpenModal] = React.useState({
         isAddImageModalOpen: false,
@@ -115,25 +112,12 @@ export function SketchesCardView({
         [config.targetKey]: 0
     })
 
-    if (title === "2. Sketches") {
-        // console.log('data.IsBlur', data.IsBlur)
-        // console.log('isLocked', isLocked)
-        // console.log('data.isLocked', data.isLocked)
-        // console.log('sketchesData.status', sketchesData.status)
-        // console.table({
-        //     isLocked,
-        //     sketchesData,
-        //     data
-        // });
-    }
-
     React.useEffect(() => {
         if (sketchesData) {
             const assignData = titleName === "Sequences" ? sketchesData?.sequences || [] : sketchesData?.yarns || sketchesData.fabrics || sketchesData.assign || []
 
             const currentStepDone = (sketchesData?.status === "completed" || sketchesData?.status === "skipped")
-            const shouldBeBlurred = isLocked || (sketchesData?.status === "pending" && sketchesData?.status !== "completed")
-
+            const shouldBeBlurred = !sketchesData || sketchesData?.status === "pending"
             // Only update if something actually changed
             if (
                 data.assign !== assignData ||
@@ -148,7 +132,7 @@ export function SketchesCardView({
                     IsBlur: shouldBeBlurred,
                     note: sketchesData.note,
                     [config.targetKey]: sketchesData[config.targetKey],
-                    status: sketchesData?.status,
+                    status: sketchesData?.status || "pending",
                     progress: assignData.length === 0 ? 0 : (assignData.length / sketchesData[config.targetKey]) * 100,
                     isLocked: currentStepDone
                 }, setData)
@@ -156,7 +140,6 @@ export function SketchesCardView({
         }
     }, [
         sketchesData,
-        isLocked
     ])
 
     const handleModalOpen = (val, selectedData, index = 0) => {
@@ -225,6 +208,18 @@ export function SketchesCardView({
             }
 
             const target = Number(data[config.targetKey]) || 1
+            if (titleName === "Fabric") {
+                setFabricAssignData(updatedData)
+            }
+            if (titleName === "Design") {
+                setDesignAssignData(updatedData)
+            }
+            if (titleName === "Yarn") {
+                setYarnAssignData(updatedData)
+            }
+            if (titleName === "Sequences") {
+                setSequenceAssignData(updatedData)
+            }
 
             StateUpdate({
                 assign: updatedData,
@@ -242,6 +237,9 @@ export function SketchesCardView({
 
     const { mutate: updateStatus, isPending: isUpdatingStatus } = usePost(config.assignStatus, {
         onSuccess: (res, variables) => {
+            if (titleName === "Design") {
+                setDesignAssignData(data.assign)
+            }
             if (titleName === "Fabric") {
                 setFabricAssignData(data.assign)
             }
@@ -313,7 +311,6 @@ export function SketchesCardView({
 
     const handleOnCompleted = (type) => {
         setClickedAction(type)
-        console.log('sketchesData', sketchesData)
         const body = {
             design_id: sketchesData.design_id.toString(),
             status: type
@@ -375,16 +372,18 @@ export function SketchesCardView({
                         >
                             Start
                         </Button>}
-                        {data.IsBlur === false && data.status !== "completed" && data.status !== "skipped" && <Button
-                            variant="outline"
-                            size="xs"
-                            disabled={data.IsBlur || isUpdatingStatus}
-                            onClick={() => handleOnCompleted("skipped")}
-                            className="h-7 px-4 py-0 border-[#dcccbd] bg-[#F8F5F2] text-[14px] font-medium text-primary-foreground rounded-md hover:bg-[#f1ede9]"
-                        >
-                            {isUpdatingStatus && clickedAction === "skipped" ? "..." : "Skip"}
-                        </Button>}
-                        {data.isLocked &&
+                        {/* {data.IsBlur === false && data.status !== "completed" && data.status !== "skipped" && */}
+                        {!data.IsBlur && data.status !== "completed" && data.status !== "skipped" &&
+                            <Button
+                                variant="outline"
+                                size="xs"
+                                disabled={data.IsBlur || isUpdatingStatus}
+                                onClick={() => handleOnCompleted("skipped")}
+                                className="h-7 px-4 py-0 border-[#dcccbd] bg-[#F8F5F2] text-[14px] font-medium text-primary-foreground rounded-md hover:bg-[#f1ede9]"
+                            >
+                                {isUpdatingStatus && clickedAction === "skipped" ? "..." : "Skip"}
+                            </Button>}
+                        {!["running", "pending", "reopen"].includes(data.status) &&
                             <Button
                                 variant="outline"
                                 size="xs"
@@ -400,9 +399,9 @@ export function SketchesCardView({
 
                 {/* CONTENT */}
                 <AccordionContent className="p-0">
-                    <div className={clsx(data.IsBlur && "relative")}>
+                    <div className={clsx(data.IsBlur && "relative min-h-[160px]")}>
                         {data.IsBlur && (
-                            <LockBlur className="absolute inset-0 z-50 w-full" />
+                            <LockBlur className="absolute inset-0 z-50 w-full " />
                         )}
 
                         <div
@@ -412,7 +411,7 @@ export function SketchesCardView({
                             )}
                         >
                             {/* Progress */}
-                            <div className="p-6 pb-0 flex flex-col md:flex-row md:items-end justify-between gap-6">
+                            {!data.IsBlur && <div className="p-6 pb-0 flex flex-col md:flex-row md:items-end justify-between gap-6">
                                 <div className="flex-1 space-y-2">
                                     <div className="flex justify-between items-center font-semibold text-primary-foreground w-full lg:w-[80%]">
                                         <span>Workflow Progress</span>
@@ -451,7 +450,7 @@ export function SketchesCardView({
                                         Edit Target
                                     </Button>}
                                 </div>
-                            </div>
+                            </div>}
                             <div className="border-b border-[#dcccbd]"></div>
                             {/* Gallery */}
                             <div className="p-6 pt-0 grid grid-cols-2 md:flex flex-wrap items-center gap-4">
@@ -543,6 +542,7 @@ export function SketchesCardView({
                         let newImages = data.assign.map(item =>
                             Number(item.id) === Number(res.id) ? res : item
                         )
+
                         StateUpdate({
                             assign: newImages,
                         }, setData)
@@ -601,6 +601,18 @@ export function SketchesCardView({
                         let newImages = data.assign.map(item =>
                             Number(item.id) === Number(res.id) ? res : item
                         )
+                        if (titleName === "Fabric") {
+                            setFabricAssignData(newImages)
+                        }
+                        if (titleName === "Design") {
+                            setDesignAssignData(newImages)
+                        }
+                        if (titleName === "Yarn") {
+                            setYarnAssignData(newImages)
+                        }
+                        if (titleName === "Sequences") {
+                            setSequenceAssignData(newImages)
+                        }
                         StateUpdate({
                             assign: newImages,
                         }, setData)
@@ -608,6 +620,18 @@ export function SketchesCardView({
                     }}
                     onDelete={(deletedId) => {
                         const updatedImages = data.assign.filter(img => img.id !== Number(deletedId))
+                        if (titleName === "Fabric") {
+                            setFabricAssignData(updatedImages)
+                        }
+                        if (titleName === "Design") {
+                            setDesignAssignData(updatedImages)
+                        }
+                        if (titleName === "Yarn") {
+                            setYarnAssignData(updatedImages)
+                        }
+                        if (titleName === "Sequences") {
+                            setSequenceAssignData(updatedImages)
+                        }
                         StateUpdate({
                             assign: updatedImages,
                             progress: data[config.targetKey] === 0 ? 0 : (updatedImages.length / data[config.targetKey]) * 100

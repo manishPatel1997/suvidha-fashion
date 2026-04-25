@@ -20,7 +20,6 @@
 //             const payloadBase64 = token.split('.')[1]
 //             const decoded = JSON.parse(atob(payloadBase64))
 //             role = decoded?.role ?? null
-//             console.log('decoded token payload:', decoded)
 //         } catch (e) {
 //             console.error('Failed to decode token:', e)
 //         }

@@ -1,4 +1,5 @@
 export const API_LIST_AUTH = {
+    all_pre_production_data: "/api/v1/design/",
     Design: {
         create: "/api/v1/design/create",
     },

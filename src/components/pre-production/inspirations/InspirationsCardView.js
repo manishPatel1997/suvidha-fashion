@@ -29,7 +29,6 @@ const AddImageModal = dynamic(() =>
 )
 
 export function InspirationsCardView({
-    isLocked,
     title = "1. Inspirations",
     inspirationData = null,
     defaultOpen = false,
@@ -39,11 +38,11 @@ export function InspirationsCardView({
         images: inspirationData?.images || [],
         currentCount: 0,
         target_count: 0,
-        IsBlur: inspirationData?.status === "pending" || true,
+        IsBlur: !inspirationData || inspirationData?.status === "pending",
         note: inspirationData?.note || "",
         progress: (inspirationData?.inspiration_target === 0 || !inspirationData) ? 0 : (inspirationData.images.length / inspirationData.inspiration_target) * 100,
         selectedData: null,
-        status: inspirationData?.status || "",
+        status: inspirationData?.status || "pending",
         inspiration_target: inspirationData?.inspiration_target || 0,
         isLocked: false
     })
@@ -60,19 +59,17 @@ export function InspirationsCardView({
             // Only update if something actually changed
             if (
                 data.images !== inspirationData.images ||
-                data.status !== inspirationData.status ||
+                data.status !== inspirationData?.status ||
                 data.inspiration_target !== inspirationData.inspiration_target ||
-                data.note !== inspirationData.note ||
-                data.isLocked !== inspirationData.isLocked
+                data.note !== inspirationData.note
             ) {
                 StateUpdate({
                     images: inspirationData.images,
                     inspiration_target: inspirationData.inspiration_target,
-                    IsBlur: inspirationData.status === "pending",
+                    IsBlur: !inspirationData || inspirationData?.status === "pending",
                     note: inspirationData.note,
-                    status: inspirationData.status,
+                    status: inspirationData?.status || "pending",
                     progress: inspirationData.inspiration_target === 0 ? 0 : (inspirationData.images.length / inspirationData.inspiration_target) * 100,
-                    isLocked: isLocked
                 }, setData)
             }
         }
@@ -233,7 +230,7 @@ export function InspirationsCardView({
                                 {isUpdatingStatus && clickedAction === "skipped" ? "..." : "Skip"}
                             </Button>
                         }
-                        {data.isLocked && data.status !== "reopen" &&
+                        {!["running", "pending", "reopen"].includes(data.status) &&
                             <Button
                                 variant="outline"
                                 size="xs"
@@ -248,7 +245,7 @@ export function InspirationsCardView({
                 </div>
                 {/* CONTENT */}
                 <AccordionContent className="p-0">
-                    <div className={clsx(data.IsBlur && "relative")}>
+                    <div className={clsx(data.IsBlur && "relative min-h-[160px]")}>
                         {data.IsBlur && (
                             <LockBlur className="absolute inset-0 z-50 w-full" />
                         )}
@@ -260,7 +257,7 @@ export function InspirationsCardView({
                             )}
                         >
                             {/* Progress */}
-                            <div className="p-6 pb-0 flex flex-col md:flex-row md:items-end justify-between gap-6">
+                            {!data.IsBlur && <div className="p-6 pb-0 flex flex-col md:flex-row md:items-end justify-between gap-6">
                                 <div className="flex-1 space-y-2">
                                     <div className="flex justify-between items-center font-semibold text-primary-foreground w-full lg:w-[80%]">
                                         <span>Workflow Progress</span>
@@ -301,7 +298,7 @@ export function InspirationsCardView({
                                         </Button>
                                     }
                                 </div>
-                            </div>
+                            </div>}
                             <div className="border-b border-[#dcccbd]"></div>
                             {/* Gallery */}
                             <div className="p-6 pt-0 grid grid-cols-2 md:flex flex-wrap items-center gap-4">
@@ -318,7 +315,7 @@ export function InspirationsCardView({
                                                 alt={`Work ${idx}`}
                                                 fill
                                                 sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 150px"
-                                                className="object-cover"
+                                                className="object-cover hover:scale-110 hover:opacity-90 transition-all duration-500"
                                                 priority={idx === 0}
                                                 loading={idx === 0 ? undefined : "lazy"}
                                             />

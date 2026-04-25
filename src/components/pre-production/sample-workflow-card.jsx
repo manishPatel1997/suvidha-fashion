@@ -41,7 +41,6 @@ const DetailItem = ({ label, value, textColor = "#1A1A1A" }) => (
 );
 
 export function SampleWorkflowCard({
-  isLocked,
   title = "6. Sample",
   PreData,
 }) {
@@ -49,14 +48,15 @@ export function SampleWorkflowCard({
   const fabricAssignData = getFabricAssignData()
   const modalTitle = `${title} Target`
   const [data, setData] = React.useState({
-    status: PreData?.sampleData?.status || "",
-    IsBlur: PreData?.sampleData?.status ? PreData?.sampleData?.status === "pending" : true,
+    status: PreData?.sampleData?.status,
     assign: PreData?.sampleData?.assigns || [],
     sample_target: PreData?.sampleData?.sample_target || 0,
     note: PreData?.sampleData?.note || "",
     progress: PreData?.sampleData?.sample_target !== 0 ? (PreData?.sampleData?.assigns?.length / PreData?.sampleData?.sample_target) * 100 : 0,
-    isLocked: false
   })
+
+  const [fabricData, setFabricData] = React.useState([])
+
   const [clickedAction, setClickedAction] = React.useState(null)
   const [openModal, setOpenModal] = React.useState({
     isEditModalOpen: false,
@@ -64,19 +64,23 @@ export function SampleWorkflowCard({
     selectData: null
   })
   React.useEffect(() => {
+    if (fabricAssignData) {
+      setFabricData(fabricAssignData)
+    }
+  }, [fabricAssignData])
+
+  React.useEffect(() => {
     if (PreData?.sampleData) {
       const prgrssVar = PreData?.sampleData?.sample_target !== 0 ? (PreData?.sampleData?.assigns?.length / PreData?.sampleData?.sample_target) * 100 : 0
       StateUpdate({
-        status: PreData?.sampleData?.status || "",
-        IsBlur: isLocked || PreData?.sampleData?.status === "pending",
+        status: PreData?.sampleData?.status,
         assign: PreData?.sampleData?.assigns || [],
         sample_target: PreData?.sampleData?.sample_target || 0,
         note: PreData?.sampleData?.note || "",
         progress: prgrssVar,
-        isLocked: PreData?.sampleData?.status === "completed" || PreData?.sampleData?.status === "skipped"
       }, setData)
     }
-  }, [PreData?.sampleData, isLocked])
+  }, [PreData?.sampleData])
 
   const { mutate: updateStatus, isPending: isUpdatingStatus } = usePost(API_LIST_AUTH.Sample.assignStatus, {
     onSuccess: (res, variables) => {
@@ -85,7 +89,7 @@ export function SampleWorkflowCard({
         if (variables.status === "reopen") {
           StateUpdate({ status: variables.status, isLocked: false }, setData)
         } else {
-          StateUpdate({ IsBlur: false, status: variables.status, isLocked: true }, setData)
+          StateUpdate({ status: variables.status, isLocked: true }, setData)
         }
       }
     },
@@ -120,7 +124,6 @@ export function SampleWorkflowCard({
         StateUpdate({
           sample_target: Number(variables.sample_target),
           progress: (data.assign.length / Number(variables.sample_target)) * 100,
-          IsBlur: false,
           status: "running"
         }, setData)
         StateUpdate({ isEditModalOpen: false, IsEditTarget: false }, setOpenModal)
@@ -176,7 +179,7 @@ export function SampleWorkflowCard({
 
           </AccordionTrigger>
           <div className="absolute right-14 top-[50%] -translate-y-1/2 flex items-center space-x-2 z-10 group-data-[state=closed]:hidden">
-            {data.IsBlur && data.status === "pending" &&
+            {data.status === "pending" &&
               <Button
                 variant="outline"
                 size="xs"
@@ -186,20 +189,20 @@ export function SampleWorkflowCard({
                 Start
               </Button>
             }
-            {!data.IsBlur && data.status !== "completed" && data.status !== "skipped" && <Button
+            {['reopen', 'running'].includes(data.status) && <Button
               variant="outline"
               size="xs"
-              disabled={data.IsBlur || isUpdatingStatus}
+              disabled={isUpdatingStatus}
               onClick={() => handleOnCompleted("skipped")}
               className="h-7 px-4 py-0 border-[#dcccbd] bg-[#F8F5F2] text-[14px] font-medium text-primary-foreground rounded-md hover:bg-[#f1ede9]"
             >
               {isUpdatingStatus && clickedAction === "skipped" ? "..." : "Skip"}
             </Button>}
-            {data.isLocked &&
+            {!["running", "pending", "reopen"].includes(data.status) &&
               <Button
                 variant="outline"
                 size="xs"
-                disabled={data.IsBlur || isUpdatingStatus}
+                disabled={isUpdatingStatus}
                 onClick={() => handleOnCompleted("reopen")}
                 className="h-7 px-4 py-0 border-[#dcccbd] bg-[#F8F5F2] text-[14px] font-medium text-primary-foreground rounded-md hover:bg-[#f1ede9]"
               >
@@ -212,37 +215,39 @@ export function SampleWorkflowCard({
         <AccordionContent className="p-0">
           <div
             className={clsx(
-              "p-6 space-y-8",
+              "space-y-6",
             )}
           >
             {/* Progress */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-              <div className="flex-1 space-y-2">
-                <div className="flex justify-between items-center font-semibold text-primary-foreground w-full lg:w-[80%]">
-                  <span>Workflow Progress</span>
-                  <span>{data?.progress ? Math.round(data.progress) : 0}%</span>
-                </div>
+              {data.status !== "pending" &&
+                <div className="flex-1 space-y-2 p-6">
+                  <div className="flex justify-between items-center font-semibold text-primary-foreground w-full lg:w-[80%]">
+                    <span>Workflow Progress</span>
+                    <span>{data?.progress ? Math.round(data.progress) : 0}%</span>
+                  </div>
+                  <div className="relative w-full lg:w-[80%] h-2 bg-[#F0F0F0] rounded-full overflow-hidden">
+                    <div
+                      className="absolute top-0 left-0 h-full rounded-full transition-all duration-300"
+                      style={{
+                        width: `${data.progress}%`,
+                        background:
+                          "linear-gradient(90deg, #D47A7A 0%, #D4A57A 50%, #8DB88D 100%)",
+                      }}
+                    />
+                  </div>
 
-                <div className="relative w-full lg:w-[80%] h-2 bg-[#F0F0F0] rounded-full overflow-hidden">
-                  <div
-                    className="absolute top-0 left-0 h-full rounded-full transition-all duration-300"
-                    style={{
-                      width: `${data.progress}%`,
-                      background:
-                        "linear-gradient(90deg, #D47A7A 0%, #D4A57A 50%, #8DB88D 100%)",
-                    }}
-                  />
                 </div>
-              </div>
+              }
             </div>
           </div>
           <div className="border-b border-[#dcccbd]"></div>
           {/* Sample Rows */}
-          <div className={clsx("space-y-4 p-6 pt-6", data.IsBlur && "relative min-h-[225px]")}>
-            {data.IsBlur && (
-              <LockBlur className="absolute inset-0 h-full z-50 w-full" />
+          <div className={clsx("space-y-4 p-6 pt-6", data.status === "pending" && "relative min-h-[160px]")}>
+            {data.status === "pending" && (
+              <LockBlur className="absolute inset-0 h-full z-50 w-full " />
             )}
-            {!data.IsBlur && fabricAssignData?.map((row) => {
+            {data.status !== "pending" && fabricData?.map((row) => {
               const filteredAssign =
                 data?.assign?.filter(
                   (item) => item.fabric_assign_id === row.id
@@ -318,12 +323,12 @@ export function SampleWorkflowCard({
                 </div>
               )
             })}
-            {!data.IsBlur && data.status !== "completed" && data.status !== "skipped" &&
+            {data.status !== "pending" && data.status !== "completed" && data.status !== "skipped" &&
               <div className="flex justify-end flex-auto self-end">
                 <Button
                   onClick={() => handleOnCompleted("completed")}
                   className="bg-[#dcccbd] hover:bg-[#dcccbd]/90 h-[36px] px-8 rounded-[8px]"
-                  disabled={data.IsBlur || isUpdatingStatus}
+                  disabled={isUpdatingStatus}
                 >
                   {isUpdatingStatus && clickedAction === "completed" ? "Processing..." : "Completed"}
                 </Button>

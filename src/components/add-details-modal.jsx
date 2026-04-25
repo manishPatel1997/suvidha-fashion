@@ -12,6 +12,7 @@ import { StateUpdate } from "@/lib/helper"
 import { API_LIST_AUTH } from "@/hooks/api-list"
 import { usePost } from "@/hooks/useApi"
 import { toast } from "sonner"
+import usePreProductionStore from "@/store/preProductionStore"
 
 
 const validationSchema = Yup.object().shape({
@@ -56,12 +57,48 @@ const validationSchema = Yup.object().shape({
 //     }
 // )
 export function AddDetailsModal({ open, onOpenChange, onAdd, selectData, PreData, assign }) {
-
+    const { designAssignData, yarnAssignData, sequenceAssignData } = usePreProductionStore()
     const [data, setData] = React.useState({
         yarnOption: [],
         sequenceOption: [],
         visualDesignerOption: []
     })
+
+    React.useEffect(() => {
+        if (designAssignData?.length > 0) {
+            const formatted = [
+                { value: "none", label: "None" },
+                ...(designAssignData?.map((item) => ({
+                    value: item.id.toString(),
+                    label: item.design_no,
+                    rawData: item
+                })) || [])
+            ]
+            StateUpdate({ visualDesignerOption: formatted }, setData)
+        }
+        if (yarnAssignData?.length > 0) {
+            const formatted = [
+                { value: "none", label: "None" },
+                ...(yarnAssignData?.map((item) => ({
+                    value: item.id.toString(),
+                    label: item.yarn_name,
+                    rawData: item
+                })) || [])
+            ]
+            StateUpdate({ yarnOption: formatted }, setData)
+        }
+        if (sequenceAssignData?.length > 0) {
+            const formatted = [
+                { value: "none", label: "None" },
+                ...(sequenceAssignData?.map((item) => ({
+                    value: item.id.toString(),
+                    label: item.sequence_name,
+                    rawData: item
+                })) || [])
+            ]
+            StateUpdate({ sequenceOption: formatted }, setData)
+        }
+    }, [designAssignData, yarnAssignData, sequenceAssignData])
 
 
     const { mutate: addDetails, isPending } = usePost(API_LIST_AUTH.Sample.assign, {
@@ -75,61 +112,61 @@ export function AddDetailsModal({ open, onOpenChange, onAdd, selectData, PreData
         }
     })
 
-    const { mutate: getVisualDesignersData } = usePost(API_LIST_AUTH.VisualDesigners.get, {
-        onSuccess: (res) => {
-            if (res.success && res.data) {
-                const formatted = [
-                    { value: "none", label: "None" },
-                    ...(res.data.assign?.map((item) => ({
-                        value: item.design_no,
-                        label: item.design_no,
-                    })) || [])
-                ]
-                StateUpdate({ visualDesignerOption: formatted }, setData)
-            }
-        }
-    })
+    // const { mutate: getVisualDesignersData } = usePost(API_LIST_AUTH.VisualDesigners.get, {
+    //     onSuccess: (res) => {
+    //         if (res.success && res.data) {
+    //             const formatted = [
+    //                 { value: "none", label: "None" },
+    //                 ...(res.data.assign?.map((item) => ({
+    //                     value: item.design_no,
+    //                     label: item.design_no,
+    //                 })) || [])
+    //             ]
+    //             StateUpdate({ visualDesignerOption: formatted }, setData)
+    //         }
+    //     }
+    // })
 
-    const { mutate: getYarnData } = usePost(API_LIST_AUTH.Yarn.get, {
-        onSuccess: (res) => {
-            if (res.success && res.data) {
-                const formatted = [
-                    { value: "none", label: "None" },
-                    ...(res.data.yarns?.map((item) => ({
-                        value: item.id.toString(),
-                        label: item.yarn_name,
-                        rawData: item
-                    })) || [])
-                ]
-                StateUpdate({ yarnOption: formatted }, setData)
-            }
-        }
-    })
+    // const { mutate: getYarnData } = usePost(API_LIST_AUTH.Yarn.get, {
+    //     onSuccess: (res) => {
+    //         if (res.success && res.data) {
+    //             const formatted = [
+    //                 { value: "none", label: "None" },
+    //                 ...(res.data.yarns?.map((item) => ({
+    //                     value: item.id.toString(),
+    //                     label: item.yarn_name,
+    //                     rawData: item
+    //                 })) || [])
+    //             ]
+    //             StateUpdate({ yarnOption: formatted }, setData)
+    //         }
+    //     }
+    // })
 
-    const { mutate: getSequencesData } = usePost(API_LIST_AUTH.Sequences.get, {
-        onSuccess: (res) => {
-            if (res.success && res.data) {
-                const formatted = [
-                    { value: "none", label: "None" },
-                    ...(res.data.sequences?.map((item) => ({
-                        value: item.id.toString(),
-                        label: item.sequence_name,
-                        rawData: item
-                    })) || [])
-                ]
-                StateUpdate({ sequenceOption: formatted }, setData)
-            }
-        }
-    })
+    // const { mutate: getSequencesData } = usePost(API_LIST_AUTH.Sequences.get, {
+    //     onSuccess: (res) => {
+    //         if (res.success && res.data) {
+    //             const formatted = [
+    //                 { value: "none", label: "None" },
+    //                 ...(res.data.sequences?.map((item) => ({
+    //                     value: item.id.toString(),
+    //                     label: item.sequence_name,
+    //                     rawData: item
+    //                 })) || [])
+    //             ]
+    //             StateUpdate({ sequenceOption: formatted }, setData)
+    //         }
+    //     }
+    // })
 
-    React.useEffect(() => {
-        if (open && PreData?.sampleData?.design_id) {
-            const design_id = PreData.sampleData.design_id.toString()
-            getVisualDesignersData({ design_id })
-            getYarnData({ design_id })
-            getSequencesData({ design_id })
-        }
-    }, [open, PreData?.sampleData?.design_id])
+    // React.useEffect(() => {
+    //     if (open && PreData?.sampleData?.design_id) {
+    //         const design_id = PreData.sampleData.design_id.toString()
+    //         // getVisualDesignersData({ design_id })
+    //         getYarnData({ design_id })
+    //         getSequencesData({ design_id })
+    //     }
+    // }, [open, PreData?.sampleData?.design_id])
 
 
     const formik = useFormik({

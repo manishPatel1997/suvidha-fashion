@@ -13,7 +13,6 @@ export function EditTargetModal({ open, onOpenChange, onSave, initialValue = 0, 
             .required("Target is required")
             .min(min, `Target cannot be less than ${min}`),
     }), [min])
-
     const formik = useFormik({
         initialValues: {
             target: initialValue,
@@ -57,15 +56,17 @@ export function EditTargetModal({ open, onOpenChange, onSave, initialValue = 0, 
                     />
                 </div>
 
-                <div className="flex justify-center pt-2">
-                    <Button
-                        type="submit"
-                        className="bg-[#dcccbd] hover:bg-[#dcccbd]/90 text-primary-foreground h-10 px-10 rounded-md font-semibold text-[16px] min-w-[120px]"
-                        disabled={isLoading}
-                    >
-                        {isLoading ? "Adding..." : IsEditTarget ? "Update" : "Add"}
-                    </Button>
-                </div>
+                {formik.values.target != initialValue && (
+                    <div className="flex justify-center pt-2">
+                        <Button
+                            type="submit"
+                            className="bg-[#dcccbd] hover:bg-[#dcccbd]/90 text-primary-foreground h-10 px-10 rounded-md font-semibold text-[16px] min-w-[120px]"
+                            disabled={isLoading}
+                        >
+                            {isLoading ? "Adding..." : IsEditTarget ? "Update" : "Add"}
+                        </Button>
+                    </div>
+                )}
             </form>
         </CommonModal>
     )
