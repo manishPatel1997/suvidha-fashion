@@ -60,7 +60,7 @@ export async function post(url, body = {}, options = {}) {
 /**
  * Server-side GET request helper
  */
-export async function get(url, params = {}) {
+export async function get(url, params = {}, options = {}) {
     const searchParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
@@ -73,5 +73,6 @@ export async function get(url, params = {}) {
 
     return serverFetcher(finalUrl, {
         method: "GET",
+        ...options,
     });
 }

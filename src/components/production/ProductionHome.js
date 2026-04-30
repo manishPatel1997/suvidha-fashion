@@ -5,12 +5,17 @@ import clsx from 'clsx'
 import ProductionItemCard from './ProductionItemCard'
 import { AddProductionModal } from '../add-production-modal'
 import { ProductionViewModal } from './ProductionViewModal'
-import { StateUpdate } from '@/lib/helper'
+import { StateUpdate, statusColors } from '@/lib/helper'
+
+import { Button } from '../ui/button'
+import { usePost } from '@/hooks/useApi'
+import { API_PRODUCTION } from '@/hooks/api-list'
 
 function ProductionHome({
     productionData = null,
     title = "Sample",
     progress = 50,
+    id
 }) {
 
     const [PreProductionData, setPreProductionData] = React.useState({})
@@ -27,6 +32,18 @@ function ProductionHome({
         selectedItem: null
     })
 
+    const { mutate: updateStatus, isPending: isUpdatingStatus } = usePost(API_PRODUCTION.status_update, {
+        onSuccess: (res, variables) => {
+            if (res.success) {
+                setPreProductionData(prev => ({ ...prev, status: res.data?.status || variables?.status || prev.status }))
+            }
+        }
+    })
+
+    const handleStatusUpdate = (status) => {
+        updateStatus({ design_id: id.toString(), status })
+    }
+
     const handleAddProduction = (values) => {
         StateUpdate({ isAddModalOpen: false }, setOpenModal)
     }
@@ -35,16 +52,47 @@ function ProductionHome({
         StateUpdate({ isViewModalOpen: true, selectedItem: item }, setOpenModal)
     }
 
+    const currentStatus = PreProductionData?.status || ""
+
     return (
         <div className="border border-[#dcccbd] rounded-[10px] bg-white overflow-hidden">
             {/* Header */}
             <div className={clsx(
                 "px-6 py-3 bg-[#F8F5F2] border-b border-[#dcccbd]",
-                "h-[50px] flex items-center"
+                "h-[50px] flex items-center justify-between"
             )}>
                 <h3 className="text-[18px] font-semibold text-primary-foreground font-sans">
                     {title}
                 </h3>
+                {currentStatus === "completed" || currentStatus === "skipped" ? (
+                    <div className={clsx(
+                        "px-3 py-1 rounded-full text-[12px] font-semibold uppercase tracking-wider",
+                        statusColors[currentStatus] || "bg-muted-foreground text-white"
+                    )}>
+                        {currentStatus}
+                    </div>
+                ) : (
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="xs"
+                            disabled={isUpdatingStatus}
+                            onClick={() => handleStatusUpdate("skipped")}
+                            className="h-7 px-4 py-0 border-[#dcccbd] bg-[#F8F5F2] text-[14px] font-medium text-primary-foreground rounded-md hover:bg-[#f1ede9]"
+                        >
+                            Skip
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="xs"
+                            disabled={isUpdatingStatus}
+                            onClick={() => handleStatusUpdate("completed")}
+                            className="h-7 px-4 py-0 border-[#dcccbd] bg-[#7DAA7B] text-[14px] font-medium text-white rounded-md hover:bg-[#5d8d5b]"
+                        >
+                            Complete
+                        </Button>
+                    </div>
+                )}
             </div>
 
             {/* Content Area */}

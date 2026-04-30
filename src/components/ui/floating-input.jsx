@@ -21,7 +21,7 @@ export function FloatingInput({
         id={id}
         className={clsx(
           "block h-12 w-full rounded-md border border-muted-foreground bg-transparent px-3 text-[16px] text-[#1A1A1A] focus:outline-none focus:ring-1 focus:ring-muted-foreground peer",
-          isFloating ? "pb-1 pt-4" : "py-2",
+          isFloating ? "" : "py-2",
           className,
         )}
         placeholder={isFloating ? " " : label || props.placeholder}

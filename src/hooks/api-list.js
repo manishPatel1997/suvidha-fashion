@@ -148,7 +148,8 @@ export const API_PRODUCTION = {
     get: "/api/v1/production/get",
     update: "/api/v1/production/update_sample",
     delete: "/api/v1/production/delete",
-    sample_get: "/api/v1/production/sample_get"
+    sample_get: "/api/v1/production/sample_get",
+    status_update: "/api/v1/production/status"
 }
 
 export const API_NOT_ADMIN = {
@@ -160,4 +161,12 @@ export const API_NOT_ADMIN = {
 export const User_DATA = {
     get: "/api/v1/common/profile",
     update: "/api/v1/common/profile_update"
+}
+
+export const API_POST_PRODUCTION = {
+    get: "/api/v1/post_production/get",
+    deko_update: "/api/v1/post_production/deko/update",
+    mill_update: "/api/v1/post_production/mill/update",
+    photography_update: "/api/v1/post_production/photography/update",
+    folder_update: "/api/v1/post_production/folder/update"
 }

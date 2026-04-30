@@ -9,7 +9,10 @@ function PostProductionItemCard({ item, onClick, titleName = "Sample ID" }) {
     const sampleId = item?.sample_id || "S-480"
 
     return (
-        <div className="flex flex-col w-[218px] rounded-[12px] bg-white border border-[#dcccbd] p-4  space-y-2">
+        <div 
+            onClick={onClick}
+            className="flex flex-col w-[218px] rounded-[12px] bg-white border border-[#dcccbd] p-4 space-y-2 cursor-pointer hover:shadow-md transition-all group"
+        >
             {/* Header */}
             <div className="px-1 pt-1">
                 <span className="text-[13px] font-medium text-primary-foreground">
@@ -19,8 +22,7 @@ function PostProductionItemCard({ item, onClick, titleName = "Sample ID" }) {
 
             {/* Image Container */}
             <div
-                onClick={onClick}
-                className="relative w-[184px] h-[116px] cursor-pointer hover:opacity-95 transition-opacity rounded-[10px] overflow-hidden border border-[#dcccbd]/40"
+                className="relative w-[184px] h-[116px] rounded-[10px] overflow-hidden border border-[#dcccbd]/40 group-hover:opacity-95 transition-opacity"
             >
                 <Image
                     src={item?.src || "/design-thumb.png"}

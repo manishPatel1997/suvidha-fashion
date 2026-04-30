@@ -41,6 +41,7 @@ export const statusColors = {
   pending: "bg-[#858585] text-white",
   running: "bg-[#EAB308] text-white",
   completed: "bg-[#22C55E] text-white",
+  skipped: "bg-[#858585] text-white",
   review_request: "bg-[#3B82F6] text-white",
 }
 

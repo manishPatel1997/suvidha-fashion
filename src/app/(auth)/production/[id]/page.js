@@ -13,7 +13,7 @@ async function page({ params }) {
                 </h1>
             </div>
 
-            <ProductionHome productionData={productionData} />
+            <ProductionHome productionData={productionData} id={ProductionParams.id} />
 
         </div>
     )

@@ -109,6 +109,7 @@ const categoryOptions = [
     { value: "fabric", label: "Fabric" },
     { value: "yarn", label: "Yarn" },
     { value: "sequences", label: "Sequences" },
+    { value: "mill", label: "Mill" },
 ]
 
 export function AddFabricModal({
@@ -263,7 +264,7 @@ export function AddFabricModal({
             return Yup.object().shape({
                 [config.nameKey]: Yup.string()
                     .trim()
-                    .min(1, "Minimum 1 characters required")
+                    .min(3, "Minimum 3 characters required")
                     .required("Name is required"),
                 [config.categoryKey]: Yup.string().required(`Category is required`),
                 [config.contactKey]: Yup.string()
@@ -535,7 +536,7 @@ export function AddFabricModal({
                                                         <ChevronDown className="ml-2 h-4 w-4 shrink-0" />
                                                     </Button>
                                                 </PopoverTrigger>
-                                                <PopoverContent 
+                                                <PopoverContent
                                                     onWheel={(e) => e.stopPropagation()}
                                                     className="w-(--radix-popover-trigger-width) p-0 bg-white border-[#dcccbd] overflow-y-auto max-h-[300px]"
                                                 >
