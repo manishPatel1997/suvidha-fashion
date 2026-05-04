@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import { errorContainer } from "@/lib/helper"
-import { Search } from "lucide-react"
+import { Search, Edit2 } from "lucide-react"
 import { Label } from "@/components/ui/label"
 
 const SearchInput = ({ value, onChange }) => {
@@ -52,6 +52,7 @@ function FormSelect({
     readOnly = false,
     onChange,
     value: propValue,
+    hasEdit = false,
     ...props
 }) {
     const [searchQuery, setSearchQuery] = React.useState("")
@@ -146,6 +147,10 @@ function FormSelect({
                     </div>
                 </SelectContent>
             </Select>
+
+            {hasEdit && (
+                <Edit2 className="w-3.5 h-3.5 text-gray-400 absolute right-10 top-1/2 -translate-y-1/2 pointer-events-none z-10" />
+            )}
 
             {floatingUi && label && (
                 <Label

@@ -9,7 +9,7 @@ function PostProductionItemCard({ item, onClick, titleName = "Sample ID" }) {
     const sampleId = item?.sample_id || "S-480"
 
     return (
-        <div 
+        <div
             onClick={onClick}
             className="flex flex-col w-[218px] rounded-[12px] bg-white border border-[#dcccbd] p-4 space-y-2 cursor-pointer hover:shadow-md transition-all group"
         >
@@ -25,7 +25,7 @@ function PostProductionItemCard({ item, onClick, titleName = "Sample ID" }) {
                 className="relative w-[184px] h-[116px] rounded-[10px] overflow-hidden border border-[#dcccbd]/40 group-hover:opacity-95 transition-opacity"
             >
                 <Image
-                    src={item?.src || "/design-thumb.png"}
+                    src={item?.image_url ? `${process.env.NEXT_PUBLIC_API_URL}${item.image_url}` : "/design-thumb.png"}
                     alt="Work item"
                     fill
                     className="object-cover"

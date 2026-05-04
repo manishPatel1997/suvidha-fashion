@@ -1,6 +1,8 @@
 "use client"
 
 import * as React from "react"
+import { useFormik } from "formik"
+import * as Yup from "yup"
 import Image from "next/image"
 import { Share2, Download, Edit2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -22,11 +24,11 @@ export function PostProductionViewModal({
     titleName,
     onUpdateSuccess,
 }) {
-    console.log('selectedData?.sample_details', selectedData?.sample_details)
     const [isEditing, setIsEditing] = React.useState(false)
-    const [formData, setFormData] = React.useState({})
     const [vendorOptions, setVendorOptions] = React.useState([])
+    const [userOptions, setUserOptions] = React.useState([])
     const [previewImage, setPreviewImage] = React.useState(null)
+    const [uploadPreview, setUploadPreview] = React.useState(null)
     const [sampleDetails, setSampleDetails] = React.useState(null)
     const [selectedFile, setSelectedFile] = React.useState(null)
     const fileInputRef = React.useRef(null)
@@ -58,6 +60,8 @@ export function PostProductionViewModal({
             if (res.success) {
                 if (onUpdateSuccess) onUpdateSuccess(res.data)
                 setIsEditing(false)
+                setSelectedFile(null)
+                setUploadPreview(null)
             }
         },
         onError: (error) => {
@@ -79,32 +83,90 @@ export function PostProductionViewModal({
             console.error("Error fetching vendors:", error)
         }
     })
+    const { mutate: GetUser, isPending: GetUserPending } = usePost(
+        API_LIST_AUTH.users_get,
+        {
+            onSuccess: (res) => {
+                if (res.success && res.data) {
+                    const formattedUsers = res.data.map((user) => ({
+                        value: user.id.toString(),
+                        label: user.name,
+                        email: user.email
+                    }))
+
+                    setUserOptions(formattedUsers)
+                }
+            }
+        }
+    )
+
+    const runForm = useFormik({
+        initialValues: {
+            status: "In Process",
+            assign_user_id: "",
+            vendor_id: "",
+        },
+        validationSchema: Yup.object({
+            assign_user_id: Yup.string().required("Assign is required"),
+            vendor_id: titleName === "Mill"
+                ? Yup.string().required("Vendor is required")
+                : Yup.string()
+        }),
+        enableReinitialize: true,
+        onSubmit: (values) => {
+            const idKey = `${titleName.toLowerCase()}_assign_id`
+            const payload = {
+                image_url: selectedFile,
+                [idKey]: String(selectedData.id),
+                status: values.status?.toLowerCase().replace(" ", "_"),
+                assign_id: String(values.assign_user_id || ""),
+            }
+
+            if (titleName === "Mill") {
+                payload.vendor = String(values.vendor_id || "")
+            }
+
+            updatePostProduction(toFormData(payload))
+        }
+    })
+
+    const lastInitializedId = React.useRef(null)
 
     React.useEffect(() => {
         if (!open) {
             setIsEditing(false)
             setSelectedFile(null)
+            setUploadPreview(null)
+            runForm.resetForm()
+            lastInitializedId.current = null
+            return
         }
-        if (open && selectedData) {
-            getVendors({ type: "mill" })
-            setFormData({
-                id: selectedData.id || "",
+        if (open && selectedData && lastInitializedId.current !== selectedData.id) {
+            lastInitializedId.current = selectedData.id
+
+            if (titleName === "Mill") {
+                getVendors({ type: "mill" })
+            }
+            GetUser({ role: "" })
+
+            runForm.setValues({
                 status: selectedData.status ? (selectedData.status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')) : "In Process",
-                assign_user_name: selectedData.assign_user_name || "",
-                assign_user_id: selectedData.assign_id || "",
-                sample_id: selectedData.sample_id || "",
-                design_id: selectedData.design_id || "",
-                edit_note: selectedData.edit_note || "",
-                note: selectedData.note || "",
+                assign_user_id: String(selectedData?.assign_id || ""),
+                vendor_id: String(selectedData?.vendor || selectedData?.vendeor || selectedData?.vender || selectedData?.vendor_id || ""),
             })
-            setPreviewImage(selectedData?.image_url ? `${process.env.NEXT_PUBLIC_BASE_URL}${selectedData?.image_url}` : "/design-thumb.png")
+            const firstImg = selectedData?.images?.[0];
+            const firstImgSrc = typeof firstImg === 'string' ? firstImg : (firstImg?.image_url || firstImg?.image || firstImg?.url);
+
+            setPreviewImage(firstImgSrc
+                ? `${process.env.NEXT_PUBLIC_BASE_URL}${firstImgSrc}`
+                : (selectedData?.image_url ? `${process.env.NEXT_PUBLIC_BASE_URL}${selectedData?.image_url}` : "/design-thumb.png"))
 
             // Fetch sample details if we have a sample_id
             if (selectedData.sample_id) {
                 getSampleDetails({ production_items_id: String(selectedData.id) })
             }
         }
-    }, [open, selectedData, getSampleDetails, getVendors])
+    }, [open, selectedData, getSampleDetails, getVendors, titleName, GetUser])
 
     const handleImageChange = (e) => {
         const file = e.target.files?.[0]
@@ -113,27 +175,14 @@ export function PostProductionViewModal({
             const reader = new FileReader()
             reader.onloadend = () => {
                 setPreviewImage(reader.result)
+                setUploadPreview(reader.result)
             }
             reader.readAsDataURL(file)
         }
+        e.target.value = ""
     }
 
-    const handleFieldChange = (name, value) => {
-        setFormData(prev => ({ ...prev, [name]: value }))
-    }
 
-    const handleSubmit = () => {
-        const idKey = `${titleName.toLowerCase()}_assign_id`
-        const payload = {
-            image_url: selectedFile,
-            [idKey]: String(selectedData.id),
-            status: formData.status?.toLowerCase().replace(" ", "_"),
-            assign_id: String(formData.assign_user_id || ""),
-            // edit_note: formData.edit_note,
-            // note: formData.note,
-        }
-        updatePostProduction(toFormData(payload))
-    }
 
     const statusOptions = [
         { value: "Pending", label: "Pending" },
@@ -185,46 +234,88 @@ export function PostProductionViewModal({
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-x-12 gap-y-8 items-start">
+                            <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-x-8 gap-y-8 items-start">
                                 {/* Image Preview */}
-                                <div className="relative w-full aspect-19/10 lg:w-[380px] lg:h-[200px] rounded-[12px] overflow-hidden bg-[#F8F5F2] group border /40">
-                                    {previewImage && (
-                                        <Image
-                                            src={previewImage}
-                                            alt="Post Production Preview"
-                                            fill
-                                            className={cn("object-cover", isEditing && "opacity-80")}
-                                        />
-                                    )}
-
-                                    {isEditing && (
-                                        <div className="absolute inset-0 flex items-center justify-center">
-                                            <Button
-                                                onClick={() => fileInputRef.current?.click()}
-                                                className="bg-white hover:bg-white/90 text-primary-foreground font-semibold px-6 py-2 rounded-md shadow-md"
-                                            >
-                                                Upload New Image
-                                            </Button>
-                                            <input
-                                                ref={fileInputRef}
-                                                type="file"
-                                                accept="image/*"
-                                                hidden
-                                                onChange={handleImageChange}
+                                <div className="flex flex-col lg:flex-row gap-4">
+                                    <div className={cn(
+                                        "relative w-full aspect-19/10 rounded-[12px] overflow-hidden bg-[#E6D9CB] group border border-[#dcccbd]/40",
+                                        titleName === "Mill" ? "lg:w-[360px] lg:h-[428px]" : "lg:w-[380px] lg:h-[200px]"
+                                    )}>
+                                        {previewImage && (
+                                            <Image
+                                                src={previewImage}
+                                                alt="Post Production Preview"
+                                                fill
+                                                className={cn("object-cover", isEditing && "opacity-80")}
                                             />
-                                        </div>
-                                    )}
+                                        )}
 
-                                    {!isEditing && previewImage && (
-                                        <div className="absolute bottom-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button className="w-9 h-9 flex items-center justify-center bg-[#A67F6F] hover:bg-[#8B6A5C] text-white rounded-full shadow-lg">
-                                                <Share2 className="w-4 h-4" />
-                                            </button>
+                                        {isEditing && (
+                                            <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+                                                <Button
+                                                    onClick={() => fileInputRef.current?.click()}
+                                                    className="bg-white hover:bg-white/90 text-primary-foreground font-semibold px-6 py-2 rounded-md shadow-md"
+                                                >
+                                                    Upload New Image
+                                                </Button>
+                                                <input
+                                                    ref={fileInputRef}
+                                                    type="file"
+                                                    accept="image/*"
+                                                    hidden
+                                                    onChange={handleImageChange}
+                                                />
+                                            </div>
+                                        )}
+
+                                        {!isEditing && previewImage && (
+                                            <div className="absolute bottom-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button className="w-9 h-9 flex items-center justify-center bg-[#A67F6F] hover:bg-[#8B6A5C] text-white rounded-full shadow-lg">
+                                                    <Share2 className="w-4 h-4" />
+                                                </button>
+                                                <button
+                                                    className="w-9 h-9 flex items-center justify-center bg-[#A67F6F] hover:bg-[#8B6A5C] text-white rounded-full shadow-lg"
+                                                    onClick={() => downloadImage(previewImage)}
+                                                >
+                                                    <Download className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {titleName === "Mill" && (
+                                        <div className="flex lg:flex-col gap-3 h-auto lg:h-[428px] w-full lg:w-auto">
+                                            <div className="flex-1 overflow-x-auto lg:overflow-y-auto pb-2 lg:pb-0 lg:pr-2 custom-scrollbar flex flex-row lg:flex-col gap-3">
+                                                {selectedData?.images?.map((img, idx) => {
+                                                    const imgSrc = typeof img === 'string' ? img : (img?.image_url || img?.image || img?.url);
+                                                    if (!imgSrc) return null;
+                                                    const fullImgSrc = `${process.env.NEXT_PUBLIC_BASE_URL}${imgSrc}`;
+                                                    return (
+                                                        <div 
+                                                            key={idx} 
+                                                            className="relative shrink-0 w-[76px] h-[76px] rounded-[8px] bg-[#E6D9CB] border border-[#B0826A]/40 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                                                            onClick={() => setPreviewImage(fullImgSrc)}
+                                                        >
+                                                            <Image src={fullImgSrc} alt={`Mill Image ${idx}`} fill className="object-cover" />
+                                                        </div>
+                                                    );
+                                                })}
+                                                {selectedFile && uploadPreview && (
+                                                    <div 
+                                                        className="relative shrink-0 w-[76px] h-[76px] rounded-[8px] bg-[#E6D9CB] border border-[#B0826A]/40 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                                                        onClick={() => setPreviewImage(uploadPreview)}
+                                                    >
+                                                        <Image src={uploadPreview} alt="Uploaded image" fill className="object-cover" />
+                                                    </div>
+                                                )}
+                                            </div>
                                             <button
-                                                className="w-9 h-9 flex items-center justify-center bg-[#A67F6F] hover:bg-[#8B6A5C] text-white rounded-full shadow-lg"
-                                                onClick={() => downloadImage(previewImage)}
+                                                className="shrink-0 w-[76px] h-[76px] rounded-[8px] bg-white border border-[#dcccbd] flex items-center justify-center text-[#B0826A] hover:bg-gray-50 transition-colors"
+                                                onClick={() => isEditing && fileInputRef.current?.click()}
+                                                disabled={!isEditing}
+                                                style={{ cursor: isEditing ? 'pointer' : 'default' }}
                                             >
-                                                <Download className="w-4 h-4" />
+                                                <span className="text-3xl font-light leading-none mb-1">+</span>
                                             </button>
                                         </div>
                                     )}
@@ -233,12 +324,13 @@ export function PostProductionViewModal({
                                 {/* Basic Fields */}
                                 <div className="space-y-6 flex-1">
                                     <FormSelect
+                                        name="status"
+                                        runForm={runForm}
                                         label="Status"
                                         floatingUi={true}
+                                        hasEdit
                                         options={statusOptions}
-                                        value={formData.status}
                                         readOnly={!isEditing}
-                                        onValueChange={(val) => handleFieldChange("status", val)}
                                         triggerClassName={cn(
                                             "h-12! rounded-[10px]!",
                                             !isEditing && "bg-white!"
@@ -246,24 +338,33 @@ export function PostProductionViewModal({
                                     />
 
                                     <FormSelect
+                                        name="assign_user_id"
+                                        runForm={runForm}
                                         label="Assign"
                                         floatingUi={true}
-                                        options={vendorOptions}
-                                        value={String(formData.assign_user_id || "")}
+                                        hasEdit
+                                        options={userOptions}
                                         readOnly={!isEditing}
-                                        onValueChange={(val) => {
-                                            const selectedVendor = vendorOptions.find(opt => opt.value === val)
-                                            setFormData(prev => ({
-                                                ...prev,
-                                                assign_user_id: val,
-                                                assign_user_name: selectedVendor?.label || ""
-                                            }))
-                                        }}
                                         triggerClassName={cn(
                                             "h-12! rounded-[10px]!",
                                             !isEditing && "bg-white!"
                                         )}
                                     />
+                                    {titleName === "Mill" && (
+                                        <FormSelect
+                                            name="vendor_id"
+                                            runForm={runForm}
+                                            label="Vendor"
+                                            floatingUi={true}
+                                            hasEdit
+                                            options={vendorOptions}
+                                            readOnly={!isEditing}
+                                            triggerClassName={cn(
+                                                "h-12! rounded-[10px]!",
+                                                !isEditing && "bg-white!"
+                                            )}
+                                        />
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -291,7 +392,7 @@ export function PostProductionViewModal({
                                     <div className="grid grid-cols-2 gap-4">
                                         <FloatingInput
                                             label="Sample Id"
-                                            value={selectedData?.sample_details?.sample_id}
+                                            value={selectedData?.sample_details?.sample_id || ""}
                                             readOnly={true}
                                             className="h-12 rounded-[10px]  bg-white!"
                                         />
@@ -305,15 +406,15 @@ export function PostProductionViewModal({
 
                                     <FloatingInput
                                         label="Status"
-                                        value={selectedData?.sample_details?.status}
+                                        value={selectedData?.sample_details?.status || ""}
                                         readOnly={true}
                                         className="h-12 rounded-[10px]  bg-white!"
                                     />
 
                                     <FloatingTextarea
                                         label="Edit"
-                                        value={selectedData?.sample_details?.edit_note}
-                                        readOnly={!isEditing}
+                                        value={selectedData?.sample_details?.edit_note || ""}
+                                        readOnly={true}
                                         onChange={(e) => handleFieldChange("edit_note", e.target.value)}
                                         isFloating={true}
                                         className="min-h-[80px] rounded-[10px] "
@@ -321,8 +422,8 @@ export function PostProductionViewModal({
 
                                     <FloatingTextarea
                                         label="Note"
-                                        value={selectedData?.sample_details?.note}
-                                        readOnly={!isEditing}
+                                        value={selectedData?.sample_details?.note || ""}
+                                        readOnly={true}
                                         onChange={(e) => handleFieldChange("note", e.target.value)}
                                         isFloating={true}
                                         className="min-h-[80px] rounded-[10px] "
@@ -337,7 +438,7 @@ export function PostProductionViewModal({
                 {isEditing && (
                     <div className="px-6 py-6 md:px-10 flex justify-end bg-white border-t /30">
                         <Button
-                            onClick={handleSubmit}
+                            onClick={runForm.handleSubmit}
                             disabled={isUpdating}
                             className="bg-[#DCCCBD] hover:bg-[#DCCCBD]/90 text-primary-foreground font-semibold h-11 px-16 rounded-lg transition-all"
                         >

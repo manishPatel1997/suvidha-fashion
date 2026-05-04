@@ -98,6 +98,26 @@ export function StockDetailsSidebar({
         gcTime: 0
     });
 
+    const [vendorOptions, setVendorOptions] = React.useState([]);
+    const vendorType = type === "Fabric" ? "fabric" : type === "Sequence" ? "sequences" : "yarn";
+
+    const { mutate: fetchVendors } = usePost(API_LIST_AUTH.Vendor.type, {
+        onSuccess: (res) => {
+            if (res?.success && Array.isArray(res.data)) {
+                setVendorOptions(res.data.map(item => ({
+                    label: item.name,
+                    value: item.name
+                })));
+            }
+        }
+    });
+
+    React.useEffect(() => {
+        if (open) {
+            fetchVendors({ type: vendorType });
+        }
+    }, [open, vendorType]);
+
     const convertedOptions = React.useMemo(() => {
         if (!settingData?.success || !settingData?.data) return {};
 
@@ -535,13 +555,14 @@ export function StockDetailsSidebar({
                                             <label className="text-[14px] font-medium block text-[#B0826A]">
                                                 {formatLabel(config.vendorKey)}
                                             </label>
-                                            <FloatingInput
-                                                hasEdit
+                                            <FormSelect
                                                 name={config.vendorKey}
                                                 runForm={runForm}
+                                                options={vendorOptions}
+                                                placeholder={`Select ${formatLabel(config.vendorKey)}`}
+                                                isSearch
+                                                triggerClassName="h-[45px]! bg-[#fcf8f4]/50"
                                                 readOnly={!isEditing}
-                                                className="bg-[#fcf8f4]/50"
-                                                isFloating={false}
                                             />
                                         </div>}
 
@@ -568,13 +589,14 @@ export function StockDetailsSidebar({
                                                     <label className="text-[14px] font-medium block text-[#B0826A]">
                                                         {formatLabel(config.vendorKey)}
                                                     </label>
-                                                    <FloatingInput
-                                                        hasEdit
+                                                    <FormSelect
                                                         name={config.vendorKey}
                                                         runForm={runForm}
+                                                        options={vendorOptions}
+                                                        placeholder={`Select ${formatLabel(config.vendorKey)}`}
+                                                        isSearch
+                                                        triggerClassName="h-[45px]! bg-[#fcf8f4]/50"
                                                         readOnly={!isEditing}
-                                                        className="bg-[#fcf8f4]/50"
-                                                        isFloating={false}
                                                     />
                                                 </div>
                                             </div>

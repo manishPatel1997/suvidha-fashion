@@ -50,10 +50,8 @@ function PostProductionHome({
     titleName = "Deko",
     Idx = "1",
     sketchesData = null,
-    progress = 0,
 }) {
     const config = POST_PRODUCTION_CONFIG[titleName] || POST_PRODUCTION_CONFIG.Deko
-    const [clickedAction, setClickedAction] = React.useState(null)
     const initialAssign = sketchesData?.assign || []
 
     const [data, setData] = React.useState({
@@ -257,9 +255,10 @@ function PostProductionHome({
                                 selectedData={data.selectedData}
                                 titleName={titleName}
                                 onUpdateSuccess={(updatedItem) => {
+                                    const finalData = updatedItem?.assign?.find((item) => Number(item.production_items_id) === Number(data.selectedData?.production_items_id))
                                     setData(prev => ({
                                         ...prev,
-                                        assign: prev.assign.map(item => item.id === updatedItem.id ? { ...item, ...updatedItem } : item)
+                                        assign: prev.assign.map(item => item.id === updatedItem.id ? { ...finalData } : item)
                                     }))
                                 }}
                             />}

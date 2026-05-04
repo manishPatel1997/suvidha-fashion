@@ -25,7 +25,6 @@ function ProductionHome({
         }
     }, [productionData])
 
-
     const [openModal, setOpenModal] = React.useState({
         isAddModalOpen: false,
         isViewModalOpen: false,
@@ -65,11 +64,22 @@ function ProductionHome({
                     {title}
                 </h3>
                 {currentStatus === "completed" || currentStatus === "skipped" ? (
-                    <div className={clsx(
-                        "px-3 py-1 rounded-full text-[12px] font-semibold uppercase tracking-wider",
-                        statusColors[currentStatus] || "bg-muted-foreground text-white"
-                    )}>
-                        {currentStatus}
+                    <div className="flex items-center gap-2">
+                        <div className={clsx(
+                            "px-3 py-1 rounded-full text-[12px] font-semibold uppercase tracking-wider",
+                            statusColors[currentStatus] || "bg-muted-foreground text-white"
+                        )}>
+                            {currentStatus}
+                        </div>
+                        <Button
+                            variant="outline"
+                            size="xs"
+                            disabled={isUpdatingStatus}
+                            onClick={() => handleStatusUpdate("reopen")}
+                            className="h-7 px-4 py-0 border-[#dcccbd] bg-[#F8F5F2] text-[14px] font-medium text-primary-foreground rounded-md hover:bg-[#f1ede9]"
+                        >
+                            Reopen
+                        </Button>
                     </div>
                 ) : (
                     <div className="flex items-center gap-2">
@@ -78,7 +88,7 @@ function ProductionHome({
                             size="xs"
                             disabled={isUpdatingStatus}
                             onClick={() => handleStatusUpdate("skipped")}
-                            className="h-7 px-4 py-0 border-[#dcccbd] bg-[#F8F5F2] text-[14px] font-medium text-primary-foreground rounded-md hover:bg-[#f1ede9]"
+                            className="h-7 px-4 py-0 border-[#dcccbd] bg-[#F8F5F2] text-[14px] font-medium  rounded-md hover:bg-[#f1ede9]"
                         >
                             Skip
                         </Button>

@@ -20,11 +20,12 @@ async function page({ params }) {
                 sketchesData={postProductionData?.deko}
                 defaultOpen={true}
             />
-            {/* <PostProductionHome
+            <PostProductionHome
                 titleName="Mill"
                 Idx="2"
                 sketchesData={postProductionData?.mill}
             />
+            {/* 
             <PostProductionHome
                 titleName="Photography"
                 Idx="3"

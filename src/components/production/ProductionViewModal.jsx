@@ -249,7 +249,7 @@ export function ProductionViewModal({
                                             value={formData.sample_id}
                                             readOnly={true}
                                             onChange={(e) => handleFieldChange("sample_id", e.target.value)}
-                                            className="h-11 rounded-[10px] border-[#dcccbd] bg-gray-50!"
+                                            className="h-11 rounded-[10px]  bg-gray-50!"
                                         />
                                     </div>
                                     <div className="space-y-1">
@@ -258,44 +258,53 @@ export function ProductionViewModal({
                                             value={formData.design_id}
                                             readOnly={true}
                                             onChange={(e) => handleFieldChange("design_id", e.target.value)}
-                                            className="h-11 rounded-[10px] border-[#dcccbd] bg-gray-50!"
+                                            className="h-11 rounded-[10px]  bg-gray-50!"
                                         />
                                     </div>
                                 </div>
 
                                 <div className="space-y-1">
-                                    <label className="text-[12px] font-medium text-[#B0826A] ml-2">Status</label>
+                                    <label className="text-[12px] font-medium flex items-center gap-1.5 text-[#B0826A] ml-2">
+                                        Status
+                                        <Edit2 className="w-3 h-3" />
+                                    </label>
                                     <FormSelect
                                         options={statusOptions}
                                         value={formData.status}
                                         readOnly={!isEditing}
                                         onValueChange={(val) => handleFieldChange("status", val)}
                                         triggerClassName={cn(
-                                            "h-11 rounded-[10px] border-[#dcccbd]!",
+                                            "h-11 rounded-[10px] ",
                                             !isEditing && "bg-gray-50!"
                                         )}
                                     />
                                 </div>
 
                                 <div className="space-y-1">
-                                    <label className="text-[12px] font-medium text-[#B0826A] ml-2">Edit</label>
+                                    <label className="text-[12px] font-medium flex items-center gap-1.5 text-[#B0826A] ml-2">
+                                        Edit
+                                        <Edit2 className="w-3 h-3" />
+                                    </label>
                                     <FloatingTextarea
                                         value={formData.edit_note}
                                         readOnly={!isEditing}
                                         onChange={(e) => handleFieldChange("edit_note", e.target.value)}
                                         isFloating={false}
-                                        className="min-h-[80px] rounded-[10px] border-[#dcccbd]"
+                                        className="min-h-[80px] rounded-[10px] "
                                     />
                                 </div>
 
                                 <div className="space-y-1">
-                                    <label className="text-[12px] font-medium text-[#B0826A] ml-2">Note</label>
+                                    <label className="text-[12px] font-medium flex items-center gap-1.5 text-[#B0826A] ml-2">
+                                        Note
+                                        <Edit2 className="w-3 h-3" />
+                                    </label>
                                     <FloatingTextarea
                                         value={formData.note}
                                         readOnly={!isEditing}
                                         onChange={(e) => handleFieldChange("note", e.target.value)}
                                         isFloating={false}
-                                        className="min-h-[80px] rounded-[10px] border-[#dcccbd]"
+                                        className="min-h-[80px] rounded-[10px] "
                                     />
                                 </div>
                             </div>
@@ -317,7 +326,7 @@ export function ProductionViewModal({
                                         value={formData.yarn}
                                         readOnly={true}
                                         onChange={(e) => handleFieldChange("yarn", e.target.value)}
-                                        className="h-11 rounded-[10px] border-[#dcccbd] bg-gray-50!"
+                                        className="h-11 rounded-[10px]  bg-gray-50!"
                                     />
                                 </div>
                                 <div className="space-y-1">
@@ -326,7 +335,7 @@ export function ProductionViewModal({
                                         value={formData.quality_con}
                                         readOnly={true}
                                         onChange={(e) => handleFieldChange("quality_con", e.target.value)}
-                                        className="h-11 rounded-[10px] border-[#dcccbd] bg-gray-50!"
+                                        className="h-11 rounded-[10px]  bg-gray-50!"
                                     />
                                 </div>
                                 <div className="space-y-1">
@@ -335,7 +344,7 @@ export function ProductionViewModal({
                                         value={formData.sequence}
                                         readOnly={true}
                                         onChange={(e) => handleFieldChange("sequence", e.target.value)}
-                                        className="h-11 rounded-[10px] border-[#dcccbd] bg-gray-50!"
+                                        className="h-11 rounded-[10px]  bg-gray-50!"
                                     />
                                 </div>
                                 <div className="space-y-1">
@@ -344,7 +353,7 @@ export function ProductionViewModal({
                                         value={formData.cd_con}
                                         readOnly={true}
                                         onChange={(e) => handleFieldChange("cd_con", e.target.value)}
-                                        className="h-11 rounded-[10px] border-[#dcccbd] bg-gray-50!"
+                                        className="h-11 rounded-[10px]  bg-gray-50!"
                                     />
                                 </div>
                                 <div className="space-y-1">
@@ -353,7 +362,7 @@ export function ProductionViewModal({
                                         value={formData.meter}
                                         readOnly={true}
                                         onChange={(e) => handleFieldChange("meter", e.target.value)}
-                                        className="h-11 rounded-[10px] border-[#dcccbd] bg-gray-50!"
+                                        className="h-11 rounded-[10px]  bg-gray-50!"
                                     />
                                 </div>
                                 <div className="space-y-1">
@@ -362,7 +371,7 @@ export function ProductionViewModal({
                                         value={formData.sample_design_no}
                                         readOnly={true}
                                         onChange={(e) => handleFieldChange("sample_design_no", e.target.value)}
-                                        className="h-11 rounded-[10px] border-[#dcccbd] bg-gray-50!"
+                                        className="h-11 rounded-[10px]  bg-gray-50!"
                                     />
                                 </div>
                                 <div className="space-y-1 select-none">
@@ -372,7 +381,7 @@ export function ProductionViewModal({
                                         readOnly={true}
                                         onChange={(val) => handleFieldChange("yarn_color", val)}
                                         isFloating={false}
-                                        className="h-11 rounded-[10px] border-[#dcccbd]! bg-gray-50!"
+                                        className="h-11 rounded-[10px] bg-gray-50!"
                                     />
                                 </div>
                             </div>
