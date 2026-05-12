@@ -170,3 +170,9 @@ export const API_POST_PRODUCTION = {
     photography_update: "/api/v1/post_production/photography/update",
     folder_update: "/api/v1/post_production/folder/update"
 }
+
+export const IDEAS = {
+    get: "/api/v1/ideas/get",
+    create: "/api/v1/ideas/create",
+    update: "/api/v1/ideas/update",
+}

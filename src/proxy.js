@@ -12,7 +12,8 @@ const protectedRoutes = [
     '/people',
     '/vendor',
     '/tasks',
-    '/profile'
+    '/profile',
+    '/idea'
 ]
 
 // Admin-only routes
@@ -26,7 +27,8 @@ const adminOnlyRoutes = [
     '/sequence',
     '/people',
     '/vendor',
-    '/setting'
+    '/setting',
+    '/idea'
 ]
 
 // Routes accessible by non-admin users
