@@ -6,8 +6,11 @@ import { modalOpen, StateUpdate } from '@/lib/helper'
 import LockBlur from '@/assets/LockBlur'
 import { API_LIST_AUTH } from '@/hooks/api-list'
 import React from 'react'
+import Image from 'next/image'
+import { cn } from '@/lib/utils'
 import PostProductionItemCard from './PostProductionItemCard'
 import { PostProductionViewModal } from './PostProductionViewModal'
+import { PostProductionFolderModal } from './PostProductionFolderModal'
 
 const POST_PRODUCTION_CONFIG = {
     Deko: {
@@ -52,7 +55,7 @@ function PostProductionHome({
     sketchesData = null,
 }) {
     const config = POST_PRODUCTION_CONFIG[titleName] || POST_PRODUCTION_CONFIG.Deko
-    const initialAssign = sketchesData?.assign || []
+    const initialAssign = sketchesData?.assign || sketchesData?.assigns || []
 
     const [data, setData] = React.useState({
         assign: initialAssign,
@@ -73,16 +76,13 @@ function PostProductionHome({
         [config.targetKey]: 0
     })
 
-    const handleModalOpen = (val, selectedData, index = 0) => {
-        StateUpdate({ selectedData: selectedData }, setData)
-        // modalOpen("SketchesImg", true, setOpenModal)
+    const handleModalOpen = (val, selectedData, groupItems = null) => {
+        StateUpdate({ selectedData: selectedData, groupItems: groupItems }, setData)
         if (val === "Deko") {
             modalOpen("DekoViewModalImage", true, setOpenModal)
-            // modalOpen("SketchesIndex", index, setOpenModal)
         }
         if (val === "Mill") {
             modalOpen("MillViewModalImage", true, setOpenModal)
-            // modalOpen("SketchesIndex", index, setOpenModal)
         }
         if (val === "Photography") {
             modalOpen("PhotographyViewModalImage", true, setOpenModal)
@@ -91,29 +91,6 @@ function PostProductionHome({
             modalOpen("FolderViewModalImage", true, setOpenModal)
         }
     }
-
-    const onEditTarget = async (val) => {
-        // const body = {
-        //     design_id: sketchesData.design_id.toString(),
-        //     [config.targetKey]: val.toString(),
-        //     status: "running", // running
-        //     note: ""
-        // }
-        // updateTarget(body)
-    }
-
-    const handleOnCompleted = (type) => {
-        // setClickedAction(type)
-        // const body = {
-        //     design_id: sketchesData.design_id.toString(),
-        //     status: type
-        // }
-        // updateStatus(body)
-    }
-
-
-    const isUpdatingStatus = false
-
     return (
         <Accordion
             type="single"
@@ -129,10 +106,11 @@ function PostProductionHome({
                 <div className="relative">
                     <AccordionTrigger
                         className={clsx(
+
                             "px-6 py-3 bg-[#F8F5F2] border-b border-[#dcccbd] ",
                             "flex items-start justify-between",
                             "hover:no-underline",
-                            "data-[state=closed]:h-[73.74px]"
+                            "data-[state=closed]:h-[54px]"
                         )}
                     >
                         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 w-full ">
@@ -185,7 +163,7 @@ function PostProductionHome({
                     <div >
                         <div
                             className={clsx(
-                                " space-y-6",
+                                titleName === "Folder" ? "" : "space-y-6",
                             )}
                         >
                             {/* Progress */}
@@ -230,38 +208,148 @@ function PostProductionHome({
                             </div> */}
                             <div className="border-b border-[#dcccbd]"></div>
                             {/* Gallery */}
-                            <div className="p-6 pt-0 grid grid-cols-2 md:flex flex-wrap items-center gap-4">
-                                {data.assign.map((item, index) => (
-                                    <PostProductionItemCard
-                                        key={index}
-                                        item={item}
-                                        titleName={titleName === "Photography" || titleName === "Folder" ? "Design ID" : "Sample ID"}
-                                        onClick={() => handleModalOpen(titleName, item, index)}
-                                    />
-                                ))}
-                            </div>
+                            <div className={cn(
+                                titleName === "Folder" ? "p-0" : "p-6",
+                                "pt-0",
+                                "flex flex-wrap items-center gap-4"
+                            )}>
+                                {titleName === "Photography" ? (
+                                    data.assign.map((item) => {
+                                        let arr = [...(item?.images || [])]
+                                        while (arr.length < 4) {
+                                            arr.push({
+                                                "image_url": null
+                                            });
+                                        }
+                                        if (arr.length > 4) {
+                                            arr = arr.slice(0, 4)
+                                        }
+                                        return (
+                                            <div
+                                                className="flex flex-col w-[218px] rounded-[16px] bg-[#FAF8F6] border border-[#DCCCBD] p-4 space-y-3 shadow-sm hover:shadow-md transition-all group/card cursor-pointer"
+                                                key={item.photography_id}
+                                                onClick={() => handleModalOpen(titleName, item)}
+                                            >
+                                                <div className="flex flex-col items-center gap-1 border-b border-[#DCCCBD]/50 pb-2">
+                                                    <span className="text-[13px] font-semibold text-primary-foreground font-sans">
+                                                        Sample ID: {item.photography_id}
+                                                    </span>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    {arr.map((val, idx) => {
+                                                        return val?.image_url ? (
+                                                            <div
+                                                                key={idx}
+                                                                className="relative aspect-square rounded-[12px] overflow-hidden border border-[#DCCCBD]/40 hover:opacity-90 transition-opacity"
+                                                            >
+                                                                <Image
+                                                                    src={`${process.env.NEXT_PUBLIC_API_URL}${val.image_url}`}
+                                                                    alt="Work"
+                                                                    fill
+                                                                    className="object-cover"
+                                                                />
+                                                            </div>
+                                                        ) : (
+                                                            <div
+                                                                key={idx}
+                                                                className="aspect-square rounded-[12px] bg-[#E6D9CB]/30 border border-dashed border-[#B0826A]/40 flex items-center justify-center hover:bg-[#E6D9CB]/50 transition-colors group"
+                                                            >
+                                                                <span className="text-2xl font-light text-[#B0826A] group-hover:scale-110 transition-transform">+</span>
+                                                            </div>
+                                                        )
+                                                    })}
+                                                </div>
+                                            </div>
+                                        )
+                                    })
+                                ) : titleName === "Folder" ? (
+                                    <div className="flex flex-col gap-3 w-full">
+                                        {data.assign.map((item, index) => (
+                                            <div
+                                                key={item.folder_id || item.id}
+                                                onClick={() => handleModalOpen(titleName, item, data.assign)}
+                                                className={
+                                                    clsx(
+                                                        data.assign.length > 1 && index !== data.assign.length - 1
+                                                            ? "border-b border-[#DCCCBD]"
+                                                            : "",
+                                                        "flex items-center gap-4 py-3  cursor-pointer group",
+                                                    )
+                                                }
+                                            >
+                                                <div className="flex items-center gap-2 px-2">
+                                                    <span className="text-[13px]  font-sans">Sample ID:</span>
+                                                    <span className="text-[14px] font-semibold text-primary-foreground font-sans">
+                                                        {item?.sample_details?.sample_id || ""}
+                                                    </span>
+                                                </div>
 
-                            {data.selectedData && <PostProductionViewModal
-                                open={openModal.DekoViewModalImage || openModal.MillViewModalImage || openModal.PhotographyViewModalImage || openModal.FolderViewModalImage}
-                                onOpenChange={(val) => {
-                                    setOpenModal(prev => ({
-                                        ...prev,
-                                        DekoViewModalImage: false,
-                                        MillViewModalImage: false,
-                                        PhotographyViewModalImage: false,
-                                        FolderViewModalImage: false,
-                                    }))
-                                }}
-                                selectedData={data.selectedData}
-                                titleName={titleName}
-                                onUpdateSuccess={(updatedItem) => {
-                                    const finalData = updatedItem?.assign?.find((item) => Number(item.production_items_id) === Number(data.selectedData?.production_items_id))
-                                    setData(prev => ({
-                                        ...prev,
-                                        assign: prev.assign.map(item => item.id === updatedItem.id ? { ...finalData } : item)
-                                    }))
-                                }}
-                            />}
+                                                <span className="text-[#DCCCBD] font-light">|</span>
+
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-[13px]  font-sans">Folder No:</span>
+                                                    <span className="text-[14px] font-semibold text-primary-foreground font-sans">
+                                                        {item?.folder_name || "F-01"}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    data.assign.map((item, index) => (
+                                        <PostProductionItemCard
+                                            key={index}
+                                            item={item}
+                                            titleName={titleName === "Folder" ? "Design ID" : "Sample ID"}
+                                            onClick={() => handleModalOpen(titleName, item, data.assign)}
+                                        />
+                                    ))
+                                )}
+                            </div>
+                            {data.selectedData && titleName === "Folder" ? (
+                                <PostProductionFolderModal
+                                    open={openModal.FolderViewModalImage}
+                                    onOpenChange={(val) => modalOpen("FolderViewModalImage", val, setOpenModal)}
+                                    selectedData={data.selectedData}
+                                    onSuccess={(updatedItem) => {
+                                        setData(prev => ({
+                                            ...prev,
+                                            assign: prev.assign.map(item => (item.folder_id || item.id) === (updatedItem.folder_id || updatedItem.id) ? updatedItem : item)
+                                        }))
+                                    }}
+                                />
+                            ) : data.selectedData && (
+                                <PostProductionViewModal
+                                    open={openModal.DekoViewModalImage || openModal.MillViewModalImage || openModal.PhotographyViewModalImage || openModal.FolderViewModalImage}
+                                    onOpenChange={(val) => {
+                                        setOpenModal(prev => ({
+                                            ...prev,
+                                            DekoViewModalImage: false,
+                                            MillViewModalImage: false,
+                                            PhotographyViewModalImage: false,
+                                            FolderViewModalImage: false,
+                                        }))
+                                    }}
+                                    selectedData={data.selectedData}
+                                    groupData={data.groupItems}
+                                    titleName={titleName}
+                                    onUpdateSuccess={(updatedItem) => {
+                                        if (data.selectedData?.photography_id) {
+                                            setData(prev => ({
+                                                ...prev,
+                                                assign: updatedItem?.assigns || []
+                                            }))
+                                            modalOpen("PhotographyViewModalImage", false, setOpenModal)
+                                        } else {
+                                            const finalData = updatedItem?.assign?.find((item) => Number(item.production_items_id) === Number(data.selectedData?.production_items_id))
+                                            setData(prev => ({
+                                                ...prev,
+                                                assign: prev.assign.map(item => item.id === updatedItem.id ? { ...finalData } : item)
+                                            }))
+                                        }
+                                    }}
+                                />
+                            )}
                         </div>
                     </div>
                 </AccordionContent>

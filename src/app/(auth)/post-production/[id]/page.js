@@ -6,7 +6,6 @@ import { fetchGetData } from '@/lib/helperServer'
 async function page({ params }) {
     const { id } = await params
     const postProductionData = await fetchGetData(API_POST_PRODUCTION.get, id)
-    console.log('postProductionData', postProductionData)
     return (
         <div className="space-y-8">
             <div className="flex flex-row sm:items-center justify-between gap-4">
@@ -25,7 +24,6 @@ async function page({ params }) {
                 Idx="2"
                 sketchesData={postProductionData?.mill}
             />
-            {/* 
             <PostProductionHome
                 titleName="Photography"
                 Idx="3"
@@ -35,7 +33,7 @@ async function page({ params }) {
                 titleName="Folder"
                 Idx="4"
                 sketchesData={postProductionData?.folder}
-            /> */}
+            />
         </div>
     )
 }

@@ -4,7 +4,7 @@ import * as React from "react"
 import { useFormik } from "formik"
 import * as Yup from "yup"
 import Image from "next/image"
-import { Share2, Download, Edit2 } from "lucide-react"
+import { Share2, Download, Edit2, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import CloseIcon from "@/assets/CloseIcon"
@@ -21,6 +21,7 @@ export function PostProductionViewModal({
     open,
     onOpenChange,
     selectedData,
+    groupData,
     titleName,
     onUpdateSuccess,
 }) {
@@ -107,7 +108,9 @@ export function PostProductionViewModal({
             vendor_id: "",
         },
         validationSchema: Yup.object({
-            assign_user_id: Yup.string().required("Assign is required"),
+            assign_user_id: titleName === "Photography"
+                ? Yup.string()
+                : Yup.string().required("Assign is required"),
             vendor_id: titleName === "Mill"
                 ? Yup.string().required("Vendor is required")
                 : Yup.string()
@@ -129,7 +132,6 @@ export function PostProductionViewModal({
             updatePostProduction(toFormData(payload))
         }
     })
-
     const lastInitializedId = React.useRef(null)
 
     React.useEffect(() => {
@@ -147,7 +149,9 @@ export function PostProductionViewModal({
             if (titleName === "Mill") {
                 getVendors({ type: "mill" })
             }
-            GetUser({ role: "" })
+            if (titleName !== "Photography") {
+                GetUser({ role: "" })
+            }
 
             runForm.setValues({
                 status: selectedData.status ? (selectedData.status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')) : "In Process",
@@ -162,9 +166,9 @@ export function PostProductionViewModal({
                 : (selectedData?.image_url ? `${process.env.NEXT_PUBLIC_BASE_URL}${selectedData?.image_url}` : "/design-thumb.png"))
 
             // Fetch sample details if we have a sample_id
-            if (selectedData.sample_id) {
-                getSampleDetails({ production_items_id: String(selectedData.id) })
-            }
+            // if (selectedData.sample_id) {
+            //     getSampleDetails({ production_items_id: String(selectedData.id) })
+            // }
         }
     }, [open, selectedData, getSampleDetails, getVendors, titleName, GetUser])
 
@@ -201,27 +205,40 @@ export function PostProductionViewModal({
             <div className="bg-white rounded-[20px] overflow-hidden flex flex-col max-h-[90vh]">
                 {/* Header Actions */}
                 <div className="px-6 py-4 md:px-10 flex items-center justify-between bg-white">
-                    <Button
-                        variant="ghost"
-                        onClick={() => setIsEditing(!isEditing)}
-                        className={cn(
-                            "h-9 px-4 flex items-center gap-2 rounded-md text-[14px] font-semibold transition-colors",
-                            isEditing
-                                ? "bg-[#DCCCBD] text-primary-foreground hover:bg-[#DCCCBD]/90"
-                                : "bg-[#F3F0EC] hover:bg-[#E8E2DA] text-primary-foreground"
-                        )}
-                    >
-                        {!isEditing && <Edit2 className="w-4 h-4" />}
-                        {isEditing ? "Cancel" : "Edit"}
-                    </Button>
+                    <div className="flex items-center gap-3">
+                        <Button
+                            variant="ghost"
+                            onClick={() => setIsEditing(!isEditing)}
+                            className={cn(
+                                "h-9 px-4 flex items-center gap-2 rounded-md text-[14px] font-semibold transition-colors",
+                                isEditing
+                                    ? "bg-[#DCCCBD] text-primary-foreground hover:bg-[#DCCCBD]/90"
+                                    : "bg-[#F3F0EC] hover:bg-[#E8E2DA] text-primary-foreground"
+                            )}
+                        >
+                            {!isEditing && <Edit2 className="w-4 h-4" />}
+                            {isEditing ? "Cancel" : "Edit"}
+                        </Button>
+                    </div>
 
-                    <Button
-                        variant="ghost"
-                        onClick={() => onOpenChange(false)}
-                        className="text-primary-foreground hover:opacity-70 transition-opacity"
-                    >
-                        <CloseIcon width={17} height={17} color="#1a1a1a" />
-                    </Button>
+                    <div className="flex items-center gap-3">
+                        {/* {titleName === "Photography" && ( */}
+                        {/* <Button
+                            variant="ghost"
+                            className="h-9 px-4 bg-[#F8F2F2] hover:bg-[#F1E6E6] text-[#D47A7A] flex items-center gap-2 rounded-md text-[14px] font-semibold transition-colors"
+                        >
+                            <Trash2 className="w-3.5 h-3.5 mr-0.5" />
+                            Delete
+                        </Button> */}
+                        {/* )} */}
+                        <Button
+                            variant="ghost"
+                            onClick={() => onOpenChange(false)}
+                            className="text-primary-foreground hover:opacity-70 transition-opacity"
+                        >
+                            <CloseIcon width={17} height={17} color="#1a1a1a" />
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="flex-1 overflow-y-auto overflow-x-hidden">
@@ -234,139 +251,179 @@ export function PostProductionViewModal({
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-x-8 gap-y-8 items-start">
-                                {/* Image Preview */}
-                                <div className="flex flex-col lg:flex-row gap-4">
-                                    <div className={cn(
-                                        "relative w-full aspect-19/10 rounded-[12px] overflow-hidden bg-[#E6D9CB] group border border-[#dcccbd]/40",
-                                        titleName === "Mill" ? "lg:w-[360px] lg:h-[428px]" : "lg:w-[380px] lg:h-[200px]"
-                                    )}>
-                                        {previewImage && (
-                                            <Image
-                                                src={previewImage}
-                                                alt="Post Production Preview"
-                                                fill
-                                                className={cn("object-cover", isEditing && "opacity-80")}
-                                            />
-                                        )}
+                            {titleName === "Photography" ? (
+                                <div className="space-y-6">
+                                    <div className="grid grid-cols-2 sm:flex sm:gap-4 sm:overflow-x-auto pb-2 custom-scrollbar pr-2 min-h-[160px] gap-4">
+                                        {isEditing &&
+                                            <div
+                                                onClick={() => isEditing && fileInputRef.current?.click()}
+                                                className={cn(
+                                                    "w-full sm:w-[150px] shrink-0 aspect-square rounded-[16px] bg-[#E6D9CB]/30 border border-dashed border-[#B0826A]/40 flex items-center justify-center transition-colors",
+                                                    isEditing ? "cursor-pointer hover:bg-[#E6D9CB]/50" : "cursor-default opacity-50"
+                                                )}
+                                            >
+                                                <span className="text-3xl font-light text-[#B0826A]">+</span>
+                                            </div>
+                                        }
 
-                                        {isEditing && (
-                                            <div className="absolute inset-0 flex items-center justify-center bg-black/10">
-                                                <Button
-                                                    onClick={() => fileInputRef.current?.click()}
-                                                    className="bg-white hover:bg-white/90 text-primary-foreground font-semibold px-6 py-2 rounded-md shadow-md"
+                                        {selectedData?.images.map((item, idx) => {
+                                            const isSelected = item?.id === selectedData?.id;
+                                            return (
+                                                <div
+                                                    key={idx}
+                                                    className={cn(
+                                                        "relative w-full sm:w-[150px] shrink-0 aspect-square rounded-[16px] overflow-hidden border transition-all cursor-pointer",
+                                                        isSelected ? "border-[#B0826A] ring-2 ring-[#B0826A]/20 shadow-md" : "border-[#DCCCBD]/40 hover:border-[#DCCCBD]"
+                                                    )}
                                                 >
-                                                    Upload New Image
-                                                </Button>
-                                                <input
-                                                    ref={fileInputRef}
-                                                    type="file"
-                                                    accept="image/*"
-                                                    hidden
-                                                    onChange={handleImageChange}
+                                                    <Image
+                                                        src={item?.image_url ? `${process.env.NEXT_PUBLIC_API_URL}${item.image_url}` : "/design-thumb.png"}
+                                                        alt={`Photography ${idx}`}
+                                                        fill
+                                                        className="object-cover"
+                                                    />
+                                                </div>
+                                            )
+                                        })}
+                                        {selectedFile && uploadPreview && (
+                                            <div className="relative w-full sm:w-[150px] shrink-0 aspect-square rounded-[16px] overflow-hidden border border-[#B0826A] ring-2 ring-[#B0826A]/20 shadow-md">
+                                                <Image
+                                                    src={uploadPreview}
+                                                    alt="Upload Preview"
+                                                    fill
+                                                    className="object-cover"
                                                 />
                                             </div>
                                         )}
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-x-8 gap-y-8 items-start">
+                                    {/* Image Preview */}
+                                    <div className="flex flex-col lg:flex-row gap-4">
+                                        <div className={cn(
+                                            "relative w-full aspect-19/10 rounded-[12px] overflow-hidden bg-[#E6D9CB] group border border-[#dcccbd]/40",
+                                            titleName === "Mill" ? "lg:w-[360px] lg:h-[428px]" : "lg:w-[380px] lg:h-[200px]"
+                                        )}>
+                                            {previewImage && (
+                                                <Image
+                                                    src={previewImage}
+                                                    alt="Post Production Preview"
+                                                    fill
+                                                    className={cn("object-cover", isEditing && "opacity-80")}
+                                                />
+                                            )}
 
-                                        {!isEditing && previewImage && (
-                                            <div className="absolute bottom-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button className="w-9 h-9 flex items-center justify-center bg-[#A67F6F] hover:bg-[#8B6A5C] text-white rounded-full shadow-lg">
-                                                    <Share2 className="w-4 h-4" />
-                                                </button>
+                                            {isEditing && (
+                                                <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+                                                    <Button
+                                                        onClick={() => fileInputRef.current?.click()}
+                                                        className="bg-white hover:bg-white/90 text-primary-foreground font-semibold px-6 py-2 rounded-md shadow-md"
+                                                    >
+                                                        Upload New Image
+                                                    </Button>
+                                                </div>
+                                            )}
+
+                                            {!isEditing && previewImage && (
+                                                <div className="absolute bottom-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button className="w-9 h-9 flex items-center justify-center bg-[#A67F6F] hover:bg-[#8B6A5C] text-white rounded-full shadow-lg">
+                                                        <Share2 className="w-4 h-4" />
+                                                    </button>
+                                                    <button
+                                                        className="w-9 h-9 flex items-center justify-center bg-[#A67F6F] hover:bg-[#8B6A5C] text-white rounded-full shadow-lg"
+                                                        onClick={() => downloadImage(previewImage)}
+                                                    >
+                                                        <Download className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {titleName === "Mill" && (
+                                            <div className="flex lg:flex-col gap-3 h-auto lg:h-[428px] w-full lg:w-auto">
+                                                <div className="flex-1 overflow-x-auto lg:overflow-y-auto pb-2 lg:pb-0 lg:pr-2 custom-scrollbar flex flex-row lg:flex-col gap-3">
+                                                    {selectedData?.images?.map((img, idx) => {
+                                                        const imgSrc = typeof img === 'string' ? img : (img?.image_url || img?.image || img?.url);
+                                                        if (!imgSrc) return null;
+                                                        const fullImgSrc = `${process.env.NEXT_PUBLIC_BASE_URL}${imgSrc}`;
+                                                        return (
+                                                            <div
+                                                                key={idx}
+                                                                className="relative shrink-0 w-[76px] h-[76px] rounded-[8px] bg-[#E6D9CB] border border-[#B0826A]/40 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                                                                onClick={() => setPreviewImage(fullImgSrc)}
+                                                            >
+                                                                <Image src={fullImgSrc} alt={`Mill Image ${idx}`} fill className="object-cover" />
+                                                            </div>
+                                                        );
+                                                    })}
+                                                    {selectedFile && uploadPreview && (
+                                                        <div
+                                                            className="relative shrink-0 w-[76px] h-[76px] rounded-[8px] bg-[#E6D9CB] border border-[#B0826A]/40 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                                                            onClick={() => setPreviewImage(uploadPreview)}
+                                                        >
+                                                            <Image src={uploadPreview} alt="Uploaded image" fill className="object-cover" />
+                                                        </div>
+                                                    )}
+                                                </div>
                                                 <button
-                                                    className="w-9 h-9 flex items-center justify-center bg-[#A67F6F] hover:bg-[#8B6A5C] text-white rounded-full shadow-lg"
-                                                    onClick={() => downloadImage(previewImage)}
+                                                    className="shrink-0 w-[76px] h-[76px] rounded-[8px] bg-white border border-[#dcccbd] flex items-center justify-center text-[#B0826A] hover:bg-gray-50 transition-colors"
+                                                    onClick={() => isEditing && fileInputRef.current?.click()}
+                                                    disabled={!isEditing}
+                                                    style={{ cursor: isEditing ? 'pointer' : 'default' }}
                                                 >
-                                                    <Download className="w-4 h-4" />
+                                                    <span className="text-3xl font-light leading-none mb-1">+</span>
                                                 </button>
                                             </div>
                                         )}
                                     </div>
-
-                                    {titleName === "Mill" && (
-                                        <div className="flex lg:flex-col gap-3 h-auto lg:h-[428px] w-full lg:w-auto">
-                                            <div className="flex-1 overflow-x-auto lg:overflow-y-auto pb-2 lg:pb-0 lg:pr-2 custom-scrollbar flex flex-row lg:flex-col gap-3">
-                                                {selectedData?.images?.map((img, idx) => {
-                                                    const imgSrc = typeof img === 'string' ? img : (img?.image_url || img?.image || img?.url);
-                                                    if (!imgSrc) return null;
-                                                    const fullImgSrc = `${process.env.NEXT_PUBLIC_BASE_URL}${imgSrc}`;
-                                                    return (
-                                                        <div 
-                                                            key={idx} 
-                                                            className="relative shrink-0 w-[76px] h-[76px] rounded-[8px] bg-[#E6D9CB] border border-[#B0826A]/40 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
-                                                            onClick={() => setPreviewImage(fullImgSrc)}
-                                                        >
-                                                            <Image src={fullImgSrc} alt={`Mill Image ${idx}`} fill className="object-cover" />
-                                                        </div>
-                                                    );
-                                                })}
-                                                {selectedFile && uploadPreview && (
-                                                    <div 
-                                                        className="relative shrink-0 w-[76px] h-[76px] rounded-[8px] bg-[#E6D9CB] border border-[#B0826A]/40 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
-                                                        onClick={() => setPreviewImage(uploadPreview)}
-                                                    >
-                                                        <Image src={uploadPreview} alt="Uploaded image" fill className="object-cover" />
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <button
-                                                className="shrink-0 w-[76px] h-[76px] rounded-[8px] bg-white border border-[#dcccbd] flex items-center justify-center text-[#B0826A] hover:bg-gray-50 transition-colors"
-                                                onClick={() => isEditing && fileInputRef.current?.click()}
-                                                disabled={!isEditing}
-                                                style={{ cursor: isEditing ? 'pointer' : 'default' }}
-                                            >
-                                                <span className="text-3xl font-light leading-none mb-1">+</span>
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Basic Fields */}
-                                <div className="space-y-6 flex-1">
-                                    <FormSelect
-                                        name="status"
-                                        runForm={runForm}
-                                        label="Status"
-                                        floatingUi={true}
-                                        hasEdit
-                                        options={statusOptions}
-                                        readOnly={!isEditing}
-                                        triggerClassName={cn(
-                                            "h-12! rounded-[10px]!",
-                                            !isEditing && "bg-white!"
-                                        )}
-                                    />
-
-                                    <FormSelect
-                                        name="assign_user_id"
-                                        runForm={runForm}
-                                        label="Assign"
-                                        floatingUi={true}
-                                        hasEdit
-                                        options={userOptions}
-                                        readOnly={!isEditing}
-                                        triggerClassName={cn(
-                                            "h-12! rounded-[10px]!",
-                                            !isEditing && "bg-white!"
-                                        )}
-                                    />
-                                    {titleName === "Mill" && (
+                                    {/* Basic Fields */}
+                                    <div className="space-y-6 flex-1">
                                         <FormSelect
-                                            name="vendor_id"
+                                            name="status"
                                             runForm={runForm}
-                                            label="Vendor"
+                                            label="Status"
                                             floatingUi={true}
                                             hasEdit
-                                            options={vendorOptions}
+                                            options={statusOptions}
                                             readOnly={!isEditing}
                                             triggerClassName={cn(
                                                 "h-12! rounded-[10px]!",
                                                 !isEditing && "bg-white!"
                                             )}
                                         />
-                                    )}
+
+                                        <FormSelect
+                                            name="assign_user_id"
+                                            runForm={runForm}
+                                            label="Assign"
+                                            floatingUi={true}
+                                            hasEdit
+                                            options={userOptions}
+                                            readOnly={!isEditing}
+                                            triggerClassName={cn(
+                                                "h-12! rounded-[10px]!",
+                                                !isEditing && "bg-white!"
+                                            )}
+                                        />
+                                        {titleName === "Mill" && (
+                                            <FormSelect
+                                                name="vendor_id"
+                                                runForm={runForm}
+                                                label="Vendor"
+                                                floatingUi={true}
+                                                hasEdit
+                                                options={vendorOptions}
+                                                readOnly={!isEditing}
+                                                triggerClassName={cn(
+                                                    "h-12! rounded-[10px]!",
+                                                    !isEditing && "bg-white!"
+                                                )}
+                                            />
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
 
                         {/* Bottom Section: Sample Details */}
@@ -404,18 +461,25 @@ export function PostProductionViewModal({
                                         />
                                     </div>
 
-                                    <FloatingInput
-                                        label="Status"
-                                        value={selectedData?.sample_details?.status || ""}
-                                        readOnly={true}
-                                        className="h-12 rounded-[10px]  bg-white!"
-                                    />
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <FloatingInput
+                                            label="Status"
+                                            value={selectedData?.sample_details?.status || ""}
+                                            readOnly={true}
+                                            className="h-12 rounded-[10px] bg-white!"
+                                        />
+                                        <FloatingInput
+                                            label="Assign"
+                                            value={selectedData?.sample_details?.assign_name || selectedData?.sample_details?.assigned_to || ""}
+                                            readOnly={true}
+                                            className="h-12 rounded-[10px] bg-white!"
+                                        />
+                                    </div>
 
                                     <FloatingTextarea
                                         label="Edit"
                                         value={selectedData?.sample_details?.edit_note || ""}
                                         readOnly={true}
-                                        onChange={(e) => handleFieldChange("edit_note", e.target.value)}
                                         isFloating={true}
                                         className="min-h-[80px] rounded-[10px] "
                                     />
@@ -424,7 +488,6 @@ export function PostProductionViewModal({
                                         label="Note"
                                         value={selectedData?.sample_details?.note || ""}
                                         readOnly={true}
-                                        onChange={(e) => handleFieldChange("note", e.target.value)}
                                         isFloating={true}
                                         className="min-h-[80px] rounded-[10px] "
                                     />
@@ -447,6 +510,14 @@ export function PostProductionViewModal({
                     </div>
                 )}
             </div>
+            {/* Hidden shared file input for all modes */}
+            <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={handleImageChange}
+            />
         </CommonModal>
     )
 }
