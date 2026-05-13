@@ -32,7 +32,8 @@ export function InspirationsCardView({
     title = "1. Inspirations",
     inspirationData = null,
     defaultOpen = false,
-    getInspirationData
+    getInspirationData,
+    designId
 }) {
     const [data, setData] = React.useState({
         images: inspirationData?.images || [],
@@ -122,11 +123,11 @@ export function InspirationsCardView({
             setClickedAction(null)
             if (res.success) {
                 if (variables.status === "reopen") {
-                    StateUpdate({ status: variables.status, isLocked: false }, setData)
+                    StateUpdate({ status: variables.status, isLocked: false, IsBlur: false }, setData)
                 } else {
                     StateUpdate({ IsBlur: false, status: variables.status, isLocked: true }, setData)
                 }
-                getInspirationData({ design_id: inspirationData?.design_id?.toString(), ...data, status: variables.status })
+                getInspirationData({ design_id: (designId || inspirationData?.design_id)?.toString(), ...data, status: variables.status })
             }
         },
         onError: (error) => {
@@ -145,8 +146,13 @@ export function InspirationsCardView({
     }
 
     const onEditTarget = async (val) => {
+        const dId = designId || inspirationData?.design_id
+        if (!dId) {
+            console.error("Design ID missing")
+            return
+        }
         const body = {
-            design_id: inspirationData.design_id.toString(),
+            design_id: dId.toString(),
             inspiration_target: val.toString(),
             status: data?.status === "reopen" ? "reopen" : "running", // running
             note: ""
@@ -155,9 +161,14 @@ export function InspirationsCardView({
     }
 
     const handleOnCompleted = (type) => {
+        const dId = designId || inspirationData?.design_id
+        if (!dId) {
+            console.error("Design ID missing")
+            return
+        }
         setClickedAction(type)
         const body = {
-            design_id: inspirationData.design_id.toString(),
+            design_id: dId.toString(),
             status: type
         }
         updateStatus(body)
@@ -213,7 +224,10 @@ export function InspirationsCardView({
                             <Button
                                 variant="outline"
                                 size="xs"
-                                onClick={() => StateUpdate({ isEditModalOpen: true }, setOpenModal)}
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    StateUpdate({ isEditModalOpen: true }, setOpenModal)
+                                }}
                                 className="h-7 px-4 py-0 border-[#dcccbd] bg-[#7DAA7B] text-[14px] font-medium text-white rounded-md hover:bg-[#5d8d5b]"
                             >
                                 Start
@@ -223,8 +237,11 @@ export function InspirationsCardView({
                             < Button
                                 variant="outline"
                                 size="xs"
-                                disabled={data.IsBlur || isUpdatingStatus}
-                                onClick={() => handleOnCompleted("skipped")}
+                                disabled={isUpdatingStatus}
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleOnCompleted("skipped")
+                                }}
                                 className="h-7 px-4 py-0 border-[#dcccbd] bg-[#F8F5F2] text-[14px] font-medium text-primary-foreground rounded-md hover:bg-[#f1ede9]"
                             >
                                 {isUpdatingStatus && clickedAction === "skipped" ? "..." : "Skip"}
@@ -234,8 +251,11 @@ export function InspirationsCardView({
                             <Button
                                 variant="outline"
                                 size="xs"
-                                disabled={data.IsBlur || isUpdatingStatus}
-                                onClick={() => handleOnCompleted("reopen")}
+                                disabled={isUpdatingStatus}
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleOnCompleted("reopen")
+                                }}
                                 className="h-7 px-4 py-0 border-[#dcccbd] bg-[#F8F5F2] text-[14px] font-medium text-primary-foreground rounded-md hover:bg-[#f1ede9]"
                             >
                                 {isUpdatingStatus && clickedAction === "reopen" ? "..." : "Reopen"}

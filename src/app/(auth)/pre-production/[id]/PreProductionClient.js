@@ -2,8 +2,6 @@
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { SampleWorkflowCard } from '@/components/pre-production/sample-workflow-card'
-import { usePost } from '@/hooks/useApi'
-import { StateUpdate } from '@/lib/helper'
 import { InspirationsCardView } from '@/components/pre-production/inspirations/InspirationsCardView'
 import { SketchesCardView } from '@/components/pre-production/sketches/SketchesCardView'
 import PageHeader from '@/components/PageHeader'
@@ -62,101 +60,46 @@ export function PreProductionClient({ designData, id, inspirationData = null, sk
         }
     }, [fabricData, yarnData, sequencesData])
 
-    const designId = inspirationData?.design_slug_id
-
-    const useFetchAndStore = (api, stateKey, extraOnSuccess) => {
-        return usePost(api, {
-            onSuccess: (res) => {
-                if (res?.success) {
-                    const data = res?.data || null;
-
-                    StateUpdate(
-                        { [stateKey]: data },
-                        setPreData
-                    );
-
-                    // 🔥 extra custom logic
-                    if (extraOnSuccess) {
-                        extraOnSuccess(data);
-                    }
-                }
-            },
-            onError: (error) => {
-                console.error(`Error fetching ${stateKey}:`, error);
-            },
-        });
-    };
-
     const getSketchDataClick = (payload) => {
-        const updatedInspirationData = { ...PreData.inspirationData, images: payload.images, status: payload.status, inspiration_target: payload.inspiration_target, note: payload.note }
         setPreData(prev => ({
             ...prev,
-            inspirationData: updatedInspirationData,
+            inspirationData: { ...prev.inspirationData, ...payload },
         }))
     }
 
 
     const getVisualDesignersDataClick = (payload) => {
-        const updatedInspirationData = { ...PreData.sketchesData, assign: payload.assign, note: payload.note, status: payload.status, sketche_target: payload.sketche_target }
         setPreData(prev => ({
             ...prev,
-            sketchesData: updatedInspirationData,
+            sketchesData: { ...prev.sketchesData, ...payload, sketche_target: payload.sketche_target },
         }))
     }
 
     const getFabricDataClick = (payload) => {
-        const updatedInspirationData = {
-            ...PreData.visualDesignersData,
-            assign: payload.assign,
-            note: payload.note,
-            status: payload.status,
-            visual_designer_target: payload.visual_designer_target
-        }
         setPreData(prev => ({
             ...prev,
-            visualDesignersData: updatedInspirationData,
+            visualDesignersData: { ...prev.visualDesignersData, ...payload, visual_designer_target: payload.visual_designer_target },
         }))
     }
 
     const getYarnDataClick = (payload) => {
-        const updatedInspirationData = {
-            ...PreData.fabricData,
-            fabrics: payload.assign,
-            note: payload.note,
-            status: payload.status,
-            fabric_target: payload.fabric_target
-        }
         setPreData(prev => ({
             ...prev,
-            fabricData: updatedInspirationData,
+            fabricData: { ...prev.fabricData, ...payload, fabrics: payload.assign, fabric_target: payload.fabric_target },
         }))
     }
 
     const getSequencesDataClick = (payload) => {
-        const updatedInspirationData = {
-            ...PreData.yarnData,
-            yarns: payload.assign,
-            note: payload.note,
-            status: payload.status,
-            yarn_target: payload.yarn_target
-        }
         setPreData(prev => ({
             ...prev,
-            yarnData: updatedInspirationData,
+            yarnData: { ...prev.yarnData, ...payload, yarns: payload.assign, yarn_target: payload.yarn_target },
         }))
     }
 
     const getSampleDataClick = (payload) => {
-        const updatedInspirationData = {
-            ...PreData.sequencesData,
-            sequences: payload.assign,
-            note: payload.note,
-            status: payload.status,
-            sequence_target: payload.sequence_target
-        }
         setPreData(prev => ({
             ...prev,
-            sequencesData: updatedInspirationData,
+            sequencesData: { ...prev.sequencesData, ...payload, sequences: payload.assign, sequence_target: payload.sequence_target },
         }))
     }
 
@@ -183,31 +126,37 @@ export function PreProductionClient({ designData, id, inspirationData = null, sk
                 defaultOpen
                 title="1. Inspirations"
                 inspirationData={PreData.inspirationData}
+                designId={id}
             />
             <SketchesCardView
                 title="2. Sketches"
                 sketchesData={PreData.sketchesData}
                 getVisualDesignersData={getVisualDesignersDataClick}
+                designId={id}
             />
             <SketchesCardView
                 title="3. Design"
                 sketchesData={PreData.visualDesignersData}
                 getVisualDesignersData={getFabricDataClick}
+                designId={id}
             />
             <SketchesCardView
                 title="4. Fabric"
                 sketchesData={PreData.fabricData}
                 getVisualDesignersData={getYarnDataClick}
+                designId={id}
             />
             <SketchesCardView
                 title="5. Yarn"
                 sketchesData={PreData.yarnData}
                 getVisualDesignersData={getSequencesDataClick}
+                designId={id}
             />
             <SketchesCardView
                 title="6. Sequences"
                 sketchesData={PreData.sequencesData}
                 getVisualDesignersData={getFabricAndSampleData}
+                designId={id}
             />
             <SampleWorkflowCard
                 PreData={PreData}

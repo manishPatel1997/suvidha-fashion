@@ -81,7 +81,8 @@ export function SketchesCardView({
     sketchesData = null,
     defaultOpen = false,
     getVisualDesignersData,
-    onStatusChange
+    onStatusChange,
+    designId
 }) {
     const { setFabricAssignData, setYarnAssignData, setSequenceAssignData, setDesignAssignData } = usePreProductionStore()
     const titleName = title.split('.').pop()?.trim() || title
@@ -256,7 +257,7 @@ export function SketchesCardView({
                 if (onStatusChange) {
                     onStatusChange(variables.status)
                 }
-                getVisualDesignersData({ design_id: sketchesData?.design_id?.toString(), ...data, status: variables.status })
+                getVisualDesignersData({ design_id: (designId || sketchesData?.design_id)?.toString(), ...data, status: variables.status })
             }
         },
         onError: (error) => {
@@ -297,8 +298,13 @@ export function SketchesCardView({
     }
 
     const onEditTarget = async (val) => {
+        const dId = designId || sketchesData?.design_id
+        if (!dId) {
+            toast.error("Design ID missing")
+            return
+        }
         const body = {
-            design_id: sketchesData.design_id.toString(),
+            design_id: dId.toString(),
             [config.targetKey]: val.toString(),
             status: "running", // running
             note: ""
@@ -307,9 +313,14 @@ export function SketchesCardView({
     }
 
     const handleOnCompleted = (type) => {
+        const dId = designId || sketchesData?.design_id
+        if (!dId) {
+            toast.error("Design ID missing")
+            return
+        }
         setClickedAction(type)
         const body = {
-            design_id: sketchesData.design_id.toString(),
+            design_id: dId.toString(),
             status: type
         }
         updateStatus(body)
@@ -364,7 +375,10 @@ export function SketchesCardView({
                         {data.IsBlur && data.status === "pending" && <Button
                             variant="outline"
                             size="xs"
-                            onClick={() => StateUpdate({ isEditModalOpen: true }, setOpenModal)}
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                StateUpdate({ isEditModalOpen: true }, setOpenModal)
+                            }}
                             className="h-7 px-4 py-0 border-[#dcccbd] bg-[#7DAA7B] text-[14px] font-medium text-white rounded-md hover:bg-[#5d8d5b]"
                         >
                             Start
@@ -373,8 +387,11 @@ export function SketchesCardView({
                             <Button
                                 variant="outline"
                                 size="xs"
-                                disabled={data.IsBlur || isUpdatingStatus}
-                                onClick={() => handleOnCompleted("skipped")}
+                                disabled={isUpdatingStatus}
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleOnCompleted("skipped")
+                                }}
                                 className="h-7 px-4 py-0 border-[#dcccbd] bg-[#F8F5F2] text-[14px] font-medium text-primary-foreground rounded-md hover:bg-[#f1ede9]"
                             >
                                 {isUpdatingStatus && clickedAction === "skipped" ? "..." : "Skip"}
@@ -383,8 +400,11 @@ export function SketchesCardView({
                             <Button
                                 variant="outline"
                                 size="xs"
-                                disabled={data.IsBlur || isUpdatingStatus}
-                                onClick={() => handleOnCompleted("reopen")}
+                                disabled={isUpdatingStatus}
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleOnCompleted("reopen")
+                                }}
                                 className="h-7 px-4 py-0 border-[#dcccbd] bg-[#F8F5F2] text-[14px] font-medium text-primary-foreground rounded-md hover:bg-[#f1ede9]"
                             >
                                 {isUpdatingStatus && clickedAction === "reopen" ? "..." : "Reopen"}

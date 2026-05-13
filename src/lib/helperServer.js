@@ -9,6 +9,12 @@ export const fetchStepData = async (url, id) => {
         if (error.digest?.startsWith('NEXT_REDIRECT')) {
             throw error
         }
+
+        // Handle "Record not found" errors gracefully by returning null instead of redirecting
+        if (error.status === 404 || error.data?.message?.toLowerCase().includes("not found")) {
+            return null
+        }
+
         console.error(`Error fetching ${url}:`, error)
         redirect('/dashboard')
     }
@@ -22,6 +28,12 @@ export const fetchGetData = async (url, id, options = { cache: 'no-store' }) => 
         if (error.digest?.startsWith('NEXT_REDIRECT')) {
             throw error
         }
+
+        // Handle "Record not found" errors gracefully by returning null instead of redirecting
+        if (error.status === 404 || error.data?.message?.toLowerCase().includes("not found")) {
+            return null
+        }
+
         console.error(`Error fetching ${url}:`, error)
         redirect('/dashboard')
     }

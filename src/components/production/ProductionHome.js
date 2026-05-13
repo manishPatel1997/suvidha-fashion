@@ -10,6 +10,7 @@ import { StateUpdate, statusColors } from '@/lib/helper'
 import { Button } from '../ui/button'
 import { usePost } from '@/hooks/useApi'
 import { API_PRODUCTION } from '@/hooks/api-list'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 function ProductionHome({
     productionData = null,
@@ -19,11 +20,40 @@ function ProductionHome({
 }) {
 
     const [PreProductionData, setPreProductionData] = React.useState({})
+    const router = useRouter()
+    const searchParams = useSearchParams()
+    const page = searchParams.get('page') || '1'
+    const limit = searchParams.get('limit') || '10'
+
     React.useEffect(() => {
         if (productionData) {
             setPreProductionData(productionData)
         }
     }, [productionData])
+
+    if (!productionData) {
+        return (
+            <div className="flex flex-col items-center justify-center p-20 border border-dashed border-[#dcccbd] rounded-[10px] bg-[#F8F5F2] text-center space-y-4">
+                <div className="w-16 h-16 bg-[#dcccbd]/20 rounded-full flex items-center justify-center">
+                    <PlusIcon className="w-8 h-8 text-[#b0826a] opacity-50" />
+                </div>
+                <div className="space-y-2">
+                    <h3 className="text-xl font-serif font-bold text-primary-foreground">Production Record Not Found</h3>
+                    <p className="text-muted-foreground max-w-sm mx-auto">
+                        This design hasn't entered the production phase yet. 
+                        Please complete all pre-production steps to initialize production.
+                    </p>
+                </div>
+                <Button 
+                    variant="outline" 
+                    onClick={() => router.push(`/pre-production/${id}?page=${page}&limit=${limit}`)}
+                    className="border-[#dcccbd] text-primary-foreground hover:bg-[#F0EDE9]"
+                >
+                    Go Back to Pre-Production
+                </Button>
+            </div>
+        )
+    }
 
     const [openModal, setOpenModal] = React.useState({
         isAddModalOpen: false,
