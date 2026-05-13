@@ -5,7 +5,7 @@ import React from 'react'
 
 function PostProductionItemCard({ item, onClick, titleName = "Sample ID" }) {
     const status = item?.status || "running" // default to running for showing "In Process"
-    const assignedName = item?.assign_user_name || "Name"
+    const assignedName = item?.sample_details?.name || item?.sample_details?.assign_name || ""
     const sampleId = item?.sample_id || "S-480"
 
     return (

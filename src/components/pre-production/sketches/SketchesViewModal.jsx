@@ -263,6 +263,7 @@ export function SketchesViewImage({
                                             readOnly={!isEditing}
                                             floatingUi={true}
                                             options={userOptions}
+                                            hasEdit
                                         />
                                         <FloatingInput
                                             name="submitted_by"
@@ -284,6 +285,7 @@ export function SketchesViewImage({
                                             { label: "In Progress", value: "running" },
                                             { label: "Completed", value: "completed" },
                                         ]}
+                                        hasEdit
                                     />
 
                                     <FloatingTextarea
@@ -300,6 +302,7 @@ export function SketchesViewImage({
                                         runForm={runForm}
                                         readOnly={!isEditing}
                                         className="min-h-[140px]"
+                                        hasEdit
                                     />
 
                                     {/* {isEditing && (

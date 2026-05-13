@@ -54,7 +54,7 @@ function ProductionHome({
     const currentStatus = PreProductionData?.status || ""
 
     return (
-        <div className="border border-[#dcccbd] rounded-[10px] bg-white overflow-hidden">
+        <div className="border border-[#dcccbd] rounded-md bg-white overflow-hidden">
             {/* Header */}
             <div className={clsx(
                 "px-6 py-3 bg-[#F8F5F2] border-b border-[#dcccbd]",

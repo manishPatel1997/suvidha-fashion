@@ -2,9 +2,11 @@ import * as React from "react";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { errorContainer, formAttr } from "@/lib/helper";
+import { Edit2 } from "lucide-react";
 
 export function FloatingTextarea({
   label,
+  hasEdit,
   className,
   showError = true,
   customHandle = false,
@@ -41,6 +43,10 @@ export function FloatingTextarea({
           {label}
         </Label>
       )}
+      {hasEdit && (
+        <Edit2 className="w-3.5 h-3.5 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer pointer-events-none" />
+      )}
+
       {/* Error container with fixed height and absolute position */}
       {runForm && showError && (
         <div className="absolute left-0 top-full min-h-4 ">

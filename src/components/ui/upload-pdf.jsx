@@ -2,7 +2,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { errorContainer } from "@/lib/helper"
 import { Label } from "@/components/ui/label"
-import { FileText, Paperclip } from "lucide-react"
+import { Edit2, FileText, Paperclip } from "lucide-react"
 
 export function UploadPdf({
     className,
@@ -13,6 +13,7 @@ export function UploadPdf({
     name,
     readOnly = false,
     isFloating = true,
+    hasEdit,
     ...props
 }) {
     const id = React.useId()
@@ -67,6 +68,9 @@ export function UploadPdf({
                     >
                         {label}
                     </Label>
+                )}
+                {hasEdit && (
+                    <Edit2 className="w-3.5 h-3.5 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer pointer-events-none" />
                 )}
             </div>
 

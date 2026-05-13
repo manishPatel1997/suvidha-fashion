@@ -411,7 +411,7 @@ export function FabricViewModalImage({
                                             readOnly={!isEditing}
                                             value={
                                                 runForm.values[field("meter")]
-                                                    ? `${runForm.values[field("meter")]} Meter`
+                                                    ? `${runForm.values[field("meter")]}`
                                                     : ""
                                             }
                                             onChange={(e) => {
@@ -456,6 +456,7 @@ export function FabricViewModalImage({
                                         runForm={runForm}
                                         readOnly={!isEditing}
                                         className="min-h-[100px]"
+                                        hasEdit
                                     />
 
                                     {isEditing && (

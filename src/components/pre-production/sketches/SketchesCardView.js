@@ -144,14 +144,11 @@ export function SketchesCardView({
 
     const handleModalOpen = (val, selectedData, index = 0) => {
         StateUpdate({ selectedData: selectedData }, setData)
-        // modalOpen("SketchesImg", true, setOpenModal)
         if (val === "Sketches") {
             modalOpen("SketchesImg", true, setOpenModal)
-            // modalOpen("SketchesIndex", index, setOpenModal)
         }
         if (val === "Design") {
             modalOpen("DesignViewModalImage", true, setOpenModal)
-            // modalOpen("SketchesIndex", index, setOpenModal)
         }
         if (val === "Fabric") {
             modalOpen("FabricViewModalImage", true, setOpenModal)
@@ -372,7 +369,6 @@ export function SketchesCardView({
                         >
                             Start
                         </Button>}
-                        {/* {data.IsBlur === false && data.status !== "completed" && data.status !== "skipped" && */}
                         {!data.IsBlur && data.status !== "completed" && data.status !== "skipped" &&
                             <Button
                                 variant="outline"
@@ -490,14 +486,10 @@ export function SketchesCardView({
                                         }
                                         className={clsx(
                                             "rounded-[10px] bg-[#F8F5F2] flex items-center justify-center hover:bg-[#F0EDE9] transition-colors w-full sm:w-[150px] h-[164px]",
-                                            // (titleName === "Sketches" || titleName === "Design")
-                                            //     ? "w-[150px] h-[164px] border border-[#dcccbd]/30"
-                                            //     : "w-[85px] h-[85px]"
                                         )}
                                     >
                                         <PlusIcon className={clsx(
                                             "text-[#dcccbd] w-10 h-10",
-                                            // (titleName === "Sketches" || titleName === "Design") ? "w-10 h-10" : "w-8 h-8"
                                         )} />
                                     </button>
                                 )}
@@ -520,7 +512,6 @@ export function SketchesCardView({
 
 
             {/* taeget modal */}
-            {/* taeget modal */}
             <EditTargetModal
                 open={openModal.isEditModalOpen}
                 onOpenChange={(isOpen) => { StateUpdate({ isEditModalOpen: isOpen }, setOpenModal) }}
@@ -531,7 +522,6 @@ export function SketchesCardView({
                 IsEditTarget={openModal.IsEditTarget}
                 min={data.assign.length > 0 ? data.assign.length : 1}
             />
-            {/* taeget modal */}
             {/* taeget modal */}
 
             {

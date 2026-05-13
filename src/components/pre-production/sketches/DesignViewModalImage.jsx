@@ -279,6 +279,7 @@ export function DesignViewModalImage({
                                             readOnly={!isEditing}
                                             floatingUi={true}
                                             options={userOptions}
+                                            hasEdit
                                         />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
@@ -300,6 +301,7 @@ export function DesignViewModalImage({
                                                 { label: "In Progress", value: "running" },
                                                 { label: "Completed", value: "completed" },
                                             ]}
+                                            hasEdit
                                         />
                                     </div>
                                     <FloatingTextarea
@@ -315,12 +317,14 @@ export function DesignViewModalImage({
                                         runForm={runForm}
                                         readOnly={!isEditing}
                                         className="min-h-[140px]"
+                                        hasEdit
                                     />
                                     <UploadPdf
                                         name="visual_designer_pdf"
                                         label="Upload Pdf"
                                         runForm={runForm}
                                         readOnly={!isEditing}
+                                        hasEdit
                                     />
 
 

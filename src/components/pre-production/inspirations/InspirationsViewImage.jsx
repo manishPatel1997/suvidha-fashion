@@ -196,6 +196,7 @@ export function InspirationsViewImage({
                         <FloatingTextarea
                             label={isEditing ? "Add a note" : "Note"}
                             value={note}
+                            hasEdit
                             onChange={(e) => setNote(e.target.value)}
                             readOnly={!isEditing}
                             className="min-h-[80px]"
