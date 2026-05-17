@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils'
 import PostProductionItemCard from './PostProductionItemCard'
 import { PostProductionViewModal } from './PostProductionViewModal'
 import { PostProductionFolderModal } from './PostProductionFolderModal'
+import PostMillCard from './PostMillCard'
 
 const POST_PRODUCTION_CONFIG = {
     Deko: {
@@ -295,16 +296,30 @@ function PostProductionHome({
                                             </div>
                                         ))}
                                     </div>
-                                ) : (
-                                    data.assign.map((item, index) => (
-                                        <PostProductionItemCard
-                                            key={index}
-                                            item={item}
-                                            titleName={titleName === "Folder" ? "Design ID" : "Sample ID"}
-                                            onClick={() => handleModalOpen(titleName, item, data.assign)}
-                                        />
-                                    ))
-                                )}
+                                ) :
+                                    titleName === "Deko" ?
+                                        <>
+                                            {data.assign.map((item, index) => (
+                                                <PostProductionItemCard
+                                                    key={index}
+                                                    item={item}
+                                                    titleName={titleName === "Folder" ? "Design ID" : "Sample ID"}
+                                                    onClick={() => handleModalOpen(titleName, item, data.assign)}
+                                                />
+                                            ))}
+                                        </> :
+                                        <>
+                                            {
+                                                data.assign.map((item, index) => (
+                                                    <PostMillCard
+                                                        key={index}
+                                                        item={item}
+                                                        titleName={titleName === "Folder" ? "Design ID" : "Sample ID"}
+                                                        onClick={() => handleModalOpen(titleName, item, data.assign)}
+                                                    />
+                                                ))
+                                            }</>
+                                }
                             </div>
                             {data.selectedData && titleName === "Folder" ? (
                                 <PostProductionFolderModal

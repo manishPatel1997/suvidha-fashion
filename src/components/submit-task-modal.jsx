@@ -125,7 +125,8 @@ export function SubmitTaskModal({ open, onOpenChange, task, onSuccess }) {
             id: task.id,
             note: note,
             image: files,// toFormData handles arrays of files
-            category: task.category
+            category: task.category,
+            type: task.type
         };
         submitTask(toFormData(payload));
     };

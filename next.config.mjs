@@ -18,7 +18,7 @@ const nextConfig = {
     return config;
   },
   turbopack: {
-    root: '.',
+    root: process.cwd(),
     resolveAlias: {
       '@': './src',
     },

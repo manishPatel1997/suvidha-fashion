@@ -176,3 +176,9 @@ export const IDEAS = {
     create: "/api/v1/ideas/create",
     update: "/api/v1/ideas/update",
 }
+
+export const API_SKETCHES_DESIGNS = {
+    get: "/api/v1/sketche_idea/get",
+    create: "/api/v1/sketche_idea/create",
+    update: "/api/v1/sketche_idea/update"
+}

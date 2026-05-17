@@ -156,7 +156,8 @@ function TasksPage() {
 
         const reviewData = {
             id: task?.id.toString(),
-            category: task?.category
+            category: task?.category,
+            type: task?.type
         }
         submitRequest(reviewData)
     };
