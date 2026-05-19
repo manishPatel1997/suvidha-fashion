@@ -12,6 +12,7 @@ import { usePagination } from "@/hooks/usePagination";
 import { CommonPagination } from "@/components/CommonPagination";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useDebounce } from "use-debounce";
+import { BASE_URL } from "@/lib/api";
 
 
 
@@ -83,7 +84,7 @@ function DashboardContent() {
           targetDate: item.target_date ? format(new Date(item.target_date), "dd-MM-yyyy") : "",
           status: item.status,
           summary: item.note,
-          image: `${process.env.NEXT_PUBLIC_API_URL}${item.image}`,
+          image: `${BASE_URL}${item.image}`,
           isLocked: false,
           backUrl: `?page=${currentPage}&limit=${limit}${debouncedSearch ? `&search=${debouncedSearch}` : ""}${category ? `&category=${category}` : ""}`
         }));

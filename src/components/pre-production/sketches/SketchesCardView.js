@@ -28,6 +28,7 @@ import { FabricViewModalImage } from "../FabricViewModalImage"
 import { YarnViewModalImage } from "../YarnViewModalImage"
 import { toast } from "sonner"
 import usePreProductionStore from "@/store/preProductionStore"
+import { BASE_URL } from "@/lib/api"
 
 const SketchesViewImage = dynamic(() =>
     import("@/components/pre-production/sketches/SketchesViewModal").then((mod) => mod.SketchesViewImage)
@@ -471,7 +472,7 @@ export function SketchesCardView({
                             {/* Gallery */}
                             <div className="p-6 pt-0 grid grid-cols-2 md:flex flex-wrap items-center gap-4">
                                 {data.assign.map((img, idx) => {
-                                    const src = (img[config.targetImg] && img[config.targetImg] !== "") ? `${process.env.NEXT_PUBLIC_API_URL}${img[config.targetImg]}` : "/design-thumb.png"
+                                    const src = (img[config.targetImg] && img[config.targetImg] !== "") ? `${BASE_URL}${img[config.targetImg]}` : "/design-thumb.png"
                                     let itemData = { ...img, src: src }
                                     if (titleName === "Yarn" || titleName === "Fabric" || titleName === "Sequences") {
                                         return (

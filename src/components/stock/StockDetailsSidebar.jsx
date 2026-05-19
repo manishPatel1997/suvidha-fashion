@@ -23,6 +23,7 @@ import { useGet, usePost } from "@/hooks/useApi";
 import { downloadImage, StateUpdate, toFormData } from "@/lib/helper";
 import { toast } from "sonner";
 import { FormSelect } from "@/components/ui/form-select";
+import { BASE_URL } from "@/lib/api";
 
 const STOCK_CONFIG = {
     Fabric: {
@@ -142,7 +143,7 @@ export function StockDetailsSidebar({
     }, [open, selectedData]);
 
     const previewImage = localPreview || (selectedData?.[config.imageKey]
-        ? `${process.env.NEXT_PUBLIC_BASE_URL}${selectedData[config.imageKey]}`
+        ? `${BASE_URL}${selectedData[config.imageKey]}`
         : "/design-thumb.png");
 
     const handleImageChange = (e) => {
@@ -297,7 +298,7 @@ export function StockDetailsSidebar({
     const handleDownload = () => {
         if (selectedData?.[config.imageKey]) {
             downloadImage(
-                `${process.env.NEXT_PUBLIC_BASE_URL}${selectedData[config.imageKey]}`,
+                `${BASE_URL}${selectedData[config.imageKey]}`,
                 `${type}-${selectedData[config.idKey]}.jpg`
             );
         }

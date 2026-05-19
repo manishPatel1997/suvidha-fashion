@@ -19,6 +19,7 @@ import { FormSelect } from "@/components/ui/form-select"
 import { UploadPdf } from "@/components/ui/upload-pdf"
 import PdfIcon from "@/assets/PdfIcon"
 import { downloadImage, toFormData } from "@/lib/helper"
+import { BASE_URL } from "@/lib/api"
 
 const validationSchema = Yup.object({
     submitted_by: Yup.string().required("Submitted By is required"),
@@ -64,7 +65,7 @@ export function DesignViewModalImage({
             if (res.success) {
                 setViewData(res.data)
                 if (res.data?.visual_designer_image) {
-                    setPreviewImage(process.env.NEXT_PUBLIC_BASE_URL + res.data.visual_designer_image)
+                    setPreviewImage(BASE_URL + res.data.visual_designer_image)
                     setCurrentImgIndex(res.data.history.length - 1)
                 }
                 // visual_designer_pdf
@@ -340,7 +341,7 @@ export function DesignViewModalImage({
                                         <Button
                                             type="button"
                                             className="cursor-pointer px-9 py-5 bg-[#DCCCBD] hover:bg-[#DCCCBD]/90 text-primary-foreground font-semibold  rounded-[8px] text-[16px] self-end"
-                                            onClick={() => downloadImage(process.env.NEXT_PUBLIC_BASE_URL + viewData?.visual_designer_pdf)}
+                                            onClick={() => downloadImage(BASE_URL + viewData?.visual_designer_pdf)}
                                         >
                                             <PdfIcon className="size-6" /> Download Pdf
                                         </Button>
@@ -355,13 +356,13 @@ export function DesignViewModalImage({
                                                     "relative w-20 h-20 group cursor-pointer border-5 rounded-md overflow-hidden flex-shrink-0",
                                                     (currentImgIndex === idx ? "border-[#A67F6F]" : "border-transparent")
                                                 )}
-                                                onClick={() => { setCurrentImgIndex(idx); setPreviewImage(process.env.NEXT_PUBLIC_BASE_URL + thumb.visual_designer_image) }}
+                                                onClick={() => { setCurrentImgIndex(idx); setPreviewImage(BASE_URL + thumb.visual_designer_image) }}
                                             >
                                                 <div className={cn(
                                                     "w-full h-full rounded-[12px] overflow-hidden border-2 transition-all border-[#A67F6F]",
                                                 )}>
                                                     <Image
-                                                        src={`${process.env.NEXT_PUBLIC_BASE_URL}${thumb.visual_designer_image}` || 'design-thumb.png'}
+                                                        src={`${BASE_URL}${thumb.visual_designer_image}` || 'design-thumb.png'}
                                                         alt={`Version ${idx + 1}`}
                                                         fill
                                                         sizes="80px"

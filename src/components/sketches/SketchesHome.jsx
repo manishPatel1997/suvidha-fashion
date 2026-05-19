@@ -14,6 +14,7 @@ import { CommonModal } from '@/components/CommonModal'
 import { FormSelect } from '@/components/ui/form-select'
 import { FloatingTextarea } from '@/components/ui/floating-textarea'
 import { Formik } from 'formik'
+import { BASE_URL } from '@/lib/api'
 
 const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
@@ -99,7 +100,7 @@ const EditSketchModal = ({ open, onOpenChange, sketch, onUpdate, isLoading }) =>
 }
 
 const SketchCard = ({ sketch, onClick }) => {
-    const imageUrl = sketch.sketche_image ? `${process.env.NEXT_PUBLIC_API_URL}${sketch.sketche_image}` : "/no_img.webp"
+    const imageUrl = sketch.sketche_image ? `${BASE_URL}${sketch.sketche_image}` : "/no_img.webp"
 
     return (
         <div

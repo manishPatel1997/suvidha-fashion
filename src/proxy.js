@@ -14,27 +14,25 @@ const protectedRoutes = [
     '/tasks',
     '/profile',
     '/idea',
-    '/sketches'
+    '/sketches',
+    '/setting'
 ]
 
-// Admin-only routes
-const adminOnlyRoutes = [
-    '/dashboard',
-    '/pre-production',
-    '/production',
-    '/post-production',
-    '/fabric',
-    '/yarn',
-    '/sequence',
-    '/people',
-    '/vendor',
-    '/setting',
-    '/idea',
-    '/sketches'
-]
-
-// Routes accessible by non-admin users
-const nonAdminAllowedRoutes = ['/tasks', '/profile']
+// Map routes to module names in token
+const routeToModuleMap = {
+    '/pre-production': 'pre_production',
+    '/production': 'production',
+    '/post-production': 'post_production',
+    '/fabric': 'fabric',
+    '/yarn': 'yarn',
+    '/sequence': 'sequence',
+    '/people': 'user',
+    '/vendor': 'vendor',
+    '/setting': 'setting',
+    '/tasks': 'task',
+    '/idea': 'ideas',
+    '/sketches': 'sketches'
+}
 
 // Auth routes
 const authRoutes = ['/login']
@@ -44,11 +42,16 @@ export function proxy(request) {
 
     // Decode JWT (Edge compatible)
     let role = null
+    let moduleAccess = []
     if (token) {
         try {
             const payloadBase64 = token.split('.')[1]
             const decoded = JSON.parse(atob(payloadBase64))
             role = decoded?.role ?? null
+            console.log('role', role)
+            if (decoded?.module_access) {
+                moduleAccess = decoded.module_access.split(',')
+            }
         } catch (e) {
             console.error('Failed to decode token:', e)
         }
@@ -58,14 +61,6 @@ export function proxy(request) {
 
     // Route checks
     const isProtectedRoute = protectedRoutes.some(route =>
-        pathname.startsWith(route)
-    )
-
-    const isAdminOnlyRoute = adminOnlyRoutes.some(route =>
-        pathname.startsWith(route)
-    )
-
-    const isNonAdminRoute = nonAdminAllowedRoutes.some(route =>
         pathname.startsWith(route)
     )
 
@@ -80,48 +75,40 @@ export function proxy(request) {
         return NextResponse.redirect(loginUrl)
     }
 
-    // ✅ Logged in → role-based logic
+    // ✅ Logged in → logic
     if (token) {
-        const isAdmin = role === 'admin'
+        const defaultPath = (role && role.toLowerCase() === 'admin') ? '/dashboard' : '/profile';
 
-        // =========================
-        // 👤 NON-ADMIN LOGIC
-        // =========================
-        if (!isAdmin) {
-            // ❌ Block admin-only routes
-            if (isAdminOnlyRoute) {
-                return NextResponse.redirect(new URL('/tasks', request.url))
-            }
+        // ❌ Prevent access to auth pages if already logged in
+        if (isAuthRoute) {
+            return NextResponse.redirect(new URL(defaultPath, request.url))
+        }
 
-            // ❌ Prevent access to auth pages
-            if (isAuthRoute) {
-                return NextResponse.redirect(new URL('/tasks', request.url))
-            }
+        // ❌ Redirect root to defaultPath
+        if (pathname === '/') {
+            return NextResponse.redirect(new URL(defaultPath, request.url))
+        }
 
-            // ❌ Redirect root
-            if (pathname === '/') {
-                return NextResponse.redirect(new URL('/tasks', request.url))
-            }
+        // ❌ Prevent non-admins from accessing dashboard
+        if (pathname.startsWith('/dashboard') && (!role || role.toLowerCase() !== 'admin')) {
+            return NextResponse.redirect(new URL('/profile', request.url))
         }
 
         // =========================
-        // 👑 ADMIN LOGIC
+        // 🔒 MODULE ACCESS CHECK
         // =========================
-        if (isAdmin) {
-            // ❌ Admin accessing non-admin routes (/tasks, /profile)
-            if (!isAdminOnlyRoute && !isAuthRoute && pathname !== '/') {
-                return NextResponse.redirect(new URL('/dashboard', request.url))
+        let requiredModule = null;
+        for (const [route, moduleName] of Object.entries(routeToModuleMap)) {
+            if (pathname.startsWith(route)) {
+                requiredModule = moduleName;
+                break;
             }
+        }
 
-            // ❌ Prevent admin from login page
-            if (isAuthRoute) {
-                return NextResponse.redirect(new URL('/dashboard', request.url))
-            }
-
-            // ❌ Redirect root
-            if (pathname === '/') {
-                return NextResponse.redirect(new URL('/dashboard', request.url))
-            }
+        // If the route requires a specific module, check if the user has access
+        if (requiredModule && !moduleAccess.includes(requiredModule)) {
+            const fallbackPath = (role && role.toLowerCase() === 'admin') ? '/dashboard' : '/profile';
+            return NextResponse.redirect(new URL(fallbackPath, request.url));
         }
     }
 

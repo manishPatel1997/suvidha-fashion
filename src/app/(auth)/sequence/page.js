@@ -5,6 +5,7 @@ import { AddFabricModal } from "@/components/add-fabric-modal";
 import { API_LIST_AUTH } from "@/hooks/api-list";
 import { StockListPage } from "@/components/stock/StockListPage";
 import dynamic from "next/dynamic";
+import { BASE_URL } from "@/lib/api";
 const StockDetailsSidebar = dynamic(
     () =>
         import("@/components/stock/StockDetailsSidebar").then(
@@ -30,7 +31,7 @@ function DashboardContent() {
                     category={item.category}
                     fabric_name={item.sequence_name}
                     fabric_color={item.sequence_color}
-                    image={item?.sequence_image ? `${process.env.NEXT_PUBLIC_BASE_URL}${item?.sequence_image}` : "/design-thumb.png"}
+                    image={item?.sequence_image ? `${BASE_URL}${item?.sequence_image}` : "/design-thumb.png"}
                     onViewDetails={onViewDetails}
                     isFabric={false}
                     isSequences={true}

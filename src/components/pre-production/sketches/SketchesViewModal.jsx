@@ -17,6 +17,7 @@ import { usePost } from "@/hooks/useApi"
 import { FormSelect } from "@/components/ui/form-select"
 import { downloadImage, toFormData } from "@/lib/helper"
 import clsx from "clsx"
+import { BASE_URL } from "@/lib/api"
 
 const validationSchema = Yup.object({
     assigned_to: Yup.string().required("Assigned To is required"),
@@ -63,7 +64,7 @@ export function SketchesViewImage({
             if (res.success) {
                 setViewData(res.data)
                 if (res.data?.sketche_image) {
-                    setPreviewImage(process.env.NEXT_PUBLIC_BASE_URL + res.data.sketche_image)
+                    setPreviewImage(BASE_URL + res.data.sketche_image)
                     setCurrentImgIndex(res.data.history.length - 1)
                 }
             }
@@ -331,13 +332,13 @@ export function SketchesViewImage({
                                                     "relative w-20 h-20 group cursor-pointer border-5 rounded-md overflow-hidden flex-shrink-0",
                                                     (currentImgIndex === idx ? "border-[#A67F6F]" : "border-transparent")
                                                 )}
-                                                onClick={() => { setCurrentImgIndex(idx); setPreviewImage(process.env.NEXT_PUBLIC_BASE_URL + thumb.sketeche_image) }}
+                                                onClick={() => { setCurrentImgIndex(idx); setPreviewImage(BASE_URL + thumb.sketeche_image) }}
                                             >
                                                 <div className={cn(
                                                     "w-full h-full rounded-[12px] overflow-hidden border-2 transition-all border-[#A67F6F]",
                                                 )}>
                                                     <Image
-                                                        src={`${process.env.NEXT_PUBLIC_BASE_URL}${thumb.sketeche_image}` || 'design-thumb.png'}
+                                                        src={`${BASE_URL}${thumb.sketeche_image}` || 'design-thumb.png'}
                                                         alt={`Version ${idx + 1}`}
                                                         fill
                                                         sizes="80px"

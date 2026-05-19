@@ -12,6 +12,7 @@ import PostProductionItemCard from './PostProductionItemCard'
 import { PostProductionViewModal } from './PostProductionViewModal'
 import { PostProductionFolderModal } from './PostProductionFolderModal'
 import PostMillCard from './PostMillCard'
+import { BASE_URL } from '@/lib/api'
 
 const POST_PRODUCTION_CONFIG = {
     Deko: {
@@ -244,7 +245,7 @@ function PostProductionHome({
                                                                 className="relative aspect-square rounded-[12px] overflow-hidden border border-[#DCCCBD]/40 hover:opacity-90 transition-opacity"
                                                             >
                                                                 <Image
-                                                                    src={`${process.env.NEXT_PUBLIC_API_URL}${val.image_url}`}
+                                                                    src={`${BASE_URL}${val.image_url}`}
                                                                     alt="Work"
                                                                     fill
                                                                     className="object-cover"

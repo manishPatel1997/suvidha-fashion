@@ -4,6 +4,7 @@ import { SubmitTaskModal } from "@/components/submit-task-modal";
 import { Button } from "@/components/ui/button";
 import { API_NOT_ADMIN } from "@/hooks/api-list";
 import { usePost } from "@/hooks/useApi";
+import { BASE_URL } from "@/lib/api";
 import { Check, Clock, CheckCircle2, FileText, Loader2 } from "lucide-react";
 import Image from "next/image";
 import * as React from "react";
@@ -11,7 +12,7 @@ import * as React from "react";
 function TaskCard({ task, onSubmitClick, onEditClick, submitRequestPending }) {
     const isCompleted = task?.status === "completed" || task?.status === "review_request";
     const rawImagePath = task?.sketche_image;
-    const imageUrl = rawImagePath ? `${process.env.NEXT_PUBLIC_API_URL}${rawImagePath}` : "/design-thumb.png";
+    const imageUrl = rawImagePath ? `${BASE_URL}${rawImagePath}` : "/design-thumb.png";
     const isPdf = rawImagePath?.toLowerCase().endsWith('.pdf');
     return (
         <div className="bg-[#F8F5F2] rounded-[10px] p-6 flex flex-col md:flex-row gap-6 border border-[#E8E2DA] shadow-sm hover:shadow-md transition-shadow" >
@@ -53,7 +54,7 @@ function TaskCard({ task, onSubmitClick, onEditClick, submitRequestPending }) {
                             <>
                                 <span className="text-[#A67F6F] font-medium">Download:</span>
                                 <a
-                                    href={`${process.env.NEXT_PUBLIC_API_URL}${task.file_url}`}
+                                    href={`${BASE_URL}${task.file_url}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-[#A67F6F] hover:underline flex items-center gap-1"

@@ -34,7 +34,7 @@ import Cookies from "js-cookie"
 /* ================= Menu Config ================= */
 const MENU_ITEMS = [
   { name: "Home", href: "/dashboard", Icon: HomeIcon, hasArrow: false },
-  { name: "Order", href: "/order", Icon: OrderIcon, hasArrow: true },
+  // { name: "Order", href: "/order", Icon: OrderIcon, hasArrow: true },
   { name: "Fabric", href: "/fabric", Icon: FabricIcon, hasArrow: true },
   { name: "Yarn", href: "/yarn", Icon: YarnIcon, hasArrow: true },
   { name: "Sequence", href: "/sequence", Icon: SequenceIcon, hasArrow: true },
@@ -42,6 +42,8 @@ const MENU_ITEMS = [
   { name: "Vendor", href: "/vendor", Icon: VendorIcon, hasArrow: true },
   { name: "Ideas", href: "/ideas", Icon: IdeasIcon, hasArrow: true },
   { name: "Sketches", href: "/sketches", Icon: SketchesIcon, hasArrow: true },
+  { name: "Tasks", href: "/tasks", Icon: HomeIcon, hasArrow: false },
+  { name: "Profile", href: "/profile", Icon: PeopleIcon, hasArrow: false },
   { name: "Settings", href: "/settings", Icon: Settings, hasArrow: false },
 ]
 
@@ -51,26 +53,40 @@ const PRE_PRODUCTION_MENU_ITEMS = [
   { name: "Post production", href: "/post-production", Icon: FabricIcon, hasArrow: true },
 ]
 
-const NON_ADMIN_MENU_ITEMS = [
-  { name: "Tasks", href: "/tasks", Icon: HomeIcon, hasArrow: false },
-  { name: "Profile", href: "/profile", Icon: PeopleIcon, hasArrow: false },
-]
+const ROUTE_MODULE_MAP = {
+  "/pre-production": "pre_production",
+  "/production": "production",
+  "/post-production": "post_production",
+  "/fabric": "fabric",
+  "/yarn": "yarn",
+  "/sequence": "sequence",
+  "/people": "user",
+  "/vendor": "vendor",
+  "/settings": "setting",
+  "/tasks": "task",
+  "/ideas": "ideas",
+  "/sketches": "sketches"
+}
 
 export function DashboardSidebar() {
   const pathname = usePathname()
   const params = useParams()
   const searchParams = useSearchParams()
 
-  // Defer cookie reading to client-side only to avoid SSR/client hydration mismatch
-  const [isAdmin, setIsAdmin] = React.useState(false)
-
+  const [moduleAccess, setModuleAccess] = React.useState([])
+  const [userRole, setUserRole] = React.useState(null)
   React.useEffect(() => {
     try {
       const token = Cookies.get("token")
       if (token) {
         const payloadBase64 = token.split('.')[1]
         const decoded = JSON.parse(atob(payloadBase64))
-        setIsAdmin(decoded?.role === "admin")
+        if (decoded?.module_access) {
+          setModuleAccess(decoded.module_access.split(','))
+        }
+        if (decoded?.role) {
+          setUserRole(decoded.role)
+        }
       }
     } catch (e) {
       console.error('Failed to decode token:', e)
@@ -82,11 +98,19 @@ export function DashboardSidebar() {
     pathname.startsWith("/production") ||
     pathname.startsWith("/post-production")
 
-  let currentMenuItems = isPreProductionPhase ? PRE_PRODUCTION_MENU_ITEMS : MENU_ITEMS
+  let baseMenuItems = isPreProductionPhase ? PRE_PRODUCTION_MENU_ITEMS : MENU_ITEMS
 
-  if (!isAdmin) {
-    currentMenuItems = NON_ADMIN_MENU_ITEMS
-  }
+  let currentMenuItems = baseMenuItems.filter(item => {
+    if (item.href === '/dashboard') {
+      return userRole && userRole.toLowerCase() === 'admin'
+    }
+
+    const requiredModule = ROUTE_MODULE_MAP[item.href]
+    if (requiredModule) {
+      return moduleAccess.includes(requiredModule)
+    }
+    return true
+  })
 
   const handleLogout = () => {
     Cookies.remove("token")

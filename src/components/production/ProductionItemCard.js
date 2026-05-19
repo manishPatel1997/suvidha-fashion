@@ -1,3 +1,4 @@
+import { BASE_URL } from '@/lib/api'
 import { statusColors } from '@/lib/helper'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
@@ -5,7 +6,7 @@ import Image from 'next/image'
 function ProductionItemCard({ sample_id, status = "pending", image, image_url, onClick }) {
     const displayId = sample_id ? `S-${sample_id}` : "N/A"
     const imgPath = image_url || image
-    const imageUrl = imgPath ? `${process.env.NEXT_PUBLIC_API_URL}${imgPath}` : "/design-thumb.png"
+    const imageUrl = imgPath ? `${BASE_URL}${imgPath}` : "/design-thumb.png"
 
     return (
         <div

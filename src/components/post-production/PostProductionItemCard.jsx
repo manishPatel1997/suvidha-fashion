@@ -1,3 +1,4 @@
+import { BASE_URL } from '@/lib/api'
 import { statusColors } from '@/lib/helper'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
@@ -24,7 +25,7 @@ function PostProductionItemCard({ item, onClick, titleName = "Sample ID" }) {
                 className="relative w-[184px] h-[116px] rounded-[10px] overflow-hidden border border-[#dcccbd]/40 group-hover:opacity-95 transition-opacity"
             >
                 <Image
-                    src={item?.image_url ? `${process.env.NEXT_PUBLIC_API_URL}${item.image_url}` : "/design-thumb.png"}
+                    src={item?.image_url ? `${BASE_URL}${item.image_url}` : "/design-thumb.png"}
                     alt="Work item"
                     fill
                     className="object-cover"

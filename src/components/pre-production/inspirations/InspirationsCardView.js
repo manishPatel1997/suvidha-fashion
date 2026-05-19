@@ -16,6 +16,7 @@ import { modalOpen, StateUpdate, toFormData } from "@/lib/helper"
 import { usePost } from "@/hooks/useApi"
 import { API_LIST_AUTH } from "@/hooks/api-list"
 import dynamic from "next/dynamic"
+import { BASE_URL } from "@/lib/api"
 
 
 const InspirationsViewImage = dynamic(() =>
@@ -323,7 +324,7 @@ export function InspirationsCardView({
                             {/* Gallery */}
                             <div className="p-6 pt-0 grid grid-cols-2 md:flex flex-wrap items-center gap-4">
                                 {data.images.map((img, idx) => {
-                                    const src = `${process.env.NEXT_PUBLIC_API_URL}${img.image_url}`
+                                    const src = `${BASE_URL}${img.image_url}`
                                     return (
                                         <div
                                             key={idx}

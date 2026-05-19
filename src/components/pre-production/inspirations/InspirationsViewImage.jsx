@@ -13,6 +13,7 @@ import { CommonModal } from "@/components/CommonModal"
 import { DeleteConfirmationModal } from "@/components/delete-confirmation-modal"
 import { FloatingTextarea } from "@/components/ui/floating-textarea"
 import clsx from "clsx"
+import { BASE_URL } from "@/lib/api"
 
 export function InspirationsViewImage({
     isDone = false,
@@ -25,7 +26,7 @@ export function InspirationsViewImage({
     const [isEditing, setIsEditing] = React.useState(false)
     const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false)
     const [note, setNote] = React.useState('')
-    const [previewImage, setPreviewImage] = React.useState(selectedData?.image_url ? `${process.env.NEXT_PUBLIC_API_URL}${selectedData?.image_url}` : null)
+    const [previewImage, setPreviewImage] = React.useState(selectedData?.image_url ? `${BASE_URL}${selectedData?.image_url}` : null)
     const [selectedFile, setSelectedFile] = React.useState(null)
     const fileInputRef = React.useRef(null)
 
@@ -64,7 +65,7 @@ export function InspirationsViewImage({
             setSelectedFile(null)
         }
         setNote(selectedData?.note)
-        setPreviewImage(selectedData?.image_url ? `${process.env.NEXT_PUBLIC_API_URL}${selectedData?.image_url}` : null)
+        setPreviewImage(selectedData?.image_url ? `${BASE_URL}${selectedData?.image_url}` : null)
     }, [open, selectedData])
 
     const handleImageChange = (e) => {

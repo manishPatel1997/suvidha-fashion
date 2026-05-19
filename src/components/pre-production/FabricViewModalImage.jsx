@@ -17,6 +17,7 @@ import { usePost } from "@/hooks/useApi"
 import { downloadImage, toFormData } from "@/lib/helper"
 import clsx from "clsx"
 import { FormColorPicker } from "../ui/form-color-picker"
+import { BASE_URL } from "@/lib/api"
 
 export function FabricViewModalImage({
     isDone = false,
@@ -51,7 +52,7 @@ export function FabricViewModalImage({
             if (res.success) {
                 setViewData(res.data)
                 if (res.data?.fabric_image) {
-                    setPreviewImage(process.env.NEXT_PUBLIC_BASE_URL + res.data.fabric_image)
+                    setPreviewImage(BASE_URL + res.data.fabric_image)
                     //     setCurrentImgIndex(res.data.history.length - 1)
                 }
             }
@@ -65,7 +66,7 @@ export function FabricViewModalImage({
             if (res.success) {
                 setViewData(res.data)
                 if (res.data?.yarn_image) {
-                    setPreviewImage(process.env.NEXT_PUBLIC_BASE_URL + res.data.yarn_image)
+                    setPreviewImage(BASE_URL + res.data.yarn_image)
                     //     setCurrentImgIndex(res.data.history.length - 1)
                 }
             }
@@ -79,7 +80,7 @@ export function FabricViewModalImage({
             if (res.success) {
                 setViewData(res.data)
                 if (res.data?.sequence_image) {
-                    setPreviewImage(process.env.NEXT_PUBLIC_BASE_URL + res.data.sequence_image)
+                    setPreviewImage(BASE_URL + res.data.sequence_image)
                     //     setCurrentImgIndex(res.data.history.length - 1)
                 }
             }
@@ -106,19 +107,6 @@ export function FabricViewModalImage({
         }
     }, [selectedData])
 
-
-    // React.useEffect(() => {
-    //     if (selectedData) {
-    //         const imageKey = field("image")
-    //         setPreviewImage(
-    //             selectedData?.[imageKey]
-    //                 ? process.env.NEXT_PUBLIC_BASE_URL + selectedData[imageKey]
-    //                 : "/design-thumb.png"
-    //         )
-    //         setViewData(selectedData)
-    //     }
-    // }, [selectedData])
-
     const fileInputRef = React.useRef(null)
 
     const handleImageChange = (e) => {
@@ -131,20 +119,6 @@ export function FabricViewModalImage({
         }
     }
 
-    // const { mutate: updateItem, isPending } = usePost(
-    //     prefix === "fabric"
-    //         ? API_LIST_AUTH.Fabric.assignUpdate
-    //         : API_LIST_AUTH.Yarn.assignUpdate,
-    //     {
-    //         isFormData: true,
-    //         onSuccess: (res) => {
-    //             if (res.success) {
-    //                 if (onUpdateSuccess) onUpdateSuccess(res.data)
-    //                 setIsEditing(false)
-    //             }
-    //         },
-    //     }
-    // )
     const { mutate: updateItem, isPending } = usePost(
         prefix === "fabric"
             ? API_LIST_AUTH.Fabric.assignUpdate

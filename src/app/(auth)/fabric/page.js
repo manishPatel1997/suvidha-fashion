@@ -6,6 +6,7 @@ import { API_LIST_AUTH } from "@/hooks/api-list";
 // import StokeAlertCard from "@/components/fabric/StokeAlertCard";
 import { StockDetailsSidebar } from "@/components/stock/StockDetailsSidebar";
 import { StockListPage } from "@/components/stock/StockListPage";
+import { BASE_URL } from "@/lib/api";
 
 function DashboardContent() {
     return (
@@ -27,7 +28,7 @@ function DashboardContent() {
                     category={item.category}
                     fabric_name={item.fabric_name}
                     fabric_color={item.fabric_color}
-                    image={item?.fabric_image ? `${process.env.NEXT_PUBLIC_BASE_URL}${item?.fabric_image}` : "/design-thumb.png"}
+                    image={item?.fabric_image ? `${BASE_URL}${item?.fabric_image}` : "/design-thumb.png"}
                     onViewDetails={onViewDetails}
                 />
             )}

@@ -1,3 +1,4 @@
+import { BASE_URL } from '@/lib/api'
 import { statusColors } from '@/lib/helper'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
@@ -29,7 +30,7 @@ function PostMillCard({ item, onClick }) {
                             className="relative aspect-square rounded-[8px] overflow-hidden border border-[#DCCCBD]/40 group-hover:opacity-90 transition-opacity"
                         >
                             <Image
-                                src={`${process.env.NEXT_PUBLIC_API_URL}${val.image_url}`}
+                                src={`${BASE_URL}${val.image_url}`}
                                 alt={`Work item ${idx + 1}`}
                                 fill
                                 className="object-cover"

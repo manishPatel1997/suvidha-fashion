@@ -16,6 +16,7 @@ import { FloatingTextarea } from "@/components/ui/floating-textarea"
 import { FloatingInput } from "@/components/ui/floating-input"
 import { Input } from "@/components/ui/input"
 import { FormSelect } from "@/components/ui/form-select"
+import { BASE_URL } from "@/lib/api"
 
 export function PostProductionViewModal({
     open,
@@ -162,8 +163,8 @@ export function PostProductionViewModal({
             const firstImgSrc = typeof firstImg === 'string' ? firstImg : (firstImg?.image_url || firstImg?.image || firstImg?.url);
 
             setPreviewImage(firstImgSrc
-                ? `${process.env.NEXT_PUBLIC_BASE_URL}${firstImgSrc}`
-                : (selectedData?.image_url ? `${process.env.NEXT_PUBLIC_BASE_URL}${selectedData?.image_url}` : "/design-thumb.png"))
+                ? `${BASE_URL}${firstImgSrc}`
+                : (selectedData?.image_url ? `${BASE_URL}${selectedData?.image_url}` : "/design-thumb.png"))
 
             // Fetch sample details if we have a sample_id
             // if (selectedData.sample_id) {
@@ -277,7 +278,7 @@ export function PostProductionViewModal({
                                                     )}
                                                 >
                                                     <Image
-                                                        src={item?.image_url ? `${process.env.NEXT_PUBLIC_API_URL}${item.image_url}` : "/design-thumb.png"}
+                                                        src={item?.image_url ? `${BASE_URL}${item.image_url}` : "/design-thumb.png"}
                                                         alt={`Photography ${idx}`}
                                                         fill
                                                         className="object-cover"
@@ -346,7 +347,7 @@ export function PostProductionViewModal({
                                                     {selectedData?.images?.map((img, idx) => {
                                                         const imgSrc = typeof img === 'string' ? img : (img?.image_url || img?.image || img?.url);
                                                         if (!imgSrc) return null;
-                                                        const fullImgSrc = `${process.env.NEXT_PUBLIC_BASE_URL}${imgSrc}`;
+                                                        const fullImgSrc = `${BASE_URL}${imgSrc}`;
                                                         return (
                                                             <div
                                                                 key={idx}
@@ -437,7 +438,7 @@ export function PostProductionViewModal({
                                 {/* Sample Image */}
                                 <div className="relative w-full aspect-19/10 lg:w-[380px] lg:h-[330px] rounded-[12px] overflow-hidden bg-[#F8F5F2] border /40">
                                     <Image
-                                        src={sampleDetails?.image ? `${process.env.NEXT_PUBLIC_API_URL}${sampleDetails.image}` : (selectedData?.src || "/design-thumb.png")}
+                                        src={sampleDetails?.image ? `${BASE_URL}${sampleDetails.image}` : (selectedData?.src || "/design-thumb.png")}
                                         alt="Sample Preview"
                                         fill
                                         className="object-cover"

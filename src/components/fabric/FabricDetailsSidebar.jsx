@@ -22,6 +22,7 @@ import { useGet, usePost } from "@/hooks/useApi";
 import { downloadImage, StateUpdate, toFormData } from "@/lib/helper";
 import { toast } from "sonner";
 import { FormSelect } from "../ui/form-select";
+import { BASE_URL } from "@/lib/api";
 
 
 export function FabricDetailsSidebar({
@@ -71,7 +72,7 @@ export function FabricDetailsSidebar({
     }, [open, selectedData]);
 
     const previewImage = localPreview || (selectedData?.fabric_image
-        ? `${process.env.NEXT_PUBLIC_BASE_URL}${selectedData.fabric_image}`
+        ? `${BASE_URL}${selectedData.fabric_image}`
         : "/design-thumb.png");
 
     const handleImageChange = (e) => {
@@ -132,7 +133,7 @@ export function FabricDetailsSidebar({
 
     const handleDownload = () => {
         if (selectedData?.fabric_image) {
-            downloadImage(`${process.env.NEXT_PUBLIC_BASE_URL}${selectedData.fabric_image}`, `Fabric-${selectedData.fabric_id}.jpg`);
+            downloadImage(`${BASE_URL}${selectedData.fabric_image}`, `Fabric-${selectedData.fabric_id}.jpg`);
         }
     };
 

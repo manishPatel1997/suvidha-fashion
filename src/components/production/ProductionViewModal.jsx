@@ -15,6 +15,7 @@ import { FloatingTextarea } from "@/components/ui/floating-textarea"
 import { Input } from "@/components/ui/input"
 import { FormSelect } from "@/components/ui/form-select"
 import { FormColorPicker } from "@/components/ui/form-color-picker"
+import { BASE_URL } from "@/lib/api"
 
 export function ProductionViewModal({
     open,
@@ -63,7 +64,7 @@ export function ProductionViewModal({
                     yarn_color: details.yarn_color || prev.yarn_color,
                 }));
                 if (data.image) {
-                    setPreviewImage(`${process.env.NEXT_PUBLIC_API_URL}${data.image}`);
+                    setPreviewImage(`${BASE_URL}${data.image}`);
                 }
             }
         },
@@ -108,7 +109,7 @@ export function ProductionViewModal({
                 sample_design_no: selectedData.sample_design_no || "",
                 yarn_color: selectedData.yarn_color || "",
             })
-            setPreviewImage(selectedData.image_url ? `${process.env.NEXT_PUBLIC_API_URL}${selectedData.image_url}` : "/design-thumb.png")
+            setPreviewImage(selectedData.image_url ? `${BASE_URL}${selectedData.image_url}` : "/design-thumb.png")
             // Fetch latest data from API
             getSampleDetails({ production_items_id: String(selectedData.id) })
         }

@@ -4,7 +4,7 @@ import { toFormData } from "./helper";
 /**
  * Base API URL - configure via environment variable
  */
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3008";
+export const BASE_URL = process.env.NEXT_PUBLIC_URL == 1 ? process.env.NEXT_PUBLIC_API_URL : process.env.NEXT_PUBLIC_BASE_URL;
 
 /**
  * Build URL with query parameters

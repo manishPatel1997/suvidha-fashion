@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3008";
+const BASE_URL = process.env.NEXT_PUBLIC_URL == 1 ? process.env.NEXT_PUBLIC_API_URL : process.env.NEXT_PUBLIC_BASE_URL;
 
 /**
  * Server-side fetcher function
