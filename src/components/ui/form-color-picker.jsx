@@ -140,7 +140,8 @@ function FormColorPicker({
                     // "flex items-center gap-3 border border-muted-foreground rounded-md px-4 bg-white transition-colors min-h-[45px]",
                     isFloating ? "pt-6 pb-1" : "py-0",
                     readOnly
-                        ? "cursor-default select-none"
+                        ? "cursor-default"
+                        // ? "cursor-default select-none"
                         : "cursor-pointer hover:border-primary",
                     runForm?.touched?.[name] &&
                     runForm?.errors?.[name] &&
@@ -170,8 +171,9 @@ function FormColorPicker({
             {isFloating && label && (
                 <Label
                     htmlFor={id}
-                    className="absolute left-3 top-2 text-[#B0826A] text-[14px] font-semibold capitalize leading-none duration-150 transform -translate-y-4 scale-100 z-10 origin-left bg-white px-1
+                    className="absolute left-3 top-2 text-[#B0826A] text-[14px] font-semibold capitalize leading-none duration-150 transform -translate-y-4 scale-100 z-100 origin-left bg-white px-1
                     peer-placeholder-shown:scale-100 
+                    peer-disabled:opacity-100 
                     peer-placeholder-shown:translate-y-0 
                     peer-placeholder-shown:top-4 
                     peer-placeholder-shown:bg-transparent

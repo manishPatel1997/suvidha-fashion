@@ -48,7 +48,6 @@ export function proxy(request) {
             const payloadBase64 = token.split('.')[1]
             const decoded = JSON.parse(atob(payloadBase64))
             role = decoded?.role ?? null
-            console.log('role', role)
             if (decoded?.module_access) {
                 moduleAccess = decoded.module_access.split(',')
             }

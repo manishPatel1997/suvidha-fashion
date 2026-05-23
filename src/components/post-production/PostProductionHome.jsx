@@ -216,7 +216,7 @@ function PostProductionHome({
                                 "flex flex-wrap items-center gap-4"
                             )}>
                                 {titleName === "Photography" ? (
-                                    data.assign.map((item) => {
+                                    data.assign.map((item, idx) => {
                                         let arr = [...(item?.images || [])]
                                         while (arr.length < 4) {
                                             arr.push({
@@ -229,7 +229,7 @@ function PostProductionHome({
                                         return (
                                             <div
                                                 className="flex flex-col w-[218px] rounded-[16px] bg-[#FAF8F6] border border-[#DCCCBD] p-4 space-y-3 shadow-sm hover:shadow-md transition-all group/card cursor-pointer"
-                                                key={item.photography_id}
+                                                key={idx}
                                                 onClick={() => handleModalOpen(titleName, item)}
                                             >
                                                 <div className="flex flex-col items-center gap-1 border-b border-[#DCCCBD]/50 pb-2">
@@ -268,7 +268,7 @@ function PostProductionHome({
                                     <div className="flex flex-col gap-3 w-full">
                                         {data.assign.map((item, index) => (
                                             <div
-                                                key={item.folder_id || item.id}
+                                                key={index}
                                                 onClick={() => handleModalOpen(titleName, item, data.assign)}
                                                 className={
                                                     clsx(

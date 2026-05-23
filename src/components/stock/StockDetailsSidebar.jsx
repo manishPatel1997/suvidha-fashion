@@ -87,7 +87,7 @@ export function StockDetailsSidebar({
     selectedData,
     onUpdateSuccess,
 }) {
-    const config = STOCK_CONFIG[type] || STOCK_CONFIG.fabric;
+    const config = STOCK_CONFIG[type] || STOCK_CONFIG.Fabric;
     const [isEditing, setIsEditing] = React.useState(false);
     const [selectedFile, setSelectedFile] = React.useState(null);
     const [localPreview, setLocalPreview] = React.useState(null);
@@ -406,7 +406,7 @@ export function StockDetailsSidebar({
                                                 type="button"
                                                 size="icon"
                                                 variant="secondary"
-                                                className="w-9 h-9 flex items-center justify-center bg-[#A67F6F] hover:bg-[#8B6A5C] text-white rounded-full transition-colors shadow-lg"
+                                                className="w-9 h-9 flex items-center justify-center bg-[#A67F6F] hover:bg-[#8B6A5C] text-white rounded-full transition-colors shadow-lg pointer-events-auto"
                                                 onClick={handleDownload}
                                             >
                                                 <Download className="w-4 h-4" />
@@ -447,6 +447,7 @@ export function StockDetailsSidebar({
                                                 Category
                                             </label>
                                             <FormSelect
+                                                hasEdit={isEditing}
                                                 name="category"
                                                 runForm={runForm}
                                                 options={convertedOptions[config.categoryOptionsKey] || []}
@@ -464,6 +465,7 @@ export function StockDetailsSidebar({
                                                         Quality
                                                     </label>
                                                     <FormSelect
+                                                        hasEdit={isEditing}
                                                         name={config.qualityKey}
                                                         runForm={runForm}
                                                         options={convertedOptions[config.qualityOptionsKey] || []}
@@ -478,6 +480,7 @@ export function StockDetailsSidebar({
                                                         Sub Quality
                                                     </label>
                                                     <FormSelect
+                                                        hasEdit={isEditing}
                                                         name={config.subQualityKey}
                                                         runForm={runForm}
                                                         options={convertedOptions[config.subQualityOptionsKey] || []}
@@ -502,6 +505,7 @@ export function StockDetailsSidebar({
                                                 isSearch
                                                 triggerClassName="h-[45px]! bg-[#fcf8f4]/50"
                                                 readOnly={!isEditing}
+                                                hasEdit={isEditing}
                                             />
                                         </div>}
 
@@ -510,7 +514,7 @@ export function StockDetailsSidebar({
                                                 Yarn num cons
                                             </label>
                                             <FloatingInput
-                                                hasEdit
+                                                hasEdit={isEditing}
                                                 name={"yarn_num_cons"}
                                                 runForm={runForm}
                                                 readOnly={!isEditing}
@@ -524,7 +528,7 @@ export function StockDetailsSidebar({
                                                 Sequence cd
                                             </label>
                                             <FloatingInput
-                                                hasEdit
+                                                hasEdit={isEditing}
                                                 name={"sequence_cd"}
                                                 runForm={runForm}
                                                 readOnly={!isEditing}
@@ -538,12 +542,12 @@ export function StockDetailsSidebar({
                                                 {formatLabel(config.priceKey)}
                                             </label>
                                             <FloatingInput
-                                                hasEdit
+                                                hasEdit={isEditing}
                                                 name={config.priceKey}
                                                 runForm={runForm}
                                                 readOnly={!isEditing}
                                                 className="bg-[#fcf8f4]/50"
-                                                value={runForm.values[config.priceKey] ? `₹ ${runForm.values[config.priceKey]} Meter` : ""}
+                                                value={runForm.values[config.priceKey] ? `₹ ${runForm.values[config.priceKey]}` : ""}
                                                 onChange={(e) => {
                                                     const val = e.target.value.replace(/[^0-9.]/g, '');
                                                     runForm.setFieldValue(config.priceKey, val);
@@ -564,6 +568,7 @@ export function StockDetailsSidebar({
                                                 isSearch
                                                 triggerClassName="h-[45px]! bg-[#fcf8f4]/50"
                                                 readOnly={!isEditing}
+                                                hasEdit={isEditing}
                                             />
                                         </div>}
 
@@ -598,6 +603,7 @@ export function StockDetailsSidebar({
                                                         isSearch
                                                         triggerClassName="h-[45px]! bg-[#fcf8f4]/50"
                                                         readOnly={!isEditing}
+                                                        hasEdit={isEditing}
                                                     />
                                                 </div>
                                             </div>
@@ -612,6 +618,7 @@ export function StockDetailsSidebar({
                                                         name={config.colorKey}
                                                         runForm={runForm}
                                                         readOnly={!isEditing}
+                                                        isEdit={isEditing}
                                                         placeholder="Pick a color"
                                                         isFloating={false}
                                                     />
@@ -642,6 +649,7 @@ export function StockDetailsSidebar({
                                                         name="note"
                                                         runForm={runForm}
                                                         readOnly={!isEditing}
+                                                        hasEdit={isEditing}
                                                         className="min-h-[120px] resize-none"
                                                         isFloating={false}
                                                     />

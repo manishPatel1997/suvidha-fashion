@@ -164,7 +164,7 @@ export function FabricViewModalImage({
                 }
                 : {
                     [field("name")]: Yup.string().required("Yarn name is required"),
-                    yarn_num_cons: Yup.number().min(3, "Minimum value must be 3")
+                    yarn_num_cons: Yup.number().min(1, "Minimum value must be 1")
                         .required("Yarn Num Cons is required")
                 }
     );
@@ -311,7 +311,7 @@ export function FabricViewModalImage({
                                 </div>
 
                                 {/* Details */}
-                                <div className="flex flex-col gap-6">
+                                <div className="flex flex-col gap-8">
 
                                     <div className="grid grid-cols-2 gap-4">
                                         <FloatingInput

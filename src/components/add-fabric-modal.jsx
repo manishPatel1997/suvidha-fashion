@@ -264,7 +264,7 @@ export function AddFabricModal({
             return Yup.object().shape({
                 [config.nameKey]: Yup.string()
                     .trim()
-                    .min(3, "Minimum 3 characters required")
+                    .min(1, "Minimum 1 characters required")
                     .required("Name is required"),
                 [config.categoryKey]: Yup.string().required(`Category is required`),
                 [config.contactKey]: Yup.string()
@@ -355,6 +355,7 @@ export function AddFabricModal({
         isEdit ? config.update : config.create,
         {
             onSuccess: (res) => {
+                console.log(res)
                 if (res.success) {
                     onAdd(res?.data)
                     onOpenChange(false)

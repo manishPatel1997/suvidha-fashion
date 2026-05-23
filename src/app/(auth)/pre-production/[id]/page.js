@@ -1,4 +1,5 @@
 import { get } from '@/lib/server-api'
+import { rethrowNavigationError } from '@/lib/server-errors'
 import { redirect } from 'next/navigation'
 import { PreProductionClient } from './PreProductionClient'
 import { API_LIST_AUTH } from '@/hooks/api-list'
@@ -11,6 +12,7 @@ export default async function Page({ params }) {
         const res = await get(`${API_LIST_AUTH.all_pre_production_data}${id}`);
         designData = res?.data || null;
     } catch (error) {
+        rethrowNavigationError(error);
         console.error(`Error fetching design for ${id}:`, error);
         redirect('/dashboard');
     }
@@ -32,4 +34,4 @@ export default async function Page({ params }) {
             sampleData={designData.samplesList}
         />
     )
-}
+}

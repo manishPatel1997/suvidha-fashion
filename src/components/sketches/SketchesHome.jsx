@@ -1,10 +1,11 @@
 "use client"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { PlusIcon, Search } from 'lucide-react'
+import { PlusIcon } from 'lucide-react'
 import { usePost } from '@/hooks/useApi'
+import { normalizePagination } from '@/hooks/usePagination'
 import { API_SKETCHES_DESIGNS } from '@/hooks/api-list'
 import Image from 'next/image'
 import { AddImageModal } from '@/components/add-image-modal'
@@ -68,7 +69,6 @@ const EditSketchModal = ({ open, onOpenChange, sketch, onUpdate, isLoading }) =>
                                     { value: 'pending', label: 'Pending' },
                                     { value: 'running', label: 'In Process' },
                                     { value: 'completed', label: 'Completed' },
-                                    { value: 'rejected', label: 'Rejected' },
                                 ]}
                                 placeholder="Select Status"
                             />
@@ -104,7 +104,7 @@ const SketchCard = ({ sketch, onClick }) => {
 
     return (
         <div
-            className="bg-[#FAF8F6] rounded-[15px] p-2.5 shadow-sm cursor-pointer hover:shadow-md transition-shadow group flex flex-col gap-3"
+            className="bg-[#FAF8F6] rounded-[15px] p-2.5 shadow-sm cursor-pointer hover:shadow-md group flex flex-col gap-3 transition-all duration-300 hover:-translate-y-1"
             onClick={() => onClick(sketch)}
         >
             <div className="relative w-full max-w-[200px] h-[170px] mx-auto rounded-[10px] overflow-hidden bg-[#e9e6e2]">
@@ -135,11 +135,23 @@ const SketchCard = ({ sketch, onClick }) => {
 }
 
 export default function SketchesHome({ initialData = [], initialPagination = { page: 1, limit: 10, total: 0, totalPages: 1 } }) {
+    const searchParams = useSearchParams()
+    const pathname = usePathname()
+
+    const urlPage = parseInt(searchParams.get("page")) || 1
+    const urlLimit = parseInt(searchParams.get("limit")) || 10
+    const urlSearch = searchParams.get("search") || ""
+
     const [sketches, setSketches] = useState(initialData)
-    const [pagination, setPagination] = useState(initialPagination)
-    const [currentPage, setCurrentPage] = useState(initialPagination.page || 1)
-    const [limit, setLimit] = useState(initialPagination.limit || 10)
-    const [searchQuery, setSearchQuery] = useState("")
+    const [pagination, setPagination] = useState(
+        normalizePagination(initialPagination, urlLimit)
+    )
+    const [currentPage, setCurrentPage] = useState(
+        urlPage || initialPagination.page || initialPagination.currentPage || 1
+    )
+    const [limit, setLimit] = useState(urlLimit || initialPagination.limit || 10)
+    const [searchQuery, setSearchQuery] = useState(urlSearch)
+    const isFirstMount = useRef(true)
 
     const [isAddingNew, setIsAddingNew] = useState(false)
     const [editSketch, setEditSketch] = useState(null)
@@ -148,7 +160,12 @@ export default function SketchesHome({ initialData = [], initialPagination = { p
         onSuccess: (res) => {
             if (res.success && res.data) {
                 setSketches(res.data.data || [])
-                setPagination(res.data.pagination || { page: 1, limit: 10, total: 0, totalPages: 1 })
+                setPagination(
+                    normalizePagination(
+                        res.data.pagination || { page: 1, limit: 10, total: 0, totalPages: 1 },
+                        limit
+                    )
+                )
             }
         }
     })
@@ -175,9 +192,35 @@ export default function SketchesHome({ initialData = [], initialPagination = { p
         }
     })
 
+    // Sync URL for sharing/bookmarks (replaceState avoids re-running the server page)
     useEffect(() => {
+        if (
+            currentPage === urlPage &&
+            limit === urlLimit &&
+            searchQuery === urlSearch
+        ) {
+            return
+        }
+
+        const params = new URLSearchParams()
+        if (currentPage > 1) params.set("page", String(currentPage))
+        if (limit !== 10) params.set("limit", String(limit))
+        if (searchQuery) params.set("search", searchQuery)
+
+        const queryString = params.toString()
+        const newUrl = queryString ? `${pathname}?${queryString}` : pathname
+
+        window.history.replaceState(null, "", newUrl)
+    }, [currentPage, limit, searchQuery, pathname, urlPage, urlLimit, urlSearch])
+
+    useEffect(() => {
+        if (isFirstMount.current) {
+            isFirstMount.current = false
+            return
+        }
+
         const delayDebounceFn = setTimeout(() => {
-            getSketches({ page: currentPage, limit, search: searchQuery })
+            getSketches({ page: currentPage, limit, search: searchQuery, pagination: "true" })
         }, 300)
 
         return () => clearTimeout(delayDebounceFn)
