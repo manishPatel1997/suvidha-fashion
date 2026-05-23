@@ -303,7 +303,7 @@ export function SampleWorkflowCard({
                     })}
                   </div>
 
-                  {totalSampleMeter < row.fabric_meter && !data.IsBlur && data.status !== "completed" && data.status !== "skipped" &&
+                  {data?.assign?.length <= (data?.sample_target || 0) && totalSampleMeter < row.fabric_meter && !data.IsBlur && data.status !== "completed" && data.status !== "skipped" &&
                     <div className="flex justify-start lg:justify-end items-start">
                       <Button
                         variant="outline"

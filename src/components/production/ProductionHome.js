@@ -18,7 +18,6 @@ function ProductionHome({
     progress = 50,
     id
 }) {
-
     const [PreProductionData, setPreProductionData] = React.useState({})
     const router = useRouter()
     const searchParams = useSearchParams()
@@ -40,12 +39,12 @@ function ProductionHome({
                 <div className="space-y-2">
                     <h3 className="text-xl font-serif font-bold text-primary-foreground">Production Record Not Found</h3>
                     <p className="text-muted-foreground max-w-sm mx-auto">
-                        This design hasn't entered the production phase yet. 
+                        This design hasn't entered the production phase yet.
                         Please complete all pre-production steps to initialize production.
                     </p>
                 </div>
-                <Button 
-                    variant="outline" 
+                <Button
+                    variant="outline"
                     onClick={() => router.push(`/pre-production/${id}?page=${page}&limit=${limit}`)}
                     className="border-[#dcccbd] text-primary-foreground hover:bg-[#F0EDE9]"
                 >
@@ -180,15 +179,16 @@ function ProductionHome({
                 </div>
             </div>
 
-            <AddProductionModal
+            {openModal.isAddModalOpen && <AddProductionModal
                 open={openModal.isAddModalOpen}
                 onOpenChange={(isOpen) => StateUpdate({ isAddModalOpen: isOpen }, setOpenModal)}
                 onAdd={handleAddProduction}
                 title={title}
-            />
+            />}
 
-            <ProductionViewModal
+            {openModal.isViewModalOpen && <ProductionViewModal
                 open={openModal.isViewModalOpen}
+                PreProductionData={PreProductionData}
                 onOpenChange={(isOpen) => StateUpdate({ isViewModalOpen: isOpen, selectedItem: isOpen ? openModal.selectedItem : null }, setOpenModal)}
                 selectedData={openModal.selectedItem}
                 onUpdateSuccess={(updated) => {
@@ -209,7 +209,7 @@ function ProductionHome({
                         samples: prev?.samples?.filter((item) => String(item.id) !== String(id))
                     }))
                 }}
-            />
+            />}
         </div>
     )
 }

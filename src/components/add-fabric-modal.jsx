@@ -355,7 +355,6 @@ export function AddFabricModal({
         isEdit ? config.update : config.create,
         {
             onSuccess: (res) => {
-                console.log(res)
                 if (res.success) {
                     onAdd(res?.data)
                     onOpenChange(false)

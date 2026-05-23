@@ -19,6 +19,7 @@ import { BASE_URL } from "@/lib/api"
 
 export function ProductionViewModal({
     open,
+    PreProductionData,
     onOpenChange,
     selectedData,
     onDeleteSuccess,
@@ -159,7 +160,7 @@ export function ProductionViewModal({
             <div className="bg-white rounded-[20px] overflow-hidden flex flex-col max-h-[90vh]">
                 {/* Header Actions */}
                 <div className="px-6 py-4 md:px-10 flex items-center justify-between bg-white border-b border-[#dcccbd]/30">
-                    <Button
+                    {!["completed","skipped"].includes(PreProductionData?.status) ? <Button
                         variant="ghost"
                         onClick={() => setIsEditing(!isEditing)}
                         className={cn(
@@ -171,7 +172,8 @@ export function ProductionViewModal({
                     >
                         {!isEditing && <Edit2 className="w-4 h-4" />}
                         {isEditing ? "Cancel" : "Edit"}
-                    </Button>
+                    </Button>:
+                    <div></div>}
 
                     <div className="flex items-center gap-4">
                         {/* <Button

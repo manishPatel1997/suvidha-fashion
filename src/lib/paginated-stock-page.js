@@ -18,7 +18,7 @@ export async function fetchPaginatedList(
 ) {
     const params = await searchParams;
     const page = Number(params?.page) || 1;
-    const limit = Number(params?.limit) || 10;
+    const limit = Number(params?.limit > 100 ? 100 : params?.limit) || 10;
 
     let initialData = [];
     let initialPagination = { ...DEFAULT_PAGINATION, page, limit };

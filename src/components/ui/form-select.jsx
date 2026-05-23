@@ -60,19 +60,34 @@ function FormSelect({
     const value = runForm ? (runForm.values[name] || "") : (propValue || "")
     const hasValue = value !== ""
 
+    // const filteredOptions = React.useMemo(() => {
+    //     if (!isSearch) return options
+
+    //     const search = searchQuery.toLowerCase()
+    //     return options.filter((option) => {
+    //         const nameMatch =
+    //             option.label?.toLowerCase().includes(search)
+
+    //         const emailMatch =
+    //             option.email?.toLowerCase().includes(search)
+
+    //         return nameMatch || emailMatch
+    //     })
+    // }, [isSearch, options, searchQuery])
+
     const filteredOptions = React.useMemo(() => {
         if (!isSearch) return options
 
         const search = searchQuery.toLowerCase()
 
         return options.filter((option) => {
-            const nameMatch =
-                option.label?.toLowerCase().includes(search)
+            const label = String(option.label || "").toLowerCase()
+            const email = String(option.email || "").toLowerCase()
 
-            const emailMatch =
-                option.email?.toLowerCase().includes(search)
-
-            return nameMatch || emailMatch
+            return (
+                label.includes(search) ||
+                email.includes(search)
+            )
         })
     }, [isSearch, options, searchQuery])
 

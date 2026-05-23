@@ -291,7 +291,7 @@ function PostProductionHome({
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-[13px]  font-sans">Folder No:</span>
                                                     <span className="text-[14px] font-semibold text-primary-foreground font-sans">
-                                                        {item?.folder_name || "F-01"}
+                                                        {item?.folder_name || ""}
                                                     </span>
                                                 </div>
                                             </div>
@@ -330,7 +330,8 @@ function PostProductionHome({
                                     onSuccess={(updatedItem) => {
                                         setData(prev => ({
                                             ...prev,
-                                            assign: prev.assign.map(item => (item.folder_id || item.id) === (updatedItem.folder_id || updatedItem.id) ? updatedItem : item)
+                                            assign: updatedItem
+                                            // assign: prev.assign.map(item => (item.folder_id || item.id) === (updatedItem.folder_id || updatedItem.id) ? updatedItem : item)
                                         }))
                                     }}
                                 />
@@ -357,12 +358,16 @@ function PostProductionHome({
                                             }))
                                             modalOpen("PhotographyViewModalImage", false, setOpenModal)
                                         } else {
-                                            const finalData = updatedItem?.assign?.find((item) => Number(item.production_items_id) === Number(data.selectedData?.production_items_id))
+                                            // const finalData = updatedItem?.assign?.find((item) => Number(item.production_items_id) === Number(data.selectedData?.production_items_id))
                                             setData(prev => ({
                                                 ...prev,
-                                                assign: prev.assign.map(item => item.id === updatedItem.id ? { ...finalData } : item)
+                                                assign: updatedItem?.assign || []
+                                                // assign: prev.assign.map(item => item.id === updatedItem.id ? { ...finalData } : item)
                                             }))
                                         }
+                                        modalOpen("DekoViewModalImage", false, setOpenModal)
+                                        modalOpen("MillViewModalImage", false, setOpenModal)
+                                        modalOpen("FolderViewModalImage", false, setOpenModal)
                                     }}
                                 />
                             )}

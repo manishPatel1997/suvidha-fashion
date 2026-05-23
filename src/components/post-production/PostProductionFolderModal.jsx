@@ -24,7 +24,7 @@ export function PostProductionFolderModal({
     const { mutate: updateFolder, isPending } = usePost(API_POST_PRODUCTION.folder_update, {
         onSuccess: (res) => {
             if (res.success) {
-                onSuccess({ ...selectedData, folder_name: folderNo })
+                onSuccess(res?.data?.assigns || [])
                 onOpenChange(false)
             }
         },
@@ -32,11 +32,10 @@ export function PostProductionFolderModal({
             console.error("Error updating folder:", error)
         }
     })
-
     const handleAdd = () => {
         if (!folderNo) return
         updateFolder({
-            folder_assign_id: String(selectedData?.folder_id),
+            folder_assign_id: String(selectedData?.id),
             folder_name: folderNo
         })
     }
